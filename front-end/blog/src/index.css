@@ -1,0 +1,24 @@
+/*! @import */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-image: url("https://cdn.jsdelivr.net/gh/ohmyga233/CDN@b3f5723e3d63f820ce6c5a62cb41b835bd2c4102/images/bg/62824816.jpg");
+  background-size: cover;
+  background-position-x: center;
+  min-width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+}
+
+:root {
+  --trueGray: #484945
+}

@@ -17,7 +17,7 @@ const config = {
     open: true,//启动服务时是否在浏览器打开
     https: false,//是否开启https
     ssr: false,//是否服务端渲染
-    css: { postcss: './postcss.config.ts' },
+    // css: { postcss: './postcss.config.ts' },
     optimizeDeps: {// 引入第三方的配置
         include: ['axios']
     },

@@ -1,24 +1,118 @@
-/*! @import */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 body {
-  background-image: url("https://cdn.jsdelivr.net/gh/ohmyga233/CDN@b3f5723e3d63f820ce6c5a62cb41b835bd2c4102/images/bg/62824816.jpg");
-  background-size: cover;
-  background-position-x: center;
-  min-width: 100vw;
-  min-height: 100vh;
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  position: relative;
+  padding-right: 0 !important;
+  /* min-height: 100vh; */
+}
+
+/*修改滚动条样式*/
+body::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  /**/
+}
+
+/*  滚动条的轨道 */
+body::-webkit-scrollbar-track {
+  background: rgb(239, 239, 239);
+  border-radius: 2px;
+}
+/* 滚动条里面的小方块，能向上向下移动 */
+body::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+/* 边角，即两个滚动条的交汇处 */
+body::-webkit-scrollbar-corner {
+  background: #179a16;
+}
+
+@font-face {
+  font-family: 'roboto';
+  src: url('./assets/font/roboto.ttf');
+  font-weight: normal;
+  font-style: normal;
 }
 
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue",
+    Helvetica,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    "微软雅黑",
+    Arial,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  /* text-align: center; */
 }
 
 :root {
-  --trueGray: #484945
+  --trueGray: #484945;
+  --hover:rgb(185, 184, 184);
+}
+
+*,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+div,
+span,
+ul,
+li,
+a,
+img {
+  margin: 0;
+  padding: 0;
+  margin-block-start:0;
+  margin-block-end:0;
+}
+
+a,
+li,
+input {
+  text-decoration: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  outline: none;
+  color: #000;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+li {
+  list-style: none;
+}
+
+input,
+textarea {
+  outline: none;
+  border: 1px solid #ccc;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+img {
+  width: 100%;
+  display: block;
 }

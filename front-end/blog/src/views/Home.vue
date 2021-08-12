@@ -14,7 +14,7 @@
             </a>
           </div>
           <!-- nav -->
-          <div class="search">
+          <div class="search" @click="methods.openSearch()">
             <i class="iconfont iconsearch"></i>
           </div>
         </div>
@@ -109,6 +109,7 @@
               class="secondary-item"
               v-for="(item, index) in categoryList"
               :key="index"
+              @click="methods.listenCategory(item.name)"
             >
               <p>
                 {{ item.name }}
@@ -162,6 +163,23 @@
       </ul>
     </div>
   </el-drawer>
+
+  <el-dialog
+    v-model="searchDialogVisible"
+    width="80%"
+    destroy-on-close
+    center
+  >
+    <label for="search">
+      <i class="iconfont iconsearch"></i>
+      <input
+        type="text"
+        name="search"
+        v-model="condition.articleVague"
+        @keydown.enter="methods.listenSearch()"
+      />
+    </label>
+  </el-dialog>
 </template>
 
 <script lang="ts">
@@ -174,11 +192,13 @@ import {
   computed,
 } from "vue";
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 export default defineComponent({
   name: "home",
   components: {},
   setup: () => {
     const store = useStore();
+       const router = useRouter();
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       // vue2.x的data参数
@@ -198,6 +218,23 @@ export default defineComponent({
       isCategoryNone: true,
       isPageNone: true,
       isScroll: false,
+      searchDialogVisible: false,
+      condition: computed({
+        get: () => {
+          return store.state.condition;
+        },
+        set: (val) => {
+          store.commit("setCondition", val);
+        },
+      }),
+      search: computed({
+        get: () => {
+          return store.state.search;
+        },
+        set: (val) => {
+          store.commit("setSearch", val);
+        },
+      }),
     });
 
     const methods = {
@@ -210,7 +247,7 @@ export default defineComponent({
           seconds: 0,
         };
         const openday = new Date(oldDate);
-        const today = new Date(); //系统当前时间
+        const today = new Date(); // 系统当前时间
         let total = (today.getTime() - openday.getTime()) / 1000;
         time.years = Math.floor(total / 31536000);
         total = total - time.years * 31536000;
@@ -285,6 +322,29 @@ export default defineComponent({
       isPageShow() {
         state.isPageNone = state.isPageNone ? false : true;
       },
+      listenCategory(categoryTitle: string) {
+        console.log(categoryTitle);
+        state.condition.currPage = 1;
+        state.condition.categoryTitle = categoryTitle;
+        proxy.getAricleList(state.condition);
+        state.search.words = categoryTitle;
+        state.search.categoryFlag = true;
+        state.search.searchFlag = false;
+      },
+      openSearch() {
+        state.searchDialogVisible = true;
+      },
+      listenSearch() {
+        proxy.getAricleList(state.condition);
+        state.search.words = state.condition.articleVague;
+        state.search.categoryFlag = false;
+        state.search.searchFlag = true;
+        router.push({
+          name: "index",
+        });
+        state.searchDialogVisible = false;
+        state.condition.articleVague = '';
+      },
     };
 
     onMounted(() => {
@@ -293,6 +353,9 @@ export default defineComponent({
       methods.tick(localStorage.getItem("runingTime") || state.startTime);
       methods.getDataSummaryList();
       window.addEventListener("scroll", methods.listenScroll);
+      state.search.categoryFlag = false;
+      state.search.words = "";
+      state.search.searchFlag = false;
     });
 
     return {
@@ -716,6 +779,42 @@ export default defineComponent({
     background: #179a16;
   }
 }
+
+.el-dialog {
+  background: unset;
+  box-shadow: unset;
+  .el-dialog__headerbtn {
+    font-size: 35px;
+
+    .el-dialog__close {
+      color: #999;
+    }
+  }
+
+  label {
+    width: 50%;
+    height: 50px;
+    border-radius: 50px;
+    display: flex;
+    margin: 150px auto 0;
+    background-color: #fff;
+    padding: 0 0 0 10px;
+    i {
+      font-size: 30px;
+      line-height: 50px;
+    }
+
+    input {
+      flex-grow: 1;
+      border: 0;
+      border-radius: 0 50px 50px 0;
+      padding-left: 10px;
+      height: inherit;
+      font-size: 1.2em;
+    }
+  }
+}
+
 // 向上旋转
 @keyframes gyrate {
   0% {

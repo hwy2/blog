@@ -3,9 +3,9 @@ import { ElNotification } from 'element-plus';
 
 // 基础URL
 axios.defaults.baseURL = 'http://localhost:3000'
-//post请求头
+// post请求头
 axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
-//设置超时
+// 设置超时
 axios.defaults.timeout = 10000;
 
 axios.interceptors.request.use(
@@ -19,7 +19,7 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
     response => {
-        if (response.status == 200) {
+        if (response.status === 200) {
             return Promise.resolve(response);
         } else {
             return Promise.reject(response);
@@ -41,7 +41,7 @@ export default {
             axios({
                 method: 'post',
                 url,
-                data: data,
+                data
             })
                 .then(res => {
                     resolve(res.data)

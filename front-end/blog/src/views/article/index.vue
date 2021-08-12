@@ -220,7 +220,6 @@
 import dateFormat from "/@/assets/js/dateFormat.js";
 import {
   toRefs,
-  ref,
   reactive,
   onBeforeMount,
   onMounted,
@@ -399,7 +398,6 @@ export default defineComponent({
 
     onBeforeMount(() => {
       // 挂载开始之前
-      scrollTo(0, 0);
       methods.getArticleInfo();
     });
     onMounted(() => {

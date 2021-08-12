@@ -4,6 +4,24 @@
       <div class="main">
         <el-scrollbar height="">
           <el-row>
+            <el-col :md="{ span: 14, offset: 5 }" :xs="24" v-if="search.categoryFlag||search.searchFlag">
+              <el-card shadow="hover">
+                <div class="item">
+                  <div class="search-hint" v-if="search.categoryFlag">
+                    <p>
+                      分类&emsp;<span>{{ search.words }}</span
+                      >&emsp;下的文章
+                    </p>
+                  </div>
+                  <div class="search-hint" v-if="search.searchFlag">
+                    <p>
+                      包含关键字&emsp;<span>{{ search.words }}</span
+                      >&emsp;的文章
+                    </p>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
             <el-col
               :md="{ span: 14, offset: 5 }"
               :xs="24"
@@ -45,7 +63,7 @@
         <el-pagination
           @next-click="methods.handleNextPage"
           @prev-click="methods.handlePrevPage"
-          :page-size="pageSize"
+          :page-size="condition.pageSize"
           :pager-count="11"
           layout="prev, pager, next"
           :total="total"
@@ -57,7 +75,6 @@
 </template>
 
 <script lang="ts">
-import dateFormat from "/@/assets/js/dateFormat.js";
 import {
   toRefs,
   reactive,
@@ -65,53 +82,55 @@ import {
   onMounted,
   defineComponent,
   getCurrentInstance,
+  computed,
 } from "vue";
-import { ElLoading } from "element-plus";
+// import { ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 export default defineComponent({
   name: "Index",
   setup: () => {
     //// @ts-ignore
+    const store = useStore();
     const router = useRouter();
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       // vue2.x的data参数
-      aricleList: {},
-      pageSize: 7,
-      total: 0,
+      aricleList: computed(() => store.state.articleLists),
+      total: computed(() => store.state.totals),
+      condition: computed({
+        get: () => {
+          return store.state.condition;
+        },
+        set: (val) => {
+          store.commit("setCondition", val);
+        },
+      }),
+      search: computed({
+        get: () => {
+          return store.state.search;
+        },
+        set: (val) => {
+          store.commit("setSearch", val);
+        },
+      }),
     });
     const methods = {
-      getAricleList(data: any) {
-        const loading = ElLoading.service({ fullscreen: true });
-        proxy.$axios
-          .get("/article/list", data)
-          .then((res: any) => {
-            console.log(res);
-            for (const item of res.result.list) {
-              item.createDate = dateFormat(item.createDate, "yyyy年MM月dd日");
-            }
-            state.pageSize = res.result.page.pageSize;
-            state.total = res.result.page.totalRow;
-            state.aricleList = res.result.list;
-            loading.close();
-          })
-          .catch((error: any) => {
-            console.log(error);
-            loading.close();
-          });
-      },
       jumpArticle(uuid: string) {
+        scrollTo(0, 0);
         router.push({
           name: "article",
           params: { uuid },
         });
       },
       handleNextPage(val: any) {
-        methods.getAricleList({ pageSize: state.pageSize, currPage: val });
+        state.condition.currPage = val;
+        proxy.getAricleList(state.condition);
         scrollTo(0, 0); // 回到页面顶部
       },
       handlePrevPage(val: any) {
-        methods.getAricleList({ pageSize: state.pageSize, currPage: val });
+        state.condition.currPage = val;
+        proxy.getAricleList(state.condition);
         scrollTo(0, 0); // 回到页面顶部
       },
     };
@@ -120,7 +139,7 @@ export default defineComponent({
     });
     onMounted(() => {
       // 挂载之后
-      methods.getAricleList({ pageSize: 7 });
+      proxy.getAricleList(state.condition);
     });
     return {
       ...toRefs(state),
@@ -217,6 +236,20 @@ export default defineComponent({
               span {
                 padding-right: 10px;
                 font-size: 14px;
+              }
+            }
+          }
+
+          .search-hint {
+            p {
+              font-size: 1.5em;
+              color: rgba(0, 0, 0, 0.75);
+              text-align: center;
+              font-weight: bold;
+              padding: 10px 0;
+
+              span{
+                color: rgb(255, 64, 129);
               }
             }
           }

@@ -7,7 +7,20 @@ export default createStore({
         token: "",
         webConfig: {},
         blogTitle: '',
-        article: {}
+        article: {},
+        articleLists: {},
+        totals: 0,
+        condition: {
+            pageSize: 7,
+            currPage: 1,
+            categoryTitle: "",
+            articleVague:''
+        },
+        search:{
+            categoryFlag:false,
+            searchFlag: false,
+            words:"",
+        },
     },
     getters: {
         getToken(state) {
@@ -22,6 +35,18 @@ export default createStore({
         getArticle(state) {
             return state.article
         },
+        getArticleList(state) {
+            return state.articleLists
+        },
+        getTotal(state) {
+            return state.totals
+        },
+        getCondition(state) {
+            return state.condition
+        },
+        getSearch(state){
+            return state.search
+        }
     },
     mutations: {
         setToken(state, status) {
@@ -36,6 +61,18 @@ export default createStore({
         setArticle(state, status) {
             state.article = status;
         },
+        setArticleList(state, status) {
+            state.articleLists = status
+        },
+        setTotal(state, status) {
+            state.totals = status
+        },
+        setCondition(state, status) {
+            state.condition = status
+        },
+        setSearch(state, status) {
+            state.search = status
+        }
     },
     actions: {},
     modules: {}

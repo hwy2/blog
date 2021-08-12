@@ -2,16 +2,20 @@ var co = require('co');
 var i18n = require('i18n'); //i18n国际化
 var utils = require('../libs/utils'); //工具类
 var config = require('../config/default'); //配置文件
-var Article = require('../models/index').Article; //文章
-var Category = require('../models/index').Category; //类别
-var ArticleCategory = require('../models/index').ArticleCategory; //文章类别中间表
-var User = require('../models/index').User;
-var UserInfo = require('../models/index').UserInfo;
-var Comment = require('../models/index').Comment;
+var {
+    Article,
+    Category,
+    ArticleCategory,
+    User,
+    UserInfo,
+    Comment
+} = require('../models/index'); //文章
+
 var Mysql = require('../models/mysql');
+var Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 var dateFormat = require("dateformat"); //时间格式化
 var dataSummary = require('./dataSummary');
-var category = require('./category');
 module.exports = {
     /**
      * 获取文章详情
@@ -78,11 +82,19 @@ module.exports = {
      */
     getArticleList: function (req, res, next) {
         var params = req.query || req.params;
-        var categoryUuid = utils.trim(params.categoryUuid);
-        var condition = {};
-        if (categoryUuid) {
-            condition.uuid = categoryUuid
+        var categoryTitle = utils.trim(params.categoryTitle);
+        var articleVague = utils.trim(params.articleVague);
+        var categoryCondition = {},
+            condition = {};
+        if (categoryTitle) {
+            categoryCondition.title = categoryTitle
         }
+        if (articleVague) {
+            condition.content = {
+                [Op.like]: '%' + articleVague + '%'
+            }
+        }
+        console.log(condition);
         // 分页
         var page = {
             currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
@@ -99,9 +111,13 @@ module.exports = {
                         attributes: ['uuid', 'nickName']
                     }]
                 }, {
+                    model: Category,
+                    where: categoryCondition
+                }, {
                     model: Comment,
                     attributes: ['uuid']
                 }],
+                where: condition,
                 limit: page.pageSize,
                 offset: page.pageSize * (page.currPage - 1),
                 order: [
@@ -367,8 +383,8 @@ module.exports = {
         var articleUuid = utils.trim(params.articleUuid);
         var articlePageview = utils.trim(params.articlePageview);
 
-        console.log(req.ip); 
-        
+        console.log(req.ip);
+
         if (!articleUuid || !articlePageview) {
             utils.handleJson({
                 response: res,

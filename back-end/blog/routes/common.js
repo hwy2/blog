@@ -13,7 +13,7 @@ var fileService = require('../services/file'); //文件服务
  */
 router.post('/enclosure', fileService.setFileUpload({
     pathType: "default", //上传对应文件夹 默认
-}).array('file'), function (req, res, next) {
+}).array('files', 5), function (req, res, next) {
     commonDao.uploadEnclosure(req, res, next);
 });
 

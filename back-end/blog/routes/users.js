@@ -65,6 +65,12 @@ router.put('/token', function (req, res, next) {
     userDao.updateAccessToken(req, res, next);
 });
 /**
+ * 更新adminToken 防止token过期
+ */
+router.put('/adminToken', function (req, res, next) {
+    userDao.updateAccessToken(req, res, next,true);
+});
+/**
  * 查询全部用户 支持 高级搜索、分页
  */
 router.get('/list', checkAdminToken, function (req, res, next) {
@@ -73,7 +79,7 @@ router.get('/list', checkAdminToken, function (req, res, next) {
 /**
  * 查询用户 byuuid
  */
-router.get('/info', function (req, res, next) {
+router.get('/info', checkToken, function (req, res, next) {
     userDao.getUserInfo(req, res, next);
 });
 

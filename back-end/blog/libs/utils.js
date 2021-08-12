@@ -5,7 +5,7 @@ var Promise = require("bluebird");
 var config = require('config-lite'); //配置
 var i18n = require('i18n'); //i18n
 var underscore = require('underscore'); //js 工具函数
-
+var md5 = require('blueimp-md5'); //md5加密
 module.exports = {
     /**
      * 工具类
@@ -127,14 +127,22 @@ module.exports = {
         }
         return checkFlag;
     },
+    // 处理字符串数组
     handleArray: function (opt) {
         if (opt && opt.length) {
             if (opt.indexOf(",") != -1) {
                 return opt.split(',')
-            }   
+            }
             return opt;
         }
         return "";
+    },
+    // 获取Gravatar图元
+    getGravatarURL: function (email) {
+
+        const address = String(email).trim().toLowerCase();
+        const hash = md5(address);
+        return `https://gravatar.loli.net/avatar/${ hash }`;
     }
 
 };

@@ -27,6 +27,10 @@ router.put("/update", function (req, res, next) {
 router.get("/del", function (req, res, next) {
     articleDao.deleteArticle(req, res, next);
 })
+router.get("/addPageViews", function (req, res, next) {
+    articleDao.addeArticlePageViews(req, res, next);
+})
+
 
 
 module.exports = router;

@@ -7,7 +7,11 @@ var Category = require('../models/index').Category; //类别
 var ArticleCategory = require('../models/index').ArticleCategory; //文章类别中间表
 var User = require('../models/index').User;
 var UserInfo = require('../models/index').UserInfo;
+var Comment = require('../models/index').Comment;
 var Mysql = require('../models/mysql');
+var dateFormat = require("dateformat"); //时间格式化
+var dataSummary = require('./dataSummary');
+var category = require('./category');
 module.exports = {
     /**
      * 获取文章详情
@@ -33,9 +37,14 @@ module.exports = {
                     },
                     {
                         model: User,
+                        attributes: ['uuid', 'email'],
                         include: [{
-                            model: UserInfo
+                            model: UserInfo,
+                            attributes: ['uuid', 'nickName', 'face']
                         }]
+                    },
+                    {
+                        model: Comment
                     }
                 ]
             });
@@ -71,26 +80,27 @@ module.exports = {
         var params = req.query || req.params;
         var categoryUuid = utils.trim(params.categoryUuid);
         var condition = {};
-
         if (categoryUuid) {
-            condition.categoryUuid = categoryUuid
+            condition.uuid = categoryUuid
         }
         // 分页
         var page = {
-            currPage: utils.trim(params.currPage) || config.page.currPage, //获取当前页
-            pageSize: utils.trim(params.pageSize) || config.page.pageSize //每页数量
+            currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
+            pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
         }
 
         co(function* () {
             var articleResult = yield Article.findAndCountAll({
                 include: [{
-                    model: Category,
-                    attributes: ['uuid', 'title']
-                }, {
                     model: User,
+                    attributes: ['uuid', 'email'],
                     include: [{
-                        model: UserInfo
+                        model: UserInfo,
+                        attributes: ['uuid', 'nickName']
                     }]
+                }, {
+                    model: Comment,
+                    attributes: ['uuid']
                 }],
                 limit: page.pageSize,
                 offset: page.pageSize * (page.currPage - 1),
@@ -122,7 +132,7 @@ module.exports = {
                 }
             });
 
-            // console.log(articleResult);
+
         }).catch(function (error) {
             utils.handleError({
                 response: res,
@@ -181,7 +191,7 @@ module.exports = {
             // console.log(articleResult);
             //通过addCategory方法在ArticleCategory表添加记录
             yield articleResult.addCategory(categoryResult)
-
+            dataSummary.updateDataSummary(req, res, next);
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
@@ -240,7 +250,6 @@ module.exports = {
                 });
                 return;
             }
-
             articleResult = yield Article.create({
                 uuid: articleUuid,
                 title: article.title,
@@ -249,11 +258,11 @@ module.exports = {
                 state: article.state,
                 abstract: article.abstract,
                 ishot: article.ishot,
-                userUuid: article.userUuid
+                userUuid: article.userUuid,
+                updateDate: dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss')
             }, {
                 transaction: works
             });
-
             var categoryResult = yield Category.findAll({
                 where: {
                     uuid: categoryUuids
@@ -334,6 +343,7 @@ module.exports = {
                 });
                 return;
             }
+            dataSummary.updateDataSummary(req, res, next);
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
@@ -347,5 +357,55 @@ module.exports = {
             })
         })
 
+    },
+
+    /**
+     * 文章浏览量增加
+     */
+    addeArticlePageViews: function (req, res, next) {
+        var params = req.query || req.params;
+        var articleUuid = utils.trim(params.articleUuid);
+        var articlePageview = utils.trim(params.articlePageview);
+
+        console.log(req.ip); 
+        
+        if (!articleUuid || !articlePageview) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassParamsComplete')
+            });
+            return;
+        }
+
+        co(function* () {
+            var pageViews = ++articlePageview;
+            var articleResult = yield Article.update({
+                pageview: pageViews
+            }, {
+                where: {
+                    uuid: articleUuid
+                }
+            });
+
+            if (!articleResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('articleNotExist')
+                });
+                return;
+            }
+
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: "+1"
+            })
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
     }
 }

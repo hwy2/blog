@@ -25,9 +25,13 @@ var Article = Mysql.define('article', {
     },
     state: { //文章状态 （0已删除、1已发布）
         type: Sequelize.STRING(2),
-        defaultValue: "0", //默认值
+        defaultValue: "1", //默认值
     },
     abstract: Sequelize.STRING,
+    pageview: {
+        type: Sequelize.INTEGER,
+        defaultValue:0
+    },
     ishot: { //是否热文
         type: Sequelize.BOOLEAN,
         defaultValue: false, //默认值

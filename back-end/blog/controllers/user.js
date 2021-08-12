@@ -185,9 +185,23 @@ module.exports = {
                 delete user.password; //删除密码
                 user.isPwd = true;
             }
-            if (user.idcard) {
-                delete user.idcard; //删除身份证
-                user.isVerify = true;
+
+            // 验证是否为管理员
+            if (user.role && user.role==1) {
+                console.log("管理员登录");
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('loginSuccess'),
+                    result: {
+                        user: user,
+                        accessToken: tokenService.setToken({
+                            uuid: user.uuid,
+                            isAdmin: true
+                        })
+                    },
+                });
+
+                return;
             }
             //success
             utils.handleJson({
@@ -232,7 +246,7 @@ module.exports = {
      * 根据用户对象更新token post
      * put
      */
-    updateAccessToken: function (req, res, next) {
+    updateAccessToken: function (req, res, next,isAdmin) {
         var params = req.body;
         var userUuid = params.userUuid;
         var token = params.token;
@@ -250,6 +264,20 @@ module.exports = {
             // 验证token
             yield tokenService.verifyToken(token, userUuid);
 
+            if (isAdmin){
+                utils.handleJson({
+                    response,
+                    res,
+                    msg: i18n.__('tokenUpdate'),
+                    result: {
+                        accessToken: tokenService.setToken({
+                            uuid: userUuid,
+                            isAdmin: true
+                        })
+                    }
+                });
+                return;
+            }
             // success
             utils.handleJson({
                 response,
@@ -277,9 +305,9 @@ module.exports = {
      */
     getUserList: function (req, res, next) {
         var params = req.query || req.params;
-        var email = params.email;
-        var nickName = params.nickName;
-        var role = params.role;
+        var email = utils.trim(params.email) ;
+        var nickName = utils.trim(params.nickName);
+        var role = utils.trim(params.role);
         var condition = {};
 
         if (email) {
@@ -301,8 +329,8 @@ module.exports = {
 
         // 分页
         var page = {
-            currPage: utils.trim(params.currPage) || config.page.currPage, //获取当前页
-            pageSize: utils.trim(params.pageSize) || config.page.pageSize //每页数量
+            currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
+            pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
         }
 
         // 查询

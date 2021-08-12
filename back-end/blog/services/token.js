@@ -3,7 +3,7 @@
  * 2021/6/17
  */
 var Promise= require('bluebird');
-var config = require('config-lite');//配置
+var config = require('../config/default');//配置
 var jwt = require('jsonwebtoken');//json token
 
 module.exports = {

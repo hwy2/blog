@@ -11,6 +11,7 @@ module.exports = {
      */
     uploadEnclosure: function (req, res, next) {
         var files = req.files;
+        console.log("files", files);
         if (!files && !files.length) {
             //err
             utils.handleError({
@@ -21,7 +22,7 @@ module.exports = {
         }
 
         co(function* () {
-            var filsResult = yield Promise.all(files.map(function (file) {
+            var fileResult = yield Promise.all(files.map(function (file) {
                 return Attachment.create({
                     name: file.originalname,
                     relativeUrl: file.filename,

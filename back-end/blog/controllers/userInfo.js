@@ -2,9 +2,6 @@ var i18n = require("i18n");
 var co = require("co");
 var utils = require("../libs/utils");
 var UserInfo = require('../models/index').UserInfo;
-const {
-    userInfo
-} = require("os");
 
 module.exports = {
     /**

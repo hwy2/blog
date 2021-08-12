@@ -4,13 +4,13 @@ var configs = {
     env: "dev", //当前环境
     mysql: { //mysql数据库
         host: '127.0.0.1',
-        user: 'root', //你安装的数据库用户名
-        password: '', //你安装的mysql数据库密码
-        database: 'blog', //数据库
+        user: 'root', //数据库用户名
+        password: '', //数据库密码
+        database: 'blog', //数据库名
         port: 3306, //端口
     },
     cors: { //跨域请求
-        origin: ['http://localhost:5000', 'http://localhost:5001'],
+        origin: ['http://localhost:8080', 'http://localhost:5001'],
     },
     pwd: { //密码
         salt: 10, //密码强度
@@ -51,9 +51,10 @@ var configs = {
         face: 'http://localhost:3000/attchments/face/',
     },
     weather: {
-        key: "d2a66877783ac05400f583f04ececd0d"
+        key: "d2a66877783ac05400f583f04ececd0d",
+        citycode: '440113' //番禺区
     },
-    isFirstTimeInstall: false,
+    isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库
 };
 
 module.exports = configs;

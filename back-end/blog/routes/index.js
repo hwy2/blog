@@ -8,10 +8,12 @@ module.exports = function (app) {
   //router分流
   app.use('/common', require('./common'));
   app.use('/user', require('./users'));
-  app.use('/admin', require('./admin'));
   app.use('/userInfo', require('./userInfo'));
   app.use('/category', require('./category'));
   app.use('/article', require('./article'));
+  app.use('/webConfig', require('./webConfig'));
+  app.use('/comment', require('./comment'));
+  app.use('/dataSummary',require('./dataSummary'))
   // app.use('/', function (req, res, next) {
   //   res.send('respond with a resource');
   // });

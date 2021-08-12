@@ -32,5 +32,6 @@
 	"categoryAlreadyExists": "类别已存在",
 	"articleNotExist":"文章不存在",
 	"updateArticleFail":"更新文章内容失败",
-	"creationFailed":"创建失败"
+	"creationFailed":"创建失败",
+	"siteName&&siteAddress":"网站名称或网站地址不能为空"
 }

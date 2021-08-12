@@ -1,10 +1,13 @@
 var co = require('co');
-var Promise = require("bluebird");
 var i18n = require('i18n'); //i18n国际化
 var utils = require('../libs/utils'); //工具类
 var config = require('../config/default'); //配置文件
 var Category = require('../models/index').Category; //文章类别
-
+var Article = require('../models/index').Article; //文章
+var User = require('../models/index').User;
+var UserInfo = require('../models/index').UserInfo;
+var Comment = require('../models/index').Comment;
+var dataSummary = require('./dataSummary');
 module.exports = {
     /**
      * 获取文章类别
@@ -98,7 +101,7 @@ module.exports = {
             }
 
             var category = categoryResult.dataValues;
-
+            dataSummary.summaryCategory(req, res, next);
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
@@ -159,6 +162,7 @@ module.exports = {
                 });
                 return;
             }
+            dataSummary.summaryCategory(req, res, next);
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
@@ -277,6 +281,4 @@ module.exports = {
             })
         })
     }
-
-
 }

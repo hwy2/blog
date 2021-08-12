@@ -7,6 +7,7 @@ const email = require('./email');
 var axios = require('axios');
 // var sdate = require('silly-datetime');时间格式化
 var User = require('../test/user');
+var dataSummary = require('../controllers/dataSummary');
 
 module.exports = {
 
@@ -21,13 +22,14 @@ module.exports = {
             data
         } = await axios.get(`https://restapi.amap.com/v3/weather/weatherInfo?city=${citycode}&extensions=all&key=${configs.weather.key}&output=JSON`);
         if (status === 200 && data && data.forecasts && data.forecasts.length) {
-            let weeks = ["", "一", "二", "三", "四", "五", "六","日"]
+            let weeks = ["", "一", "二", "三", "四", "五", "六", "日"]
             let {
                 city,
                 casts
             } = data.forecasts[0];
-            let i=0,str_weather ="";
-            while(i<casts.length){
+            let i = 0,
+                str_weather = "";
+            while (i < casts.length) {
                 let {
                     date,
                     week,
@@ -68,7 +70,7 @@ module.exports = {
         //每天 14h 运行天气预报任务         周几
         schedule.scheduleJob('0 05 11 * * *', async function () {
             console.log('schedule', new Date());
-            var object = await _this.getWeather('440113');
+            var object = await _this.getWeather(configs.weather.citycode);
             if (!object) {
                 console.log("schedule", "获取天气信息失败！");
             }
@@ -84,9 +86,18 @@ module.exports = {
     },
 
     /**
+     * 数据统计
+     */
+    statisticalData: async function () {
+        schedule.scheduleJob('0 00 09 * * *', async function () {
+            dataSummary.updateDataSummary();
+        })
+    },
+
+    /**
      * 测试接口
      */
-    testBlogApi: async function(){
+    testBlogApi: async function () {
         let user = User.init();
         // let userInfo = UserInfo.init();
         // let admin = AdminUser.init();

@@ -31,5 +31,6 @@
     "categoryNotExist":"category does not exist",
     "categoryAlreadyExists": "category already exists",
     "updateArticleFail":"update article fail",
-    "creationFailed":"creation failed"
+    "creationFailed":"creation failed",
+    "siteName&&siteAddress": "siteName&&siteAddress not null"
 }

@@ -1,7 +1,5 @@
 /**
  * 文件服务
- * add by wwj
- * 2019-05-04 12:03:39
  */
 var fs = require('fs');
 var path = require('path'); //路径
@@ -58,6 +56,7 @@ module.exports = {
             },
             storage: storage,
         });
+
         return upload;
     },
     /**

@@ -164,12 +164,7 @@
     </div>
   </el-drawer>
 
-  <el-dialog
-    v-model="searchDialogVisible"
-    width="80%"
-    destroy-on-close
-    center
-  >
+  <el-dialog v-model="searchDialogVisible" width="80%" destroy-on-close center>
     <label for="search">
       <i class="iconfont iconsearch"></i>
       <input
@@ -198,7 +193,7 @@ export default defineComponent({
   components: {},
   setup: () => {
     const store = useStore();
-       const router = useRouter();
+    const router = useRouter();
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       // vue2.x的data参数
@@ -304,7 +299,8 @@ export default defineComponent({
         const outerWidth = window.outerWidth;
         const temp = store.getters.getWebConfig.siteName;
         if (outerWidth < 800) {
-          if (scroll > 80) {
+          const path = router.currentRoute.value.path;
+          if (scroll > 80 && /article/.test(path)) {
             state.isScroll = true;
             store.commit("setBlogTitle", store.getters.getArticle.title);
           } else {
@@ -330,6 +326,7 @@ export default defineComponent({
         state.search.words = categoryTitle;
         state.search.categoryFlag = true;
         state.search.searchFlag = false;
+        state.drawer = false;
       },
       openSearch() {
         state.searchDialogVisible = true;
@@ -343,7 +340,7 @@ export default defineComponent({
           name: "index",
         });
         state.searchDialogVisible = false;
-        state.condition.articleVague = '';
+        state.condition.articleVague = "";
       },
     };
 
@@ -799,6 +796,7 @@ export default defineComponent({
     margin: 150px auto 0;
     background-color: #fff;
     padding: 0 0 0 10px;
+    box-sizing: border-box;
     i {
       font-size: 30px;
       line-height: 50px;
@@ -813,6 +811,9 @@ export default defineComponent({
       font-size: 1.2em;
     }
   }
+}
+.el-overlay {
+  background-color: rgba(51, 50, 50, 0.89);
 }
 
 // 向上旋转
@@ -904,6 +905,20 @@ export default defineComponent({
       rgb(204, 204, 204),
       rgb(204, 204, 204)
     );
+  }
+}
+
+@media (max-width: 800px) {
+  .el-dialog {
+    label {
+      width: 100%;
+      height: 50px;
+      border-radius: 50px;
+      display: flex;
+      margin: 15vh auto 0px;
+      background-color: rgb(255, 255, 255);
+      padding: 0px 0px 0px 10px;
+    }
   }
 }
 </style>

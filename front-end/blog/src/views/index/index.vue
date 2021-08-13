@@ -4,7 +4,11 @@
       <div class="main">
         <el-scrollbar height="">
           <el-row>
-            <el-col :md="{ span: 14, offset: 5 }" :xs="24" v-if="search.categoryFlag||search.searchFlag">
+            <el-col
+              :md="{ span: 14, offset: 5 }"
+              :xs="24"
+              v-if="search.categoryFlag || search.searchFlag"
+            >
               <el-card shadow="hover">
                 <div class="item">
                   <div class="search-hint" v-if="search.categoryFlag">
@@ -248,7 +252,7 @@ export default defineComponent({
               font-weight: bold;
               padding: 10px 0;
 
-              span{
+              span {
                 color: rgb(255, 64, 129);
               }
             }
@@ -326,6 +330,12 @@ export default defineComponent({
 
             h2 {
               font-size: 1.5em;
+            }
+          }
+
+          .search-hint {
+            p {
+              font-size: 1.3em !important;
             }
           }
         }

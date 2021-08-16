@@ -22,7 +22,9 @@
     </el-affix>
 
     <el-main>
-      <router-view></router-view>
+      <transition name="slide-fade">
+        <router-view></router-view>
+      </transition>
     </el-main>
 
     <el-footer height="">
@@ -55,7 +57,7 @@
   </el-container>
 
   <el-drawer
-    title="我是标题"
+    title=""
     v-model="drawer"
     direction="ltr"
     size="240px"
@@ -161,6 +163,11 @@
           </p>
         </li>
       </ul>
+    </div>
+    <div class="sidebar-footer">
+      <button @click="methods.login()">
+        <i class="iconfont iconren"></i> 登录
+      </button>
     </div>
   </el-drawer>
 
@@ -342,6 +349,11 @@ export default defineComponent({
         state.searchDialogVisible = false;
         state.condition.articleVague = "";
       },
+      login() {
+        router.push({
+          name: "login",
+        });
+      },
     };
 
     onMounted(() => {
@@ -520,260 +532,279 @@ export default defineComponent({
 .el-drawer {
   transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
   background-color: rgb(248, 247, 247);
-}
-.sidebar-header {
-  height: 190px;
-  background: url("/@/assets/images/sidebar.jpg") no-repeat center center;
-  background-size: cover;
-  width: 100%;
-  box-sizing: border-box;
 
-  .head-portrait {
-    background: url("/@/assets/images/sidebar.jpg") no-repeat 50% 50%;
+  .sidebar-header {
+    height: 190px;
+    background: url("/@/assets/images/sidebar.jpg") no-repeat center center;
     background-size: cover;
-    width: 60px;
-    height: 60px;
-    border-radius: 60px;
-    box-shadow: 0 0 8px 0 rgb(0 0 0 / 55%);
-    transition: all 0.3s;
-    transform: translate(20px, 35px);
-    position: relative;
-    z-index: 999;
-    &:hover {
-      box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.55);
-      transform: translate(20px, 20px) rotate(20deg) scale(1.1);
-    }
-  }
-
-  .siteInfo {
-    background-color: rgba(0, 0, 0, 0.4);
-    padding: 30px 15px 10px;
+    width: 100%;
     box-sizing: border-box;
-    transform: translateY(15px);
 
-    .authorName,
-    .description {
-      overflow: hidden;
-      white-space: normal;
-      text-overflow: ellipsis;
-      color: #fff;
-      min-height: 38px;
-      p {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        font-size: 14px;
+    .head-portrait {
+      background: url("/@/assets/images/sidebar.jpg") no-repeat 50% 50%;
+      background-size: cover;
+      width: 60px;
+      height: 60px;
+      border-radius: 60px;
+      box-shadow: 0 0 8px 0 rgb(0 0 0 / 55%);
+      transition: all 0.3s;
+      transform: translate(20px, 35px);
+      position: relative;
+      z-index: 999;
+      &:hover {
+        box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.55);
+        transform: translate(20px, 20px) rotate(20deg) scale(1.1);
       }
     }
 
-    .authorName {
-      p {
-        font-size: 22px;
-        font-weight: bold;
-        text-shadow: 1px 1px 5px rgb(41, 40, 40);
+    .siteInfo {
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 30px 15px 10px;
+      box-sizing: border-box;
+      transform: translateY(15px);
+
+      .authorName,
+      .description {
+        overflow: hidden;
+        white-space: normal;
+        text-overflow: ellipsis;
+        color: #fff;
+        min-height: 38px;
+        p {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          font-size: 14px;
+        }
+      }
+
+      .authorName {
+        p {
+          font-size: 22px;
+          font-weight: bold;
+          text-shadow: 1px 1px 5px rgb(41, 40, 40);
+        }
       }
     }
   }
-}
 
-.sidebar-toolbar {
-  height: 80vh;
-  overflow: hidden;
-  overflow-y: auto;
-  ul {
-    padding: 10px 0;
-    a {
-      display: block;
-      height: auto;
-      min-height: 48px;
-      padding: 0 16px;
-      color: #666;
-      &:hover {
-        background-color: rgb(216, 216, 216);
-      }
-      p {
-        display: inline-block;
-        padding: 16px 0 16px 32px;
-        font-size: 16px;
-        line-height: 1;
-      }
-
-      i:nth-of-type(1) {
-        font-size: 22px;
-        vertical-align: middle;
-      }
-    }
-    .collapse-item {
-      .ripple {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+  .sidebar-toolbar {
+    height: 80vh;
+    overflow: hidden;
+    overflow-y: auto;
+    ul {
+      padding: 10px 0;
+      a {
+        display: block;
         height: auto;
         min-height: 48px;
-        padding: 5px 16px;
+        padding: 0 16px;
         color: #666;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         &:hover {
           background-color: rgb(216, 216, 216);
-        }
-        &:active {
-          animation: colorGradient 0.1s;
-          background-color: rgb(204, 204, 204);
         }
         p {
           display: inline-block;
           padding: 16px 0 16px 32px;
           font-size: 16px;
           line-height: 1;
-          width: 144px;
         }
 
         i:nth-of-type(1) {
           font-size: 22px;
           vertical-align: middle;
         }
-        i:nth-of-type(2) {
-          font-size: 16px;
-          transform: rotateZ(90deg);
-          font-weight: bold;
-        }
-        .rotate {
-          animation: gyrate 0.2s;
-          transform: rotateZ(270deg) !important;
-        }
-
-        .anti-rotation {
-          animation: antiRotation 0.2s;
-          transform: rotateZ(90deg) !important;
-        }
       }
-      .secondary-warp {
-        transition: all 30s cubic-bezier(0.4, 0, 0.2, 1);
-        height: 0;
-        .secondary-item {
-          padding: 0 16px 0 70px;
+      .collapse-item {
+        .ripple {
           display: flex;
           justify-content: center;
           align-items: center;
           height: auto;
-          min-height: 40px;
+          min-height: 48px;
+          padding: 5px 16px;
           color: #666;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           &:hover {
             background-color: rgb(216, 216, 216);
           }
-
-          p:nth-child(1) {
+          &:active {
+            animation: colorGradient 0.1s;
+            background-color: rgb(204, 204, 204);
+          }
+          p {
             display: inline-block;
-            padding: 16px 0;
+            padding: 16px 0 16px 32px;
             font-size: 16px;
             line-height: 1;
-            text-align: left;
-            flex-grow: 1;
+            width: 144px;
           }
 
-          p:nth-child(2) {
-            span {
-              background-color: rgb(58, 58, 58);
-              color: #fff;
-              text-align: center;
-              display: block;
-              padding: 0 8px;
-              border-radius: 5px;
+          i:nth-of-type(1) {
+            font-size: 22px;
+            vertical-align: middle;
+          }
+          i:nth-of-type(2) {
+            font-size: 16px;
+            transform: rotateZ(90deg);
+            font-weight: bold;
+          }
+          .rotate {
+            animation: gyrate 0.2s;
+            transform: rotateZ(270deg) !important;
+          }
+
+          .anti-rotation {
+            animation: antiRotation 0.2s;
+            transform: rotateZ(90deg) !important;
+          }
+        }
+        .secondary-warp {
+          transition: all 30s cubic-bezier(0.4, 0, 0.2, 1);
+          height: 0;
+          .secondary-item {
+            padding: 0 16px 0 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            min-height: 40px;
+            color: #666;
+            &:hover {
+              background-color: rgb(216, 216, 216);
+            }
+
+            p:nth-child(1) {
+              display: inline-block;
+              padding: 16px 0;
+              font-size: 16px;
+              line-height: 1;
+              text-align: left;
+              flex-grow: 1;
+            }
+
+            p:nth-child(2) {
+              span {
+                background-color: rgb(58, 58, 58);
+                color: #fff;
+                text-align: center;
+                display: block;
+                padding: 0 8px;
+                border-radius: 5px;
+              }
             }
           }
         }
       }
-    }
 
-    .summary {
-      margin: 10px 0;
-      padding: 16px 0;
-      border-top: 1px solid rgb(214, 214, 214);
-      border-bottom: 1px solid rgb(214, 214, 214);
-      p {
-        text-align: center;
-        font-size: 16px;
-        letter-spacing: 5px;
-        color: #666;
-      }
-      i {
-        vertical-align: middle;
-        font-size: 22px;
-        color: #666;
-      }
-    }
-
-    .list-item {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: auto;
-      min-height: 48px;
-      padding: 0 16px;
-      color: #666;
-      &:hover {
-        background-color: rgb(216, 216, 216);
-      }
-
-      p:nth-child(1) {
-        display: inline-block;
+      .summary {
+        margin: 10px 0;
         padding: 16px 0;
-        font-size: 16px;
-        line-height: 1;
-        text-align: left;
-        flex-grow: 1;
+        border-top: 1px solid rgb(214, 214, 214);
+        border-bottom: 1px solid rgb(214, 214, 214);
+        p {
+          text-align: center;
+          font-size: 16px;
+          letter-spacing: 5px;
+          color: #666;
+        }
+        i {
+          vertical-align: middle;
+          font-size: 22px;
+          color: #666;
+        }
       }
 
-      p:nth-child(2) {
-        span {
-          background-color: rgb(58, 58, 58);
-          color: #fff;
-          text-align: center;
+      .list-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: auto;
+        min-height: 48px;
+        padding: 0 16px;
+        color: #666;
+        &:hover {
+          background-color: rgb(216, 216, 216);
+        }
+
+        p:nth-child(1) {
+          display: inline-block;
+          padding: 16px 0;
+          font-size: 16px;
+          line-height: 1;
+          text-align: left;
+          flex-grow: 1;
+        }
+
+        p:nth-child(2) {
+          span {
+            background-color: rgb(58, 58, 58);
+            color: #fff;
+            text-align: center;
+            display: block;
+            padding: 0 8px;
+            border-radius: 5px;
+          }
+        }
+      }
+
+      .collapse-item-none {
+        .secondary-warp {
+          display: none;
+        }
+      }
+
+      .collapse-item-block {
+        .secondary-warp {
           display: block;
-          padding: 0 8px;
-          border-radius: 5px;
         }
       }
     }
 
-    .collapse-item-none {
-      .secondary-warp {
-        display: none;
-      }
+    /*修改滚动条样式*/
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+      /**/
+    }
+    /*  滚动条的轨道 */
+    &::-webkit-scrollbar-track {
+      background: rgb(239, 239, 239);
+      border-radius: 2px;
+    }
+    /* 滚动条里面的小方块，能向上向下移动 */
+    &::-webkit-scrollbar-thumb {
+      background: #bfbfbf;
+      border-radius: 10px;
     }
 
-    .collapse-item-block {
-      .secondary-warp {
-        display: block;
-      }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #333;
+    }
+    /* 边角，即两个滚动条的交汇处 */
+    &::-webkit-scrollbar-corner {
+      background: #179a16;
     }
   }
+  .sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    box-shadow: 1px 1px 10px #999;
+    display: flex;
 
-  /*修改滚动条样式*/
-  &::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-    /**/
-  }
-  /*  滚动条的轨道 */
-  &::-webkit-scrollbar-track {
-    background: rgb(239, 239, 239);
-    border-radius: 2px;
-  }
-  /* 滚动条里面的小方块，能向上向下移动 */
-  &::-webkit-scrollbar-thumb {
-    background: #bfbfbf;
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #333;
-  }
-  /* 边角，即两个滚动条的交汇处 */
-  &::-webkit-scrollbar-corner {
-    background: #179a16;
+    button {
+      border: unset;
+      flex-grow: 1;
+      font-size: 18px;
+      i {
+        font-size: 18px;
+      }
+    }
   }
 }
 

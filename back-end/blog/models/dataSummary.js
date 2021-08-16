@@ -6,7 +6,7 @@ var Sequelize = require('sequelize'); //引入sequelize
 var Mysql = require('./mysql'); //引入sequelize
 
 var DataSummary = Mysql.define('dataSummary', {
-    uuid: { //使用uuid 而不使用
+    uuid: { //使用uuid 而不使用id
         type: Sequelize.UUID, //设置类型
         allowNull: false, //是否允许为空
         primaryKey: true, //主键

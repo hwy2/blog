@@ -105,11 +105,11 @@
                 <el-form-item
                   prop="niceName"
                   label="昵称"
-                  :rules="{
+                  :rules="[{
                     required: true,
                     message: '昵称不能为空',
                     trigger: 'blur',
-                  }"
+                  },{min:3,max:255,message:'长度在 3 到 255 个字符',trigger: 'blur'}]"
                 >
                   <el-input
                     v-model="formLabelAlign.niceName"
@@ -130,6 +130,7 @@
                       trigger: 'blur',
                     },
                     {
+                      max:255,
                       type: 'email',
                       message: '请输入正确的邮箱地址',
                       trigger: ['blur', 'change'],

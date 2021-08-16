@@ -26,6 +26,16 @@ const routes: RouteRecordRaw[] = [
             }
         ]
     },
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import('/@/views/login/index.vue'),
+    },
+    {
+        path: '/backstage',
+        name: 'backstage',
+        component: () => import('/@/views/backstage/index.vue'),
+    },
 ];
 
 const router = createRouter({

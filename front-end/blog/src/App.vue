@@ -1,5 +1,7 @@
 <template>
-  <router-view></router-view>
+  <transition name="slide-fade">
+    <router-view></router-view>
+  </transition>
 </template>
 
 <script  lang='ts'>
@@ -14,13 +16,16 @@ export default {
     const store = useStore();
     const methods = {
       async getWebConfigInfo() {
-       await proxy.$axios
+        await proxy.$axios
           .get("/webConfig/info")
           .then((res: any) => {
             console.log(res);
             store.commit("setWebConfig", res.result.webConfig);
             store.commit("setBlogTitle", res.result.webConfig.siteName);
-            localStorage.setItem('runingTime',res.result.webConfig.runningTime);
+            localStorage.setItem(
+              "runingTime",
+              res.result.webConfig.runningTime
+            );
             // 修改或创建 keywords AND description
             const head: any = document.getElementsByTagName("head");
             const keyword: any =
@@ -38,7 +43,6 @@ export default {
             );
             head[0].appendChild(keyword);
             head[0].appendChild(description);
-
           })
           .catch((error: any) => {
             console.log(error);
@@ -48,19 +52,21 @@ export default {
     onBeforeMount(() => {
       // 修改网页title
       const title = document.title;
-      window.onblur =  ()=> {
+      window.onblur = () => {
         document.title = "(つ ェ ⊂)我藏好了哦~";
       };
-      window.onfocus =  ()=> {
+      window.onfocus = () => {
         document.title = "(*゜ロ゜)ノ被发现了~";
         setTimeout(() => {
           document.title = title;
         }, 3000);
       };
       document.title = "blog"; // 修改title
-      methods.getWebConfigInfo();
+      if (JSON.stringify(store.state.webConfig) === "{}") {
+        methods.getWebConfigInfo();
+      }
     }),
-    onMounted(() => {
+      onMounted(() => {
         let images: string = "/@/assets/images/winter1.png";
         const month: number = new Date().getMonth() + 1;
         switch (month) {

@@ -158,7 +158,10 @@ module.exports = {
             var userResult = yield User.findOne({
                 where: {
                     email: email
-                }
+                },
+                include: [{
+                    model: UserInfo
+                }]
             });
 
             if (!userResult) { //用户不存在
@@ -187,7 +190,7 @@ module.exports = {
             }
 
             // 验证是否为管理员
-            if (user.role && user.role==1) {
+            if (user.role && user.role == 1) {
                 console.log("管理员登录");
                 utils.handleJson({
                     response: res,
@@ -246,7 +249,7 @@ module.exports = {
      * 根据用户对象更新token post
      * put
      */
-    updateAccessToken: function (req, res, next,isAdmin) {
+    updateAccessToken: function (req, res, next, isAdmin) {
         var params = req.body;
         var userUuid = params.userUuid;
         var token = params.token;
@@ -264,7 +267,7 @@ module.exports = {
             // 验证token
             yield tokenService.verifyToken(token, userUuid);
 
-            if (isAdmin){
+            if (isAdmin) {
                 utils.handleJson({
                     response,
                     res,
@@ -305,7 +308,7 @@ module.exports = {
      */
     getUserList: function (req, res, next) {
         var params = req.query || req.params;
-        var email = utils.trim(params.email) ;
+        var email = utils.trim(params.email);
         var nickName = utils.trim(params.nickName);
         var role = utils.trim(params.role);
         var condition = {};

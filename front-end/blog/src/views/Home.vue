@@ -1,6 +1,6 @@
 <template>
   <div class="bg"></div>
-  <el-container>
+  <el-container  v-loading="loading">
     <el-affix :offset="0">
       <el-header height="" :class="isScroll ? 'backdrop' : ''">
         <div class="toolbar">
@@ -221,6 +221,7 @@ export default defineComponent({
       isPageNone: true,
       isScroll: false,
       searchDialogVisible: false,
+      loading:true,
       condition: computed({
         get: () => {
           return store.state.condition;
@@ -365,6 +366,7 @@ export default defineComponent({
       state.search.categoryFlag = false;
       state.search.words = "";
       state.search.searchFlag = false;
+      state.loading = false;
     });
 
     return {

@@ -1,5 +1,5 @@
 <template>
-  <div id="postIndex">
+  <div id="postIndex" >
     <div class="content">
       <div class="main">
         <el-scrollbar height="">

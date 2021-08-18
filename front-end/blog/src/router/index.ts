@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import store from '/@/store';
+import Cookies from 'js-cookie'
+import { ElLoading } from 'element-plus';
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
@@ -12,12 +13,12 @@ const routes: RouteRecordRaw[] = [
             {
                 path: '/index',
                 name: 'index',
-                component: () => import('/@/views/index/index.vue'),
+                component: () => import('../views/foreground/index.vue'),
             },
             {
                 path: '/article/:uuid',
                 name: 'article',
-                component: () => import('/@/views/article/index.vue'),
+                component: () => import('/@/views/foreground/article/index.vue'),
             },
             {
                 path: '/404',
@@ -35,6 +36,7 @@ const routes: RouteRecordRaw[] = [
         path: '/backstage',
         name: 'backstage',
         component: () => import('/@/views/backstage/index.vue'),
+        children: []
     },
 ];
 
@@ -45,22 +47,27 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     if (to.matched.length === 0) {
-        next('/404')
+        next('/404');
     } else {
-        next();
+        if (/backstage/.test(to.path) ) {
+            const loading = ElLoading.service({
+                lock: true,
+                text: 'Loading',
+                spinner: 'el-icon-loading',
+                background: 'rgba(0, 0, 0, 0.7)',
+            });
+            if (Cookies.get('accessToken')) {
+                loading.close();
+                next();
+            } else {
+                loading.close();
+                next('/login')
+            }
+        } else {
+            next();
+        }
+
     }
-    //     if (to.meta.requireAuth) {
-    //         if (store.state.token) {
-    //             next()
-    //         } else {
-    //             next({
-    //                 path: '/login',
-    //                 query: { redirect: to.fullPath }
-    //             })
-    //         }
-    //     } else {
-    //         next()
-    //     }
 })
 
 

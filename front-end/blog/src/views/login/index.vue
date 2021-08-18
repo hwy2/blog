@@ -129,10 +129,13 @@ export default defineComponent({
                 message: `登录成功，欢迎回来`,
                 type: "success",
               });
+              proxy.$Cookies.set('accessToken',res.result.accessToken.token,{ expires: new Date( res.result.accessToken.expiresIn) })
 
-              router.push({
-                name: "backstage",
-              });
+              setTimeout(() => {
+                router.push({
+                  name: "backstage",
+                });
+              }, 500);
             } else {
               ElNotification({
                 title: "错误",
@@ -145,9 +148,9 @@ export default defineComponent({
             console.log("err", err);
           });
       },
-      fackHome(){
-        router.go(-1)
-      }
+      fackHome() {
+        router.go(-1);
+      },
     };
 
     return {

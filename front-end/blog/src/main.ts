@@ -8,12 +8,13 @@ import 'element-plus/lib/theme-chalk/index.css'
 import './index.css'
 import '/@/assets/js/localStorage'
 import pubfunt from '/@/public'
+import Cookies from 'js-cookie'
 
 // 挂载到实例
 const app = createApp(App)
 app.config.globalProperties.$axios = axios;
 app.config.globalProperties.getAricleList = pubfunt.getAricleList;
-
+app.config.globalProperties.$Cookies = Cookies;
 // 分环境处理
 if (process.env.NODE_ENV === 'development') {
     if ('__VUE_DEVTOOLS_GLOBAL_HOOK__' in window) {

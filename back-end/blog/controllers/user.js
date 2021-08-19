@@ -188,10 +188,11 @@ module.exports = {
                 delete user.password; //删除密码
                 user.isPwd = true;
             }
-
+            user.role = user.role === '1' ? '管理员' : '普通用户'
             // 验证是否为管理员
-            if (user.role && user.role == 1) {
+            if (user.role && user.role === '管理员') {
                 console.log("管理员登录");
+
                 utils.handleJson({
                     response: res,
                     msg: i18n.__('loginSuccess'),
@@ -206,6 +207,9 @@ module.exports = {
 
                 return;
             }
+
+
+
             //success
             utils.handleJson({
                 response: res,

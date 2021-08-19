@@ -1,7 +1,7 @@
 <template>
   <div class="bg"></div>
-  <el-container  v-loading="loading">
-    <el-affix :offset="0">
+  <el-container v-loading="loading">
+    <el-affix :offset="0" position="top">
       <el-header height="" :class="isScroll ? 'backdrop' : ''">
         <div class="toolbar">
           <!-- logo -->
@@ -20,18 +20,16 @@
         </div>
       </el-header>
     </el-affix>
-
-    <el-main>
-      <transition name="slide-fade">
+    <transition name="slide-fade">
+      <el-main>
         <router-view></router-view>
-      </transition>
-    </el-main>
-
+      </el-main>
+    </transition>
     <el-footer height="">
       <div class="footer-box">
         <div class="copyright">
           <p>
-            Copyright © 2021 <a href="/">{{ blogTitle }}</a>
+            Copyright © 2021 <a href="/">{{ siteName }}</a>
           </p>
         </div>
         <div class="runningTime">
@@ -192,6 +190,7 @@ import {
   onMounted,
   getCurrentInstance,
   computed,
+  onBeforeMount,
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -204,14 +203,19 @@ export default defineComponent({
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       // vue2.x的data参数
-      blogTitle: computed(() => store.state.blogTitle), // 网站title
+      blogTitle: computed(() => store.state.foreground.blogTitle), // 网站title
+      siteName: computed(() => store.state.foreground.webConfig.siteName),
       runningTime: "", // 运行时间
-      startTime: computed(() => store.state.webConfig.runningTime),
-      recordMIIT: computed(() => store.state.webConfig.recordNumber), // 工信部备案
-      internetAlert: computed(() => store.state.webConfig.internetAlert), // 粤警备案
+      startTime: computed(() => store.state.foreground.webConfig.runningTime),
+      recordMIIT: computed(() => store.state.foreground.webConfig.recordNumber), // 工信部备案
+      internetAlert: computed(
+        () => store.state.foreground.webConfig.internetAlert
+      ), // 粤警备案
       drawer: false,
-      authorName: computed(() => store.state.webConfig.authorName), // 作者名称
-      description: computed(() => store.state.webConfig.siteDescription), // 站长简介
+      authorName: computed(() => store.state.foreground.webConfig.authorName), // 作者名称
+      description: computed(
+        () => store.state.foreground.webConfig.siteDescription
+      ), // 站长简介
       articlesTotal: 0, // 文章总数
       commentsTotal: 0, // 评论总数
       pagesTotal: 0, // 页面总数
@@ -221,21 +225,21 @@ export default defineComponent({
       isPageNone: true,
       isScroll: false,
       searchDialogVisible: false,
-      loading:true,
+      loading: true,
       condition: computed({
         get: () => {
-          return store.state.condition;
+          return store.state.foreground.condition;
         },
         set: (val) => {
-          store.commit("setCondition", val);
+          store.commit("foreground/setCondition", val);
         },
       }),
       search: computed({
         get: () => {
-          return store.state.search;
+          return store.state.foreground.search;
         },
         set: (val) => {
-          store.commit("setSearch", val);
+          store.commit("foreground/etSearch", val);
         },
       }),
     });
@@ -281,6 +285,7 @@ export default defineComponent({
           .get("/dataSummary/list")
           .then((res: any) => {
             console.log(res);
+            store.commit("foreground/setDataSummary", res.result.list);
             state.articlesTotal = res.result.list.filter((item: any) => {
               return item.name === "articlesTotal";
             })[0].value; // 文章总数
@@ -302,20 +307,29 @@ export default defineComponent({
           });
       },
       listenScroll() {
-        const scroll =
-          document.documentElement.scrollTop || document.body.scrollTop;
-        const outerWidth = window.outerWidth;
-        const temp = store.getters.getWebConfig.siteName;
-        if (outerWidth < 800) {
-          const path = router.currentRoute.value.path;
-          if (scroll > 80 && /article/.test(path)) {
-            state.isScroll = true;
-            store.commit("setBlogTitle", store.getters.getArticle.title);
-          } else {
-            state.isScroll = false;
-            store.commit("setBlogTitle", temp);
+        setTimeout(() => {
+          const scroll = document.documentElement.scrollTop;
+          const outerWidth = window.outerWidth;
+          console.log(outerWidth);
+          const temp = store.getters["foreground/getWebConfig"].siteName;
+          if (outerWidth < 800) {
+            const path = router.currentRoute.value.path;
+            if (scroll > 80 && /article/.test(path)) {
+              state.isScroll = true;
+              store.commit(
+                "foreground/setBlogTitle",
+                store.getters["foreground/getArticle"].title
+              );
+            } else {
+              state.isScroll = false;
+              store.commit("foreground/setBlogTitle", temp);
+            }
+          } else if (scroll > 1) {
+            const elaffix: any =
+              document.querySelector(".el-affix")?.firstChild;
+            elaffix.setAttribute("class", "el-affix--fixed");
           }
-        }
+        }, 500);
       },
       isCategoryShow() {
         state.isCategoryNone = state.isCategoryNone ? false : true;
@@ -335,11 +349,13 @@ export default defineComponent({
         state.search.categoryFlag = true;
         state.search.searchFlag = false;
         state.drawer = false;
+        router.push({name:'home'});
       },
       openSearch() {
         state.searchDialogVisible = true;
       },
       listenSearch() {
+        state.condition.categoryTitle = "";
         proxy.getAricleList(state.condition);
         state.search.words = state.condition.articleVague;
         state.search.categoryFlag = false;
@@ -351,12 +367,12 @@ export default defineComponent({
         state.condition.articleVague = "";
       },
       login() {
-        router.push({
-          name: "login",
-        });
+        router.push("/login");
       },
     };
-
+    onBeforeMount(() => {
+      proxy.getWebConfigInfo();
+    });
     onMounted(() => {
       // 挂载之后
       console.log("startTime", state.startTime);
@@ -405,6 +421,9 @@ export default defineComponent({
     a {
       color: #fff;
       font-size: 1.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
 
       &:hover {
         color: var(--hover);
@@ -436,6 +455,9 @@ export default defineComponent({
           margin-right: 0.8em;
         }
       }
+      a:nth-of-type(2) {
+        width: 180px;
+      }
     }
     .search {
       i {
@@ -448,7 +470,14 @@ export default defineComponent({
   padding: 20px 0;
   min-height: 74.8vh;
 }
-
+.el-affix {
+  width: 100%;
+  height: 68px;
+  .el-affix--fixed {
+    width: 100%;
+    height: 68px;
+  }
+}
 .el-footer {
   background-color: #424242;
   min-height: 168px;

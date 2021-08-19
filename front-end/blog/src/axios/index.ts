@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ElNotification } from 'element-plus';
+import cookies from 'js-cookie';
 
 // 基础URL
 axios.defaults.baseURL = 'http://localhost:3000'
@@ -10,6 +11,10 @@ axios.defaults.timeout = 10000;
 
 axios.interceptors.request.use(
     config => {
+        const accessToken = cookies.get('accessToken');
+        if (accessToken){
+            config.headers.accessToken = accessToken;
+        }
         return config;
     },
     error => {
@@ -55,6 +60,21 @@ export default {
         return new Promise((resolve, reject) => {
             axios({
                 method: 'get',
+                url,
+                params: data,
+            })
+                .then(res => {
+                    resolve(res.data)
+                })
+                .catch(err => {
+                    reject(err)
+                })
+        })
+    },
+    put(url: string, data: any) {
+        return new Promise((resolve, reject) => {
+            axios({
+                method: 'put',
                 url,
                 params: data,
             })

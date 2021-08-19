@@ -1,5 +1,5 @@
 <template>
-  <div id="postIndex" >
+  <div id="postIndex">
     <div class="content">
       <div class="main">
         <el-scrollbar height="">
@@ -100,22 +100,22 @@ export default defineComponent({
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       // vue2.x的data参数
-      aricleList: computed(() => store.state.articleLists),
-      total: computed(() => store.state.totals),
+      aricleList: computed(() => store.state.foreground.articleLists),
+      total: computed(() => store.state.foreground.totals),
       condition: computed({
         get: () => {
-          return store.state.condition;
+          return store.state.foreground.condition;
         },
         set: (val) => {
-          store.commit("setCondition", val);
+          store.commit("foreground/setCondition", val);
         },
       }),
       search: computed({
         get: () => {
-          return store.state.search;
+          return store.state.foreground.search;
         },
         set: (val) => {
-          store.commit("setSearch", val);
+          store.commit("foreground/setSearch", val);
         },
       }),
     });
@@ -144,6 +144,15 @@ export default defineComponent({
     onMounted(() => {
       // 挂载之后
       proxy.getAricleList(state.condition);
+      const category = router.currentRoute.value?.params?.category;
+      console.log(category);
+      if (category) {
+        setTimeout(() => {
+          state.search.words = category;
+          state.search.categoryFlag = true;
+          state.search.searchFlag = false;
+        }, 100);
+      }
     });
     return {
       ...toRefs(state),

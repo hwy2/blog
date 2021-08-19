@@ -4,6 +4,8 @@ var utils = require('../libs/utils'); //工具类
 var config = require('../config/default'); //配置文件
 var Comment = require('../models/index').Comment; //评论
 var dataSummary = require('./dataSummary');
+var Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 module.exports = {
     /**
      * 创建评论
@@ -17,6 +19,7 @@ module.exports = {
         var comments = utils.trim(params.comments);
         var articleUuid = utils.trim(params.articleUuid);
         var faceUrl = utils.getGravatarURL(email);
+        var link = utils.trim(params.link);
         if (!nickName || !email || !comments) {
             console.log("nickName", nickName);
             console.log("email", email);
@@ -37,7 +40,8 @@ module.exports = {
                 email: email,
                 comments: comments,
                 articleUuid: articleUuid,
-                faceUrl: faceUrl
+                faceUrl: faceUrl,
+                link: link
             });
 
             if (!commentResult) {
@@ -225,7 +229,7 @@ module.exports = {
         var condition = {};
         if (comments) {
             condition.comments = {
-                '$like': '%' + comments + '%'
+                 [Op.like]: '%' + comments + '%'
             }
         }
 
@@ -246,6 +250,9 @@ module.exports = {
         co(function* () {
             var commentResult = yield Comment.findAndCountAll({
                 where: condition,
+                attributes: {
+                    exclude: ['ip', 'agent','']
+                },
                 limit: page.pageSize, //每页多少条
                 offset: page.pageSize * (page.currPage - 1), //偏移量
                 order: [ //排序

@@ -60,7 +60,7 @@ export default defineComponent({
     const router = useRouter();
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
-      blogTitle: computed(() => store.state.blogTitle), // 网站title
+      blogTitle: computed(() => store.state.foreground.blogTitle), // 网站title
       ruleForm: {
         account: "",
         password: "",
@@ -129,8 +129,12 @@ export default defineComponent({
                 message: `登录成功，欢迎回来`,
                 type: "success",
               });
-              proxy.$Cookies.set('accessToken',res.result.accessToken.token,{ expires: new Date( res.result.accessToken.expiresIn) })
-
+              proxy.$Cookies.set("accessToken", res.result.accessToken.token, {
+                expires: new Date(res.result.accessToken.expiresIn),
+              });
+              proxy.$Cookies.set("user",JSON.stringify(res.result.user) , {
+                expires: new Date(res.result.accessToken.expiresIn),
+              });
               setTimeout(() => {
                 router.push({
                   name: "backstage",

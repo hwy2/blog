@@ -4,40 +4,66 @@ import { ElLoading } from 'element-plus';
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
-        name: 'home',
-        component: () => import('/@/views/Home.vue'),
+        name: 'app',
+        component: () => import('/@/App.vue'),
         redirect: {
-            name: 'index'
+            name: 'home'
         },
         children: [
             {
-                path: '/index',
-                name: 'index',
-                component: () => import('../views/foreground/index.vue'),
+                path: '/home',
+                name: 'home',
+                component: () => import('/@/views/Home.vue'),
+                redirect: {
+                    name: 'index'
+                },
+                children: [
+                    {
+                        path: '/home/index',
+                        name: 'index',
+                        component: () => import('../views/foreground/index.vue'),
+                    },
+                    {
+                        path: '/home/article/:uuid',
+                        name: 'article',
+                        component: () => import('/@/views/foreground/article/index.vue'),
+                    },
+                    {
+                        path: '/404',
+                        name: '404',
+                        component: () => import('/@/views/notFind/index.vue'),
+                    }
+                ]
             },
             {
-                path: '/article/:uuid',
-                name: 'article',
-                component: () => import('/@/views/foreground/article/index.vue'),
+                path: '/login',
+                name: 'login',
+                component: () => import('/@/views/login/index.vue'),
             },
             {
-                path: '/404',
-                name: '404',
-                component: () => import('/@/views/notFind/index.vue'),
-            }
+                path: '/backstage',
+                name: 'backstage',
+                component: () => import('/@/views/backstage/index.vue'),
+                redirect: {
+                    name: 'outline'
+                },
+                children: [
+                    {
+                        path: '/backstage/outline',
+                        name: 'outline',
+                        component: () => import('../views/backstage/outline/index.vue'),
+                    },
+                    {
+                        path: '/backstage/profile',
+                        name: 'profile',
+                        component: () => import('../views/backstage/profile/index.vue'),
+                    },
+                ]
+            },
+
         ]
     },
-    {
-        path: '/login',
-        name: 'login',
-        component: () => import('/@/views/login/index.vue'),
-    },
-    {
-        path: '/backstage',
-        name: 'backstage',
-        component: () => import('/@/views/backstage/index.vue'),
-        children: []
-    },
+
 ];
 
 const router = createRouter({
@@ -46,10 +72,11 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+    console.log(to.matched.length)
     if (to.matched.length === 0) {
         next('/404');
     } else {
-        if (/backstage/.test(to.path) ) {
+        if (/backstage/.test(to.path)) {
             const loading = ElLoading.service({
                 lock: true,
                 text: 'Loading',
@@ -59,6 +86,7 @@ router.beforeEach((to, from, next) => {
             if (Cookies.get('accessToken')) {
                 loading.close();
                 next();
+
             } else {
                 loading.close();
                 next('/login')

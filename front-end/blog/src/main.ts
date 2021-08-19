@@ -14,6 +14,7 @@ import Cookies from 'js-cookie'
 const app = createApp(App)
 app.config.globalProperties.$axios = axios;
 app.config.globalProperties.getAricleList = pubfunt.getAricleList;
+app.config.globalProperties.getWebConfigInfo = pubfunt.getWebConfigInfo;
 app.config.globalProperties.$Cookies = Cookies;
 // 分环境处理
 if (process.env.NODE_ENV === 'development') {

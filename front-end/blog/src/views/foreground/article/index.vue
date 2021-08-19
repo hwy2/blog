@@ -105,11 +105,19 @@
                 <el-form-item
                   prop="niceName"
                   label="昵称"
-                  :rules="[{
-                    required: true,
-                    message: '昵称不能为空',
-                    trigger: 'blur',
-                  },{min:3,max:255,message:'长度在 3 到 255 个字符',trigger: 'blur'}]"
+                  :rules="[
+                    {
+                      required: true,
+                      message: '昵称不能为空',
+                      trigger: 'blur',
+                    },
+                    {
+                      min: 3,
+                      max: 255,
+                      message: '长度在 3 到 255 个字符',
+                      trigger: 'blur',
+                    },
+                  ]"
                 >
                   <el-input
                     v-model="formLabelAlign.niceName"
@@ -130,7 +138,7 @@
                       trigger: 'blur',
                     },
                     {
-                      max:255,
+                      max: 255,
                       type: 'email',
                       message: '请输入正确的邮箱地址',
                       trigger: ['blur', 'change'],
@@ -267,7 +275,7 @@ export default defineComponent({
           .get("/article/info", { articleUuid: state.uuid })
           .then((res: any) => {
             console.log(res);
-            store.commit("setArticle", res.result.article);
+            store.commit("foreground/setArticle", res.result.article);
             res.result.article.createDate = dateFormat(
               res.result.article.createDate,
               "yyyy年MM月dd日"
@@ -325,6 +333,7 @@ export default defineComponent({
             nickName: state.formLabelAlign.niceName,
             comments: state.formLabelAlign.comments,
             articleUuid: (state.article as any).uuid,
+            link: state.articleLink,
           })
           .then((res: any) => {
             console.log(res);
@@ -469,6 +478,9 @@ export default defineComponent({
               font-size: 1.5em;
               line-height: 1.5;
               font-weight: bold;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
             }
             p:nth-of-type(2) {
               font-size: 0.9em;

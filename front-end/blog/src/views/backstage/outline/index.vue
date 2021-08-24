@@ -6,9 +6,9 @@
       </div>
       <div class="details">
         <p>
-          目前有 <span>{{ articlesTotal }}</span> 篇文章, 并有
-          <span>{{ commentsTotal }}</span> 条关于你的评论在
-          <span>{{ categoriesTotal }}</span> 个分类中.
+          目前有 <span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
+          <span>{{ dataSummary?.commentsTotal }}</span> 条关于你的评论在
+          <span>{{ dataSummary?.categoriesTotal }}</span> 个分类中.
         </p>
         <p>点击下面的链接快速开始:</p>
         <p>
@@ -84,9 +84,6 @@ export default defineComponent({
     const router = useRouter();
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
-      articlesTotal: 0,
-      commentsTotal: 0,
-      categoriesTotal: 0,
       commentList: [],
       categoryList: [],
       aricleList: computed(() => store.state.foreground.articleLists),
@@ -95,33 +92,19 @@ export default defineComponent({
           return store.state.foreground.condition;
         },
         set: (val) => {
-          store.commit("setCondition", val);
+          store.commit("foreground/setCondition", val);
         },
-      })
+      }),
+      dataSummary: computed({
+        get: () => {
+          return store.state.backstage.dataSummary;
+        },
+        set: (val) => {
+          store.commit("backstage/setDataSummary", val);
+        },
+      }),
     });
     const methods = {
-      getDataSummaryList() {
-        proxy.$axios
-          .get("/dataSummary/list")
-          .then((res: any) => {
-            console.log(res);
-            store.commit("backstage/setDataSummary", res.result.list);
-            state.articlesTotal = res.result.list.filter((item: any) => {
-              return item.name === "articlesTotal";
-            })[0].value; // 文章总数
-
-            state.commentsTotal = res.result.list.filter((item: any) => {
-              return item.name === "commentsTotal";
-            })[0].value; // 评论总数
-
-            state.categoriesTotal = res.result.list.filter((item: any) => {
-              return item.name === "categoriesTotal";
-            })[0].value; // 分类总数
-          })
-          .catch((error: any) => {
-            console.log(error);
-          });
-      },
       getCommentList() {
         proxy.$axios
           .get("/comment/list", {})
@@ -158,8 +141,7 @@ export default defineComponent({
       },
     };
     onMounted(() => {
-      methods.getDataSummaryList();
-      state.condition.pageSize = 10;
+      state.condition.pageSize = 7;
       state.condition.currPage = 1;
       state.condition.categoryTitle = "";
       proxy.getAricleList(state.condition, "MM-dd");

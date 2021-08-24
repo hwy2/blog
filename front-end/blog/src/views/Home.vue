@@ -9,7 +9,7 @@
             <a href="javascript:void(0)" @click="methods.openDrawer">
               <i class="iconfont icongengduo"></i>
             </a>
-            <a href="/">
+            <a href="javascript:void(0)" @click="methods.home()">
               {{ blogTitle }}
             </a>
           </div>
@@ -310,7 +310,6 @@ export default defineComponent({
         setTimeout(() => {
           const scroll = document.documentElement.scrollTop;
           const outerWidth = window.outerWidth;
-          console.log(outerWidth);
           const temp = store.getters["foreground/getWebConfig"].siteName;
           if (outerWidth < 800) {
             const path = router.currentRoute.value.path;
@@ -341,20 +340,24 @@ export default defineComponent({
         state.isPageNone = state.isPageNone ? false : true;
       },
       listenCategory(categoryTitle: string) {
+        // 只搜索类别
         console.log(categoryTitle);
         state.condition.currPage = 1;
+        state.condition.pageSize = 7;
         state.condition.categoryTitle = categoryTitle;
+        state.condition.articleVague = ""; // 不联合搜索
         proxy.getAricleList(state.condition);
         state.search.words = categoryTitle;
         state.search.categoryFlag = true;
         state.search.searchFlag = false;
         state.drawer = false;
-        router.push({name:'home'});
+        router.push({ name: "home" });
       },
       openSearch() {
         state.searchDialogVisible = true;
       },
       listenSearch() {
+        // 只模糊搜索文章内容
         state.condition.categoryTitle = "";
         proxy.getAricleList(state.condition);
         state.search.words = state.condition.articleVague;
@@ -364,10 +367,16 @@ export default defineComponent({
           name: "index",
         });
         state.searchDialogVisible = false;
-        state.condition.articleVague = "";
       },
       login() {
         router.push("/login");
+      },
+      home() {
+        state.condition.currPage = 1;
+        state.condition.pageSize = 7;
+        state.condition.articleVague = "";
+        state.condition.categoryTitle = "";
+        window.location.href = "/";
       },
     };
     onBeforeMount(() => {

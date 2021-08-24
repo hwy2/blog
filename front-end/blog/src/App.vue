@@ -1,20 +1,19 @@
 <template>
-    <router-view></router-view>
+  <router-view></router-view>
 </template>
 
 <script  lang='ts'>
 import { onMounted, onBeforeMount, getCurrentInstance } from "vue";
 import snowfall from "./assets/js/snowfall.min.js";
 import { useStore } from "vuex";
-import router from './router/index.js';
+import router from "./router/index.js";
 export default {
   name: "App",
   components: {},
   setup() {
     const { proxy }: any = getCurrentInstance();
     const store = useStore();
-    const methods = {
-    };
+    const methods = {};
     onBeforeMount(() => {
       // 修改网页title
       const title = document.title;
@@ -71,6 +70,25 @@ export default {
         //   flakeCount: 30,
         // });
       });
+  },
+  created() {
+    const store = useStore();
+
+    // 页面加载时读取数据
+    // if (sessionStorage.getItem("store")) {
+    //   store.replaceState(
+    //     Object.assign(
+    //       {},
+    //       store.state,
+    //       JSON.parse((sessionStorage as any).getItem("store"))
+    //     )
+    //   );
+    // }
+
+    // // 页面刷新时保存信息
+    // window.addEventListener("beforeunload", () => {
+    //   sessionStorage.setItem("store", JSON.stringify(store.state));
+    // });
   },
 };
 </script>

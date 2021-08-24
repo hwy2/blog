@@ -1,64 +1,65 @@
 <template>
   <div id="backstage">
-    <div class="navbar">
-      <el-menu
-        :default-active="activeIndex"
-        class="el-menu-demo"
-        mode="horizontal"
-        @select="methods.handleSelect"
-        background-color="#545c64"
-        text-color="#fff"
-        active-text-color="#ffd04b"
-        router
-      >
-        <el-submenu index="1">
-          <template #title>控制台</template>
-          <el-menu-item index="/backstage/outline">概要</el-menu-item>
-          <el-menu-item index="/backstage/profile">个人设置</el-menu-item>
-        </el-submenu>
-        <el-submenu index="2">
-          <template #title>撰写</template>
-          <el-menu-item index="2-1">撰写文章</el-menu-item>
-          <el-menu-item index="2-2">创建页面</el-menu-item>
-          <el-submenu index="2-4">
-            <template #title>选项4</template>
-            <el-menu-item index="2-4-1">选项1</el-menu-item>
-            <el-menu-item index="2-4-2">选项2</el-menu-item>
-            <el-menu-item index="2-4-3">选项3</el-menu-item>
+    <el-affix :offset="0">
+      <div class="navbar">
+        <el-menu
+          :default-active="activeIndex"
+          class="el-menu-demo"
+          mode="horizontal"
+          @select="methods.handleSelect"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
+          router
+        >
+          <el-submenu index="1">
+            <template #title>控制台</template>
+            <el-menu-item index="/backstage/outline">概要</el-menu-item>
+            <el-menu-item index="/backstage/profile">个人设置</el-menu-item>
           </el-submenu>
-        </el-submenu>
-        <el-submenu index="3">
-          <template #title>管理</template>
-          <el-menu-item index="3-1">文章</el-menu-item>
-          <el-menu-item index="3-2">页面</el-menu-item>
-          <el-menu-item index="3-3">评论</el-menu-item>
-          <el-menu-item index="3-4">分类</el-menu-item>
-          <el-menu-item index="3-5">文件</el-menu-item>
-          <el-menu-item index="3-6">用户</el-menu-item>
-          <el-menu-item index="3-7">友情链接</el-menu-item>
-        </el-submenu>
-        <el-submenu index="4">
-          <template #title>设置</template>
-          <el-menu-item index="4-1">基本</el-menu-item>
-        </el-submenu>
-      </el-menu>
-      <div class="information">
-        <ul>
-          <li>
-            <router-link to="/backstage/profile">{{
-              user?.userInfo?.nickName
-            }}</router-link>
-          </li>
-          <li @click="methods.logout()">登出</li>
-          <li>
-            <router-link tag="a" target="_blank" to="/home/index"
-              >网站</router-link
-            >
-          </li>
-        </ul>
+          <el-submenu index="2">
+            <template #title>撰写</template>
+            <el-menu-item index="2-1">撰写文章</el-menu-item>
+            <el-menu-item index="2-2">创建页面</el-menu-item>
+            <el-submenu index="2-4">
+              <template #title>选项4</template>
+              <el-menu-item index="2-4-1">选项1</el-menu-item>
+              <el-menu-item index="2-4-2">选项2</el-menu-item>
+              <el-menu-item index="2-4-3">选项3</el-menu-item>
+            </el-submenu>
+          </el-submenu>
+          <el-submenu index="3">
+            <template #title>管理</template>
+            <el-menu-item index="3-1">文章</el-menu-item>
+            <el-menu-item index="3-2">页面</el-menu-item>
+            <el-menu-item index="3-3">评论</el-menu-item>
+            <el-menu-item index="3-4">分类</el-menu-item>
+            <el-menu-item index="3-5">文件</el-menu-item>
+            <el-menu-item index="3-6">用户</el-menu-item>
+            <el-menu-item index="3-7">友情链接</el-menu-item>
+          </el-submenu>
+          <el-submenu index="4">
+            <template #title>设置</template>
+            <el-menu-item index="4-1">基本</el-menu-item>
+          </el-submenu>
+        </el-menu>
+        <div class="information">
+          <ul>
+            <li>
+              <router-link to="/backstage/profile">{{
+                user?.userInfo?.nickName
+              }}</router-link>
+            </li>
+            <li @click="methods.logout()">登出</li>
+            <li>
+              <router-link tag="a" target="_blank" to="/home/index"
+                >网站</router-link
+              >
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
-
+    </el-affix>
     <router-view></router-view>
   </div>
 </template>
@@ -83,7 +84,22 @@ export default defineComponent({
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       user: {},
-      activeIndex: "/backstage/outline",
+      activeIndex: computed({
+        get: () => {
+          return store.state.backstage.activeIndex;
+        },
+        set: (val) => {
+          store.commit("backstage/setActiveIndex", val);
+        },
+      }),
+      dataSummary: computed({
+        get: () => {
+          return store.state.backstage.dataSummary;
+        },
+        set: (val) => {
+          store.commit("backstage/setDataSummary", val);
+        },
+      }),
     });
     const methods = {
       handleSelect(key: string, keyPath: string) {
@@ -101,7 +117,7 @@ export default defineComponent({
               });
               proxy.$Cookies.remove("accessToken");
               proxy.$Cookies.remove("user");
-              router.push('/login');
+              router.push("/login");
             } else {
               ElNotification({
                 title: "失败",
@@ -114,9 +130,37 @@ export default defineComponent({
             console.log(err);
           });
       },
+      getDataSummaryList() {
+        proxy.$axios
+          .get("/dataSummary/list")
+          .then((res: any) => {
+            console.log(res);
+            state.dataSummary.articlesTotal = res.result.list.filter(
+              (item: any) => {
+                return item.name === "articlesTotal";
+              }
+            )[0].value; // 文章总数
+
+            state.dataSummary.commentsTotal = res.result.list.filter(
+              (item: any) => {
+                return item.name === "commentsTotal";
+              }
+            )[0].value; // 评论总数
+
+            state.dataSummary.categoriesTotal = res.result.list.filter(
+              (item: any) => {
+                return item.name === "categoriesTotal";
+              }
+            )[0].value; // 分类总数
+          })
+          .catch((error: any) => {
+            console.log(error);
+          });
+      },
     };
     onMounted(() => {
       state.user = JSON.parse(proxy.$Cookies.get("user"));
+      methods.getDataSummaryList();
     });
 
     return {
@@ -131,7 +175,8 @@ export default defineComponent({
 #backstage {
   background-color: #f6f6f3;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  box-sizing: border-box;
 
   .navbar {
     display: flex;

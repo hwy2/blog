@@ -356,6 +356,10 @@ module.exports = {
 
             var userList = result.rows || [];
 
+            for (const item of userList) {
+                item.role = item.role === '1' ? '管理员' : '普通用户'
+            }
+
             // 处理分页
             var pageResult = yield utils.handlePage({
                 count: result.count,
@@ -406,33 +410,19 @@ module.exports = {
                 },
                 attributes: {
                     exclude: ['password']
-                }
-            });
-
-            var userInfoResult = yield UserInfo.findOne({
-                where: {
-                    userUuid: userUuid
-                }
+                },
+                include: UserInfo
             });
 
             if (userResult) {
-                if (userInfoResult) {
-                    utils.handleJson({
-                        response: res,
-                        result: {
-                            user: userResult.dataValues,
-                            userInfo: userInfoResult.dataValues
-                        }
-                    });
-                } else {
-                    utils.handleJson({
-                        response: res,
-                        result: {
-                            user: userResult.dataValues
-                        }
-                    });
-                }
-
+                userResult.role = userResult.role === '1' ? '管理员' : '普通用户'
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('doSuccess'),
+                    result: {
+                        user: userResult.dataValues
+                    }
+                });
             } else {
                 utils.handleJson({
                     response: res,
@@ -495,7 +485,7 @@ module.exports = {
      * 修改密码 put
      */
     updateUserPwd: function (req, res, next) {
-        var params = req.body || req.params;
+        var params = req.query || req.params;
         // 检查数据
         var checkFlag = utils.validateMandatory(params);
         if (!checkFlag) {
@@ -511,6 +501,7 @@ module.exports = {
         var userUuid = params.userUuid;
         var oldPwd = utils.trim(params.oldPwd);
         var newPwd = utils.trim(params.newPwd);
+        console.log(oldPwd, newPwd);
         if (oldPwd === newPwd) {
             utils.handleJson({
                 response: res,
@@ -544,7 +535,7 @@ module.exports = {
 
                 return;
             }
-            yield user.update({
+            yield User.update({
                 password: md5(newPwd)
             }, {
                 where: {

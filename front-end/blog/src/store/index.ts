@@ -8,16 +8,27 @@ export default createStore({
         backstage: {
             namespaced: true,
             state: {
-                backDataSummaryList: {},
+                dataSummary: {
+                    articlesTotal: 0,
+                    commentsTotal: 0,
+                    categoriesTotal: 0
+                },
+                activeIndex: "/backstage/outline"
             },
             getters: {
-                getBackDataSummary(state) {
+                getDataSummary(state) {
                     return state.dataSummary
+                },
+                getActiveIndex(state) {
+                    return state.activeIndex
                 }
             },
             mutations: {
-                setBackDataSummary(state, status) {
+                setDataSummary(state, status) {
                     state.dataSummary = status
+                },
+                setActiveIndex(state, status) {
+                    state.activeIndex = status
                 }
             }
         },

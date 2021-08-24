@@ -131,8 +131,8 @@ module.exports = {
      * 更新用户信息
      */
     updateUserInfo: function (req, res, next) {
-        var params = req.body || req.params;
-        var userInfo = params.userInfo;
+        var params = req.query || req.params;
+        var userInfo = JSON.parse(params.userInfo);
         var userInfoUuid = utils.trim(userInfo.uuid);
         if (!userInfoUuid) {
             utils.handleJson({
@@ -142,29 +142,26 @@ module.exports = {
 
             return;
         }
+
         co(function* () {
             var userInfoResult = yield UserInfo.update(userInfo, {
                 where: {
-                    uuid: uuid
+                    uuid: userInfoUuid
                 }
             });
-
+            console.log( userInfoResult);
             if (!userInfoResult) {
                 utils.handleJson({
                     response: res,
-                    msg: "updateUserInfoFail"
+                    msg: i18n.__("updateUserInfoFail")
                 });
 
                 return;
             }
-
-            var userInfo = userInfoResult.dataValues;
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
-                result: {
-                    userInfo: userInfo
-                }
+                result: "+1"
             })
 
         }).catch(function (error) {
@@ -209,17 +206,17 @@ module.exports = {
                     uuid: userInfoUuid
                 }
             });
-            if (!userInfoResult){
+            if (!userInfoResult) {
                 utils.handleJson({
-                    response:res,
-                    msg:i18n.__('doFail')
+                    response: res,
+                    msg: i18n.__('doFail')
                 });
                 return;
             }
             utils.handleJson({
-                response:res,
-                msg:i18n.__('doSuccess'),
-                result:'-1'
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: '-1'
             })
 
         }).catch(function (error) {

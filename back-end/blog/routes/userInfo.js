@@ -22,7 +22,7 @@ router.get('/info', checkToken, function (req, res, next) {
  * update
  * 更新信息
  */
-router.put('/upinfo', function (req, res, next) {
+router.put('/upinfo', checkToken, function (req, res, next) {
     userInfoDao.updateUserInfo(req, res, next);
 });
 
@@ -30,7 +30,7 @@ router.put('/upinfo', function (req, res, next) {
  * delete
  * 删除用户
  */
-router.get("/del",function(req,res,next){
+router.get("/del", checkToken, function (req, res, next) {
     userInfoDao.deleteUserInfo(req, res, next);
 })
 

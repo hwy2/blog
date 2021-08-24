@@ -4966,3 +4966,5 @@ back-end/blog/node_modules/moment-timezone/data/meta/latest.json
 back-end/blog/node_modules/moment-timezone/data/packed/latest.json
 back-end/blog/.vscode/settings.json
 front-end/blog/.vscode/settings.json
+back-end/blog/logs/error.log
+back-end/blog/logs/error.log

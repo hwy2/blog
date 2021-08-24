@@ -28,7 +28,7 @@ var Article = Mysql.define('article', {
         defaultValue: "1", //默认值
     },
     abstract: Sequelize.STRING,
-    pageview: {
+    pageview: { // 阅读次数
         type: Sequelize.INTEGER,
         defaultValue:0
     },

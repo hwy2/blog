@@ -72,7 +72,6 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    console.log(to.matched.length)
     if (to.matched.length === 0) {
         next('/404');
     } else {

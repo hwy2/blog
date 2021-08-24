@@ -94,7 +94,6 @@ module.exports = {
                 [Op.like]: '%' + articleVague + '%'
             }
         }
-        console.log(condition);
         // 分页
         var page = {
             currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
@@ -102,17 +101,25 @@ module.exports = {
         }
 
         co(function* () {
-            var articleResult = yield Article.findAndCountAll({
+            var articleResultCount = yield Article.findAll({
                 include: [{
+                    model: Category,
+                    where: categoryCondition
+                }],
+                where: condition
+            })
+            // 由于findAndCountAll计数器的不正确性，所以需要先查询所有的条数再分页
+            var articleResult = yield Article.findAll({
+                include: [{
+                    model: Category,
+                    where: categoryCondition
+                }, {
                     model: User,
                     attributes: ['uuid', 'email'],
                     include: [{
                         model: UserInfo,
                         attributes: ['uuid', 'nickName']
                     }]
-                }, {
-                    model: Category,
-                    where: categoryCondition
                 }, {
                     model: Comment,
                     attributes: ['uuid']
@@ -123,7 +130,7 @@ module.exports = {
                 order: [
                     ['createDate', 'DESC']
                 ]
-            });
+            })
 
             if (!articleResult) {
                 utils.handleJson({
@@ -132,18 +139,16 @@ module.exports = {
                 });
                 return;
             }
-            var articleList = articleResult.rows || [];
-
             // 处理分页
             var pageResult = yield utils.handlePage({
-                count: articleResult.count,
+                count: articleResultCount.length,
                 page: page
             });
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
                 result: {
-                    list: articleList,
+                    list: articleResult,
                     page: pageResult
                 }
             });

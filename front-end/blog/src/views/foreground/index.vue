@@ -67,6 +67,7 @@
         <el-pagination
           @next-click="methods.handleNextPage"
           @prev-click="methods.handlePrevPage"
+          @current-change="methods.handleCurrentChange"
           :page-size="condition.pageSize"
           :pager-count="11"
           layout="prev, pager, next"
@@ -137,6 +138,11 @@ export default defineComponent({
         proxy.getAricleList(state.condition);
         scrollTo(0, 0); // 回到页面顶部
       },
+      handleCurrentChange(val: any) {
+        state.condition.currPage = val;
+        proxy.getAricleList(state.condition);
+        scrollTo(0, 0); // 回到页面顶部
+      },
     };
     onBeforeMount(() => {
       // 挂载开始之前
@@ -144,13 +150,24 @@ export default defineComponent({
     onMounted(() => {
       // 挂载之后
       proxy.getAricleList(state.condition);
-      const category = router.currentRoute.value?.params?.category;
+      const category =
+        router.currentRoute.value?.params?.category ||
+        state.condition.categoryTitle;
+      const article = state.condition.articleVague;
+      state.search.words = "";
+      state.search.categoryFlag = false;
+      state.search.searchFlag = false;
       console.log(category);
-      if (category) {
+      if (category || article) {
         setTimeout(() => {
-          state.search.words = category;
-          state.search.categoryFlag = true;
-          state.search.searchFlag = false;
+          state.search.words = category || article;
+          if (category) {
+            state.search.categoryFlag = true;
+            state.search.searchFlag = false;
+          } else {
+            state.search.categoryFlag = false;
+            state.search.searchFlag = true;
+          }
         }, 100);
       }
     });

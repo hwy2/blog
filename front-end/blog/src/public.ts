@@ -4,6 +4,11 @@ import axios from "./axios";
 import store from '/@/store'
 
 export default {
+    /**
+     * 获取文章列表
+     * @param data 搜索参数 {}
+     * @param format 时间格式化参数 例如 'yyyy年MM月dd日'
+     */
     getAricleList(data: any, format: string = 'yyyy年MM月dd日') {
         const loading = ElLoading.service({ fullscreen: true });
         axios.get("/article/list", data)
@@ -22,6 +27,9 @@ export default {
                 loading.close();
             });
     },
+    /**
+     * 获取网站配置项，并修改HTML页面属性
+     */
     async getWebConfigInfo() {
         await axios.get("/webConfig/info", {})
             .then((res: any) => {

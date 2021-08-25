@@ -105,6 +105,9 @@ export default defineComponent({
       }),
     });
     const methods = {
+      /**
+       * 获取评论列表
+       */
       getCommentList() {
         proxy.$axios
           .get("/comment/list", {})
@@ -119,6 +122,9 @@ export default defineComponent({
             console.log(err);
           });
       },
+      /**
+       * 获取类别列表
+       */
       getCategoryList() {
         proxy.$axios
           .get("/category/list", {})
@@ -133,6 +139,9 @@ export default defineComponent({
             console.log(err);
           });
       },
+      /**
+       * 返回首页，并搜索
+       */
       pushHome(category: string) {
         state.condition.currPage = 1;
         state.condition.categoryTitle = category;

@@ -245,6 +245,7 @@ export default defineComponent({
     });
 
     const methods = {
+      /** 计算时间差 */
       tick(oldDate: string) {
         const time = {
           years: 0,
@@ -280,6 +281,7 @@ export default defineComponent({
           methods.tick(oldDate);
         }, 1000);
       },
+      /** 获取统计数据 */
       getDataSummaryList() {
         proxy.$axios
           .get("/dataSummary/list")
@@ -306,6 +308,7 @@ export default defineComponent({
             console.log(error);
           });
       },
+      /** 监听页面滚动事件 */
       listenScroll() {
         setTimeout(() => {
           const scroll = document.documentElement.scrollTop;
@@ -330,17 +333,21 @@ export default defineComponent({
           }
         }, 500);
       },
+      /** 显示/隐藏 类别列表 */
       isCategoryShow() {
         state.isCategoryNone = state.isCategoryNone ? false : true;
       },
+      /** 打开抽屉 */
       openDrawer() {
         state.drawer = true;
       },
+      /** 显示/隐藏 页面列表 */
       isPageShow() {
         state.isPageNone = state.isPageNone ? false : true;
       },
+      /** 监听类别点击事件 */
       listenCategory(categoryTitle: string) {
-        // 只搜索类别
+        //  只搜索类别
         console.log(categoryTitle);
         state.condition.currPage = 1;
         state.condition.pageSize = 7;
@@ -353,9 +360,11 @@ export default defineComponent({
         state.drawer = false;
         router.push({ name: "home" });
       },
+      /** 打开搜索框 */
       openSearch() {
         state.searchDialogVisible = true;
       },
+      /** 监听搜索框回车事件 */
       listenSearch() {
         // 只模糊搜索文章内容
         state.condition.categoryTitle = "";
@@ -368,9 +377,11 @@ export default defineComponent({
         });
         state.searchDialogVisible = false;
       },
+      /** 登录跳转页面 */
       login() {
         router.push("/login");
       },
+      /** 搜索项恢复默认值并跳转到首页 */
       home() {
         state.condition.currPage = 1;
         state.condition.pageSize = 7;

@@ -65,9 +65,9 @@
       </div>
       <div class="paging">
         <el-pagination
-          @next-click="methods.handleNextPage"
-          @prev-click="methods.handlePrevPage"
-          @current-change="methods.handleCurrentChange"
+          @next-click="methods.handleChangePage"
+          @prev-click="methods.handleChangePage"
+          @current-change="methods.handleChangePage"
           :page-size="condition.pageSize"
           :pager-count="11"
           layout="prev, pager, next"
@@ -121,6 +121,9 @@ export default defineComponent({
       }),
     });
     const methods = {
+      /**
+       * 跳转到文章详情页
+       */
       jumpArticle(uuid: string) {
         scrollTo(0, 0);
         router.push({
@@ -128,21 +131,14 @@ export default defineComponent({
           params: { uuid },
         });
       },
-      handleNextPage(val: any) {
+      /**
+       * 分页跳转
+       */
+      handleChangePage(val: any) {
         state.condition.currPage = val;
         proxy.getAricleList(state.condition);
         scrollTo(0, 0); // 回到页面顶部
-      },
-      handlePrevPage(val: any) {
-        state.condition.currPage = val;
-        proxy.getAricleList(state.condition);
-        scrollTo(0, 0); // 回到页面顶部
-      },
-      handleCurrentChange(val: any) {
-        state.condition.currPage = val;
-        proxy.getAricleList(state.condition);
-        scrollTo(0, 0); // 回到页面顶部
-      },
+      }
     };
     onBeforeMount(() => {
       // 挂载开始之前

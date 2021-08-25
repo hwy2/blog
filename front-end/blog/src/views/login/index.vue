@@ -96,6 +96,9 @@ export default defineComponent({
     });
 
     const methods = {
+      /**
+       * 监听表单提交数据
+       */
       submitForm(formName: string) {
         proxy.$refs[formName].validate((valid: any) => {
           if (valid) {
@@ -114,7 +117,9 @@ export default defineComponent({
           }
         });
       },
-
+      /**
+       * 登录请求，并跳转
+       */
       login() {
         proxy.$axios
           .post("/user/login", {
@@ -152,6 +157,9 @@ export default defineComponent({
             console.log("err", err);
           });
       },
+      /**
+       * 返回首页
+       */
       fackHome() {
         router.go(-1);
       },

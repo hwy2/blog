@@ -12,7 +12,7 @@ axios.defaults.timeout = 10000;
 axios.interceptors.request.use(
     config => {
         const accessToken = cookies.get('accessToken');
-        if (accessToken){
+        if (accessToken) {
             config.headers.accessToken = accessToken;
         }
         return config;
@@ -34,13 +34,19 @@ axios.interceptors.response.use(
         ElNotification({
             title: '错误',
             message: `异常请求：${JSON.stringify(error.message)}`,
-            type:"error"
+            type: "error"
         });
     }
 );
 
 export default {
-    post(url:string, data:any) {
+    /**
+     * axios Post提交
+     * @param url 连接
+     * @param data 参数
+     * @returns Promise对象
+     */
+    post(url: string, data: any) {
         return new Promise((resolve, reject) => {
             axios({
                 method: 'post',
@@ -55,7 +61,12 @@ export default {
                 });
         })
     },
-
+    /**
+     * axios get提交
+     * @param url 连接
+     * @param data 参数
+     * @returns Promise对象
+     */
     get(url: string, data: any) {
         return new Promise((resolve, reject) => {
             axios({
@@ -71,6 +82,12 @@ export default {
                 })
         })
     },
+    /**
+     * axios Put提交
+     * @param url 连接
+     * @param data 参数
+     * @returns Promise对象
+     */
     put(url: string, data: any) {
         return new Promise((resolve, reject) => {
             axios({

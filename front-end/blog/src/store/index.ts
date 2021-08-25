@@ -5,7 +5,7 @@ import {
 export default createStore({
     actions: {},
     modules: {
-        backstage: {
+        backstage: {// 后台页面module
             namespaced: true,
             state: {
                 dataSummary: {
@@ -32,7 +32,7 @@ export default createStore({
                 }
             }
         },
-        foreground: {
+        foreground: {// 前台页面module
             namespaced: true,
             state: {
                 token: "",

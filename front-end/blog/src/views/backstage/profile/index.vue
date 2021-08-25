@@ -205,6 +205,9 @@ export default defineComponent({
       }),
     });
     const methods = {
+      /**
+       * 修改个人信息
+       */
       submitForm(formName: string) {
         proxy.$refs[formName].validate((valid: any) => {
           if (valid) {
@@ -242,6 +245,9 @@ export default defineComponent({
           }
         });
       },
+      /**
+       * 获取用户信息
+       */
       getUserInfo() {
         proxy.$axios
           .get("/user/info", { userUuid: (state.user as any).uuid })
@@ -257,6 +263,9 @@ export default defineComponent({
             console.log(err);
           });
       },
+      /**
+       * 修改密码
+       */
       submitPwdForm(formName: string) {
         proxy.$refs[formName].validate((valid: any) => {
           if (valid) {

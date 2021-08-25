@@ -71,11 +71,12 @@ const router = createRouter({
     routes
 });
 
+// 路由守卫
 router.beforeEach((to, from, next) => {
-    if (to.matched.length === 0) {
+    if (to.matched.length === 0) {// 一旦找不到链接即跳转404
         next('/404');
     } else {
-        if (/backstage/.test(to.path)) {
+        if (/backstage/.test(to.path)) {// 检查是否登录
             const loading = ElLoading.service({
                 lock: true,
                 text: 'Loading',

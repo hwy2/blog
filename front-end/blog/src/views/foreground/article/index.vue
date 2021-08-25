@@ -258,7 +258,9 @@ export default defineComponent({
         comments: "",
       },
     });
-
+    /**
+     * 评论条数
+     */
     const commentSumber = computed(() => {
       if ((state.article as any).comments) {
         return (state.article as any).comments.length;
@@ -269,6 +271,9 @@ export default defineComponent({
 
     // 方法
     const methods = {
+      /**
+       * 获取文章内容
+       */
       getArticleInfo() {
         const loading = ElLoading.service({ fullscreen: true });
         proxy.$axios
@@ -295,6 +300,9 @@ export default defineComponent({
             loading.close();
           });
       },
+      /**
+       * 修改文章阅读数
+       */
       setArticlePageview(pageview: number) {
         proxy.$axios
           .get("/article/addPageViews", {
@@ -309,6 +317,9 @@ export default defineComponent({
             state.isArticleShow = false;
           });
       },
+      /**
+       * 校验评论表单数据
+       */
       submitForm() {
         proxy.$refs.validateForm.validate((valid: any) => {
           if (valid) {
@@ -323,6 +334,9 @@ export default defineComponent({
           }
         });
       },
+      /**
+       * 创建评论
+       */
       createComments() {
         const loading = ElLoading.service({ fullscreen: true });
         proxy.$axios
@@ -363,6 +377,9 @@ export default defineComponent({
             loading.close();
           });
       },
+      /**
+       * 输入框自动高度
+       */
       makeExpandingArea() {
         // 控制输入框自动高度
         const text: any = document.getElementById("textarea");
@@ -371,6 +388,9 @@ export default defineComponent({
         text.style.height = text.scrollHeight + "px";
         state.formLabelAlign.comments = text?.innerHTML;
       },
+      /**
+       * 提示文字上移
+       */
       revise(e: any, type: string) {
         const formItem =
           e.target.parentElement.parentElement.parentElement.parentElement;
@@ -390,6 +410,9 @@ export default defineComponent({
             break;
         }
       },
+      /**
+       * @评论
+       */
       changeCommentFlag(nickName: string, uuid: string) {
         const comments: any = proxy.$refs.comments;
         comments.innerHTML = `<span contenteditable='false'>@${nickName}&nbsp;</span>`;
@@ -401,6 +424,9 @@ export default defineComponent({
         sel.removeAllRanges();
         sel.addRange(range);
       },
+      /**
+       * 时间格式化
+       */
       getdateFormat(data: string, format: string) {
         return dateFormat(data, format);
       },

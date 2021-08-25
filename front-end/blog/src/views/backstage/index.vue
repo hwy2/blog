@@ -102,9 +102,15 @@ export default defineComponent({
       }),
     });
     const methods = {
+      /**
+       * 导航栏选中index
+       */
       handleSelect(key: string, keyPath: string) {
         state.activeIndex = key;
       },
+      /**
+       * 退出登录
+       */
       logout() {
         proxy.$axios
           .get("/user/logout", {})
@@ -130,6 +136,9 @@ export default defineComponent({
             console.log(err);
           });
       },
+      /**
+       * 获取数据统计
+       */
       getDataSummaryList() {
         proxy.$axios
           .get("/dataSummary/list")

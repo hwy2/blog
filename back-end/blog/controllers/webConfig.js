@@ -88,11 +88,11 @@ module.exports = {
     },
     // 更新webConfig配置文件
     updateWebConfig: function (req, res, next) {
-        var params = req.body || req.params;
-        var webConfig = utils.handleArray(params.webConfig);
-        // 检查数据
-        var checkFlag = utils.validateMandatory(webConfig);
-        if (!checkFlag) {
+        var params = req.query || req.params;
+        var webConfig = JSON.parse(params.webConfig);
+        console.log(webConfig);
+        var webConfigUuid = utils.trim(webConfig.uuid);
+        if (!webConfigUuid) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('pleasePassParamsComplete')
@@ -100,8 +100,6 @@ module.exports = {
 
             return;
         }
-
-        var webConfigUuid = utils.trim(webConfig.uuid);
         co(function* () {
             var webConfigResult = yield WebConfig.update(webConfig, {
                 where: {

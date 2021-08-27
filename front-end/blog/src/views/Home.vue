@@ -38,13 +38,13 @@
 
         <div class="recordInfo">
           <p v-if="recordMIIT">
-            <a href="https://beian.miit.gov.cn/#/Integrated/index">
+            <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">
               {{ recordMIIT }}</a
             >
           </p>
           <p v-if="internetAlert">
             <a
-              href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode="
+              href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=" target="_blank"
             >
               {{ internetAlert }}</a
             >
@@ -410,6 +410,9 @@ export default defineComponent({
       methods,
     };
   },
+  created(){
+    sessionStorage.removeItem('store');
+  }
 });
 </script>
 <style lang="scss">

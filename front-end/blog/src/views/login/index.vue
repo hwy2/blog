@@ -144,6 +144,7 @@ export default defineComponent({
                 router.push({
                   name: "backstage",
                 });
+                store.commit('backstage/setActiveIndex','/backstage/outline');
               }, 500);
             } else {
               ElNotification({

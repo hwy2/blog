@@ -1,103 +1,116 @@
 <template>
   <div id="profile">
-    <div class="pageTitle">
-      <h2>个人设置</h2>
-    </div>
-    <div class="page-main">
-      <div class="content-left">
-        <p>
-          <el-image :src="user?.userInfo?.face">
-            <template #error>
-              <div class="image-slot">
-                <i class="el-icon-picture-outline"></i>
-              </div>
-            </template>
-          </el-image>
-        </p>
-        <p>
-          {{ user?.userInfo?.nickName }}
-        </p>
-        <p>
-          {{ user?.role }}
-        </p>
-        <p>
-          目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
-          <span>{{ dataSummary?.commentsTotal }}</span> 条关于你的评论在
-          <span>{{ dataSummary?.categoriesTotal }}</span> 个分类中.
-        </p>
+    <div class="container">
+      <div class="pageTitle">
+        <h2>个人设置</h2>
       </div>
-      <div class="content-pane">
-        <div class="personal-data">
-          <div class="title">
-            <p>个人资料</p>
-          </div>
-          <el-form
-            label-position="top"
-            label-width="80px"
-            :model="formUserInfo"
-            :rules="rules"
-            ref="ruleForm"
-          >
-            <el-form-item label="昵称" prop="nickName">
-              <el-input v-model="formUserInfo.nickName"></el-input>
-            </el-form-item>
-            <el-form-item label="生日">
-              <el-date-picker
-                v-model="formUserInfo.birth"
-                type="date"
-                placeholder="选择日期"
-              >
-              </el-date-picker>
-            </el-form-item>
-            <el-form-item label="性别">
-              <el-radio v-model="formUserInfo.sex" label="1" border
-                >男</el-radio
-              >
-              <el-radio v-model="formUserInfo.sex" label="0" border
-                >女</el-radio
-              >
-            </el-form-item>
-            <el-form-item label="头像" prop="face">
-              <el-input v-model="formUserInfo.face"></el-input>
-            </el-form-item>
-            <el-form-item label="城市" prop="city">
-              <el-input v-model="formUserInfo.city"></el-input>
-            </el-form-item>
-            <el-form-item label="具体地址" prop="address">
-              <el-input v-model="formUserInfo.address"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="methods.submitForm('ruleForm')"
-                >更新个人信息</el-button
-              >
-            </el-form-item>
-          </el-form>
+      <div class="page-main">
+        <div class="content-left">
+          <p>
+            <el-image :src="user?.userInfo?.face">
+              <template #error>
+                <div class="image-slot">
+                  <i class="el-icon-picture-outline"></i>
+                </div>
+              </template>
+            </el-image>
+          </p>
+          <p>
+            {{ user?.userInfo?.nickName }}
+          </p>
+          <p>
+            {{ user?.role }}
+          </p>
+          <p>
+            目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
+            <span>{{ dataSummary?.commentsTotal }}</span> 条关于你的评论在
+            <span>{{ dataSummary?.categoriesTotal }}</span> 个分类中.
+          </p>
         </div>
-        <div class="update-password">
-          <div class="title">
-            <p>密码修改</p>
+        <div class="content-pane">
+          <div class="personal-data">
+            <div class="title">
+              <p>个人资料</p>
+            </div>
+            <el-form
+              label-position="top"
+              label-width="80px"
+              :model="formUserInfo"
+              :rules="rules"
+              ref="ruleForm"
+            >
+              <el-form-item label="昵称" prop="nickName">
+                <el-input v-model="formUserInfo.nickName"></el-input>
+              </el-form-item>
+              <p>
+                用户昵称可以与用户名不同, 用于前台显示. 如果你将此项留空,
+                将默认使用用户名.
+              </p>
+              <el-form-item label="生日">
+                <el-date-picker
+                  v-model="formUserInfo.birth"
+                  type="date"
+                  placeholder="选择日期"
+                >
+                </el-date-picker>
+              </el-form-item>
+              <el-form-item label="性别">
+                <el-radio v-model="formUserInfo.sex" label="1" border
+                  >男</el-radio
+                >
+                <el-radio v-model="formUserInfo.sex" label="0" border
+                  >女</el-radio
+                >
+              </el-form-item>
+              <el-form-item label="头像" prop="face">
+                <el-input v-model="formUserInfo.face"></el-input>
+              </el-form-item>
+              <el-form-item label="城市" prop="city">
+                <el-input v-model="formUserInfo.city"></el-input>
+              </el-form-item>
+              <el-form-item label="具体地址" prop="address">
+                <el-input v-model="formUserInfo.address"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  @click="methods.submitForm('ruleForm')"
+                  >更新个人信息</el-button
+                >
+              </el-form-item>
+            </el-form>
           </div>
-          <el-form
-            label-position="top"
-            label-width="80px"
-            :model="formUser"
-            :rules="rulesPwd"
-            ref="passwordForm"
-          >
-            <el-form-item label="原密码" prop="oldPwd">
-              <el-input show-password v-model="formUser.oldPwd"></el-input>
-            </el-form-item>
-            <el-form-item label="新密码" prop="newPwd">
-              <el-input show-password v-model="formUser.newPwd"></el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button
-                type="primary"
-                @click="methods.submitPwdForm('passwordForm')"
-                >更新密码</el-button
-              >
-            </el-form-item>
-          </el-form>
+          <div class="update-password">
+            <div class="title">
+              <p>密码修改</p>
+            </div>
+            <el-form
+              label-position="top"
+              label-width="80px"
+              :model="formUser"
+              :rules="rulesPwd"
+              ref="passwordForm"
+            >
+              <el-form-item label="原密码" prop="oldPwd">
+                <el-input show-password v-model="formUser.oldPwd"></el-input>
+              </el-form-item>
+              <p>原密码，用于验证密码是否正确</p>
+              <el-form-item label="新密码" prop="newPwd">
+                <el-input show-password v-model="formUser.newPwd"></el-input>
+              </el-form-item>
+              <p>
+                为此用户分配一个密码.
+                建议使用特殊字符与字母、数字的混编样式,以增加系统安全性.
+              </p>
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  @click="methods.submitPwdForm('passwordForm')"
+                  >更新密码</el-button
+                >
+              </el-form-item>
+            </el-form>
+          </div>
         </div>
       </div>
     </div>
@@ -330,71 +343,81 @@ export default defineComponent({
 <style lang="scss">
 #profile {
   background-color: #f6f6f3;
-  width: 70%;
-  margin: 0 auto;
+  min-height: 93.5vh;
   color: #444;
   padding-bottom: 10%;
-  .pageTitle {
-    padding: 1.5% 0;
-    h2 {
-      font-size: 1.2em;
-    }
-  }
 
-  .page-main {
-    display: flex;
-    .content-pane {
-      width: 70%;
-      padding-right: 20%;
-      box-sizing: border-box;
-      .title {
-        p {
-          padding: 0 0 1.5%;
-          font-size: 1.2em;
-          font-weight: bold;
-        }
+  .container {
+    width: 70%;
+    margin: 0 auto;
+    .pageTitle {
+      padding: 1.5% 0;
+      h2 {
+        font-size: 1.2em;
       }
-      .el-form {
-        .el-form-item {
-          .el-form-item__label {
-            line-height: 1.5;
+    }
+
+    .page-main {
+      display: flex;
+      .content-pane {
+        width: 70%;
+        padding-right: 20%;
+        box-sizing: border-box;
+        .title {
+          p {
+            padding: 0 0 1.5%;
+            font-size: 1.2em;
             font-weight: bold;
           }
         }
-      }
-
-      .update-password {
-        padding-top: 5%;
-      }
-    }
-    .content-left {
-      width: 30%;
-      padding-right: 10%;
-      box-sizing: border-box;
-
-      p {
-        font-size: 87.5%;
-        line-height: 1.5;
-
-        .el-image {
-          width: 222px;
-          height: 222px;
-          border: 1px dashed #d9d9d6;
+        .el-form {
+          .el-form-item {
+            .el-form-item__label {
+              line-height: 1.5;
+              font-weight: bold;
+            }
+          }
+          p {
+            font-size: 0.8em;
+            margin-top: -8px;
+            color: #999;
+            padding-bottom: 15px;
+          }
         }
 
-        span {
-          font-style: italic;
-          font-weight: bold;
+        .update-password {
+          padding-top: 5%;
         }
       }
-      p:nth-of-type(2) {
-        font-size: 1.8em;
-        font-weight: normal;
-        color: #333;
-        padding: 1% 0;
-      }
-      p:nth-of-type(3) {
-        padding: 1% 0;
+      .content-left {
+        width: 30%;
+        padding-right: 10%;
+        box-sizing: border-box;
+
+        p {
+          font-size: 87.5%;
+          line-height: 1.5;
+
+          .el-image {
+            width: 222px;
+            height: 222px;
+            border: 1px dashed #d9d9d6;
+          }
+
+          span {
+            font-style: italic;
+            font-weight: bold;
+          }
+        }
+        p:nth-of-type(2) {
+          font-size: 1.8em;
+          font-weight: normal;
+          color: #333;
+          padding: 1% 0;
+        }
+        p:nth-of-type(3) {
+          padding: 1% 0;
+        }
       }
     }
   }

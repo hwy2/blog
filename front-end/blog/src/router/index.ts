@@ -58,6 +58,16 @@ const routes: RouteRecordRaw[] = [
                         name: 'profile',
                         component: () => import('../views/backstage/profile/index.vue'),
                     },
+                    {
+                        path: '/backstage/writingArticles',
+                        name: 'writingArticles',
+                        component: () => import('../views/backstage/writingArticles/index.vue'),
+                    },
+                    {
+                        path: '/backstage/basicSettings',
+                        name: 'basicSettings',
+                        component: () => import('../views/backstage/basicSettings/index.vue'),
+                    },
                 ]
             },
 
@@ -76,13 +86,13 @@ router.beforeEach((to, from, next) => {
     if (to.matched.length === 0) {// 一旦找不到链接即跳转404
         next('/404');
     } else {
-        if (/backstage/.test(to.path)) {// 检查是否登录
-            const loading = ElLoading.service({
-                lock: true,
-                text: 'Loading',
-                spinner: 'el-icon-loading',
-                background: 'rgba(0, 0, 0, 0.7)',
-            });
+        const loading = ElLoading.service({
+            lock: true,
+            text: 'Loading',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)',
+        });
+        if (/backstage/.test(to.path)) {// 检查是否登录 
             if (Cookies.get('accessToken')) {
                 loading.close();
                 next();
@@ -92,7 +102,10 @@ router.beforeEach((to, from, next) => {
                 next('/login')
             }
         } else {
-            next();
+            setTimeout(() => {
+                next();
+            }, 500);
+            loading.close();
         }
 
     }

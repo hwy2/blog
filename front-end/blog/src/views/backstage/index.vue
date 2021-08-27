@@ -19,7 +19,7 @@
           </el-submenu>
           <el-submenu index="2">
             <template #title>撰写</template>
-            <el-menu-item index="2-1">撰写文章</el-menu-item>
+            <el-menu-item index="/backstage/writingArticles">撰写文章</el-menu-item>
             <el-menu-item index="2-2">创建页面</el-menu-item>
             <el-submenu index="2-4">
               <template #title>选项4</template>
@@ -40,7 +40,7 @@
           </el-submenu>
           <el-submenu index="4">
             <template #title>设置</template>
-            <el-menu-item index="4-1">基本</el-menu-item>
+            <el-menu-item index="/backstage/basicSettings">基本</el-menu-item>
           </el-submenu>
         </el-menu>
         <div class="information">
@@ -72,6 +72,7 @@ import {
   onMounted,
   getCurrentInstance,
   computed,
+  onBeforeMount,
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -123,6 +124,7 @@ export default defineComponent({
               });
               proxy.$Cookies.remove("accessToken");
               proxy.$Cookies.remove("user");
+              sessionStorage.removeItem('store');
               router.push("/login");
             } else {
               ElNotification({
@@ -167,6 +169,9 @@ export default defineComponent({
           });
       },
     };
+    onBeforeMount(()=>{
+      proxy.getWebConfigInfo();
+    })
     onMounted(() => {
       state.user = JSON.parse(proxy.$Cookies.get("user"));
       methods.getDataSummaryList();
@@ -177,6 +182,24 @@ export default defineComponent({
       methods,
     };
   },
+  created() {
+    const store = useStore();
+     // 页面加载时读取数据
+    if (sessionStorage.getItem("store")) {
+      store.replaceState(
+        Object.assign(
+          {},
+          store.state,
+          JSON.parse((sessionStorage as any).getItem("store"))
+        )
+      );
+    }
+
+    // 页面刷新时保存信息
+    window.addEventListener("beforeunload", () => {
+      sessionStorage.setItem("store", JSON.stringify(store.state));
+    });
+  }
 });
 </script>
 

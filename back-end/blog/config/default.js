@@ -54,7 +54,7 @@ var configs = {
         key: "xxxxxxxx",// 高德天气 kye
         citycode: '440113' //番禺区
     },
-    isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库
+    isFirstTimeInstall: true, //第一次运行之后请确保是false，否则会重建数据库
 };
 
 module.exports = configs;

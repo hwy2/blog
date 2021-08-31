@@ -19,7 +19,9 @@
           </el-submenu>
           <el-submenu index="2">
             <template #title>撰写</template>
-            <el-menu-item index="/backstage/writingArticles">撰写文章</el-menu-item>
+            <el-menu-item index="/backstage/writingArticles"
+              >撰写文章</el-menu-item
+            >
             <el-menu-item index="2-2">创建页面</el-menu-item>
             <el-submenu index="2-4">
               <template #title>选项4</template>
@@ -77,6 +79,7 @@ import {
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
+import dateFormat from "/@/assets/js/dateFormat.js";
 export default defineComponent({
   name: "backstage",
   setup: () => {
@@ -110,6 +113,23 @@ export default defineComponent({
         state.activeIndex = key;
       },
       /**
+       * 获取类别列表
+       */
+      getCategoryList() {
+        proxy.$axios
+          .get("/category/list", {})
+          .then((res: any) => {
+            console.log(res);
+            for (const item of res.result.list) {
+              item.createDate = dateFormat(item.createDate, "MM-dd");
+            }
+            store.commit("backstage/setCategoryList", res.result.list);
+          })
+          .catch((err: any) => {
+            console.log(err);
+          });
+      },
+      /**
        * 退出登录
        */
       logout() {
@@ -124,7 +144,6 @@ export default defineComponent({
               });
               proxy.$Cookies.remove("accessToken");
               proxy.$Cookies.remove("user");
-              sessionStorage.removeItem('store');
               router.push("/login");
             } else {
               ElNotification({
@@ -169,12 +188,14 @@ export default defineComponent({
           });
       },
     };
-    onBeforeMount(()=>{
+    onBeforeMount(() => {
       proxy.getWebConfigInfo();
-    })
+      document.title = "博客后台";
+    });
     onMounted(() => {
       state.user = JSON.parse(proxy.$Cookies.get("user"));
       methods.getDataSummaryList();
+      methods.getCategoryList();
     });
 
     return {
@@ -184,7 +205,7 @@ export default defineComponent({
   },
   created() {
     const store = useStore();
-     // 页面加载时读取数据
+    // 页面加载时读取数据
     if (sessionStorage.getItem("store")) {
       store.replaceState(
         Object.assign(
@@ -199,7 +220,7 @@ export default defineComponent({
     window.addEventListener("beforeunload", () => {
       sessionStorage.setItem("store", JSON.stringify(store.state));
     });
-  }
+  },
 });
 </script>
 

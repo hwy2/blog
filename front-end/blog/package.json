@@ -10,6 +10,7 @@
     "axios": "^0.21.1",
     "element-plus": "^1.0.2-beta.54",
     "js-cookie": "^3.0.0",
+    "md-editor-v3": "^1.4.1",
     "vue": "^3.0.5",
     "vue-axios": "^3.2.4",
     "vue-router": "^4.0.0-0",

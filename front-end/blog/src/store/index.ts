@@ -13,7 +13,8 @@ export default createStore({
                     commentsTotal: 0,
                     categoriesTotal: 0
                 },
-                activeIndex: "/backstage/outline"
+                activeIndex: "/backstage/outline",
+                categoryList:[]
             },
             getters: {
                 getDataSummary(state) {
@@ -21,6 +22,9 @@ export default createStore({
                 },
                 getActiveIndex(state) {
                     return state.activeIndex
+                },
+                getCategoryList(state) {
+                    return state.categoryList
                 }
             },
             mutations: {
@@ -29,6 +33,9 @@ export default createStore({
                 },
                 setActiveIndex(state, status) {
                     state.activeIndex = status
+                },
+                setCategoryList(state, status) {
+                    state.categoryList = status
                 }
             }
         },

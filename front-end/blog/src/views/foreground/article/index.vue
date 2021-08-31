@@ -280,6 +280,7 @@ export default defineComponent({
           .get("/article/info", { articleUuid: state.uuid })
           .then((res: any) => {
             console.log(res);
+            document.title=res.result.article.title ;
             store.commit("foreground/setArticle", res.result.article);
             res.result.article.createDate = dateFormat(
               res.result.article.createDate,

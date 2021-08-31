@@ -125,6 +125,7 @@ import {
   onMounted,
   getCurrentInstance,
   computed,
+  onBeforeMount
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -319,6 +320,9 @@ export default defineComponent({
         });
       },
     };
+    onBeforeMount(()=>{
+      document.title="个人设置";
+    })
     onMounted(() => {
       state.user = JSON.parse(proxy.$Cookies.get("user"));
       state.formUserInfo = {

@@ -2,6 +2,7 @@ import dateFormat from "/@/assets/js/dateFormat.js";
 import { ElLoading } from "element-plus";
 import axios from "./axios";
 import store from '/@/store'
+import Cookies from 'js-cookie'
 
 export default {
     /**
@@ -62,4 +63,25 @@ export default {
                 console.log(error);
             });
     },
+    updateAccessToken() {
+        const user: any = JSON.parse(Cookies.get("user") || '{}');
+        const accessToken: any = Cookies.get("accessToken") || "";
+        if (user === '{}' || !accessToken) {
+            return;
+        }
+        axios.put("/user/adminToken", {
+            userUuid: user.uuid,
+            token: accessToken
+        })
+            .then((res: any) => {
+                console.log(res);
+                Cookies.set("accessToken", res.result.accessToken.token, {
+                    expires: new Date(res.result.accessToken.expiresIn),
+                });
+            })
+            .catch((error: any) => {
+                console.log(error);
+
+            });
+    }
 }

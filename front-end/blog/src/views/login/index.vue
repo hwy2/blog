@@ -48,6 +48,7 @@ import {
   toRefs,
   getCurrentInstance,
   computed,
+  onBeforeMount,
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -137,14 +138,14 @@ export default defineComponent({
               proxy.$Cookies.set("accessToken", res.result.accessToken.token, {
                 expires: new Date(res.result.accessToken.expiresIn),
               });
-              proxy.$Cookies.set("user",JSON.stringify(res.result.user) , {
+              proxy.$Cookies.set("user", JSON.stringify(res.result.user), {
                 expires: new Date(res.result.accessToken.expiresIn),
               });
               setTimeout(() => {
                 router.push({
                   name: "backstage",
                 });
-                store.commit('backstage/setActiveIndex','/backstage/outline');
+                store.commit("backstage/setActiveIndex", "/backstage/outline");
               }, 500);
             } else {
               ElNotification({
@@ -165,7 +166,9 @@ export default defineComponent({
         router.go(-1);
       },
     };
-
+    onBeforeMount(() => {
+      sessionStorage.removeItem("store");
+    });
     return {
       ...toRefs(state),
       methods,

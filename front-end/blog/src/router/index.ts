@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Cookies from 'js-cookie'
 import { ElLoading } from 'element-plus';
+import pubfunt from '/@/public'
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
@@ -92,11 +93,11 @@ router.beforeEach((to, from, next) => {
             spinner: 'el-icon-loading',
             background: 'rgba(0, 0, 0, 0.7)',
         });
-        if (/backstage/.test(to.path)) {// 检查是否登录 
+        if (/backstage/.test(to.path)) {// 检查是否登录
+            pubfunt.updateAccessToken();
             if (Cookies.get('accessToken')) {
                 loading.close();
                 next();
-
             } else {
                 loading.close();
                 next('/login')

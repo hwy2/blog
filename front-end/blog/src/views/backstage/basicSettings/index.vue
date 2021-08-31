@@ -205,11 +205,11 @@ export default defineComponent({
     };
     onBeforeMount(() => {
       // 挂载之前
+      document.title = '基本设置';
     });
     onMounted(() => {
       // 挂载之后
       const webConfig: any = store.getters["foreground/getWebConfig"];
-      console.log(webConfig);
       delete webConfig.createDate;
       delete webConfig.updateDate;
       state.webConfig = webConfig;

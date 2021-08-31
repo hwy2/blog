@@ -86,6 +86,7 @@ import {
   onMounted,
   getCurrentInstance,
   computed,
+  onBeforeMount,
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -99,7 +100,7 @@ export default defineComponent({
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       commentList: [],
-      categoryList: [],
+      categoryList: computed(() => store.state.backstage.categoryList),
       aricleList: computed(() => store.state.foreground.articleLists),
       condition: computed({
         get: () => {
@@ -145,23 +146,6 @@ export default defineComponent({
           });
       },
       /**
-       * 获取类别列表
-       */
-      getCategoryList() {
-        proxy.$axios
-          .get("/category/list", {})
-          .then((res: any) => {
-            console.log(res);
-            for (const item of res.result.list) {
-              item.createDate = dateFormat(item.createDate, "MM-dd");
-            }
-            state.categoryList = res.result.list;
-          })
-          .catch((err: any) => {
-            console.log(err);
-          });
-      },
-      /**
        * 返回首页，并搜索
        */
       pushHome(category: string) {
@@ -177,13 +161,15 @@ export default defineComponent({
         state.activeIndex = index;
       },
     };
+    onBeforeMount(() => {
+      document.title = "概要";
+    });
     onMounted(() => {
       state.condition.pageSize = 7;
       state.condition.currPage = 1;
       state.condition.categoryTitle = "";
       proxy.getAricleList(state.condition, "MM-dd");
       methods.getCommentList();
-      methods.getCategoryList();
     });
     return {
       ...toRefs(state),

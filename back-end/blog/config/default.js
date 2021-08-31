@@ -19,9 +19,9 @@ var configs = {
         secretOrPrivateKey: 'iboomer', // 秘钥
     },
     email: { //默认邮箱
-        service: "1833121448@qq.com",
-        spassword: "dcsosrkhkvsifcjh",
-        admin: "1833121448@qq.com",
+        service: "xxxxxxx@qq.com",
+        spassword: "xxxxxxx",// 令牌
+        admin: "admin@admin.com",
     },
     page: { //默认分页
         currPage: 1,
@@ -51,7 +51,7 @@ var configs = {
         face: 'http://localhost:3000/attchments/face/',
     },
     weather: {
-        key: "d2a66877783ac05400f583f04ececd0d",
+        key: "xxxxxxxx",// 高德天气 kye
         citycode: '440113' //番禺区
     },
     isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库

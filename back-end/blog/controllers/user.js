@@ -254,10 +254,11 @@ module.exports = {
      * put
      */
     updateAccessToken: function (req, res, next, isAdmin) {
-        var params = req.body;
+        var params = req.query || req.params;
         var userUuid = params.userUuid;
         var token = params.token;
-        if (!userUuid || token) {
+        console.log(userUuid, token)
+        if (!userUuid || !token) {
             //fail
             utils.handleJson({
                 response: res,
@@ -273,8 +274,7 @@ module.exports = {
 
             if (isAdmin) {
                 utils.handleJson({
-                    response,
-                    res,
+                    response: res,
                     msg: i18n.__('tokenUpdate'),
                     result: {
                         accessToken: tokenService.setToken({
@@ -287,8 +287,7 @@ module.exports = {
             }
             // success
             utils.handleJson({
-                response,
-                res,
+                response: res,
                 msg: i18n.__('tokenUpdate'),
                 result: {
                     accessToken: tokenService.setToken({

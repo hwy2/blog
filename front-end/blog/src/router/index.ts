@@ -69,6 +69,11 @@ const routes: RouteRecordRaw[] = [
                         name: 'basicSettings',
                         component: () => import('../views/backstage/basicSettings/index.vue'),
                     },
+                    {
+                        path: '/backstage/articleList',
+                        name: 'articleList',
+                        component: () => import('../views/backstage/articleList/index.vue'),
+                    },
                 ]
             },
 

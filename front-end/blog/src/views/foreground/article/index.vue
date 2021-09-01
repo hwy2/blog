@@ -236,10 +236,9 @@ import {
   getCurrentInstance,
   computed,
 } from "vue";
-import { ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ElNotification } from "element-plus";
+import { ElNotification,ElLoading } from "element-plus";
 export default defineComponent({
   setup: () => {
     const router = useRouter();

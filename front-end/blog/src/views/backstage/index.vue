@@ -32,7 +32,7 @@
           </el-submenu>
           <el-submenu index="3">
             <template #title>管理</template>
-            <el-menu-item index="3-1">文章</el-menu-item>
+            <el-menu-item index="/backstage/articleList">文章</el-menu-item>
             <el-menu-item index="3-2">页面</el-menu-item>
             <el-menu-item index="3-3">评论</el-menu-item>
             <el-menu-item index="3-4">分类</el-menu-item>

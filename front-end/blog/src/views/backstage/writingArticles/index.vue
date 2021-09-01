@@ -26,7 +26,7 @@
                 :preview="false"
               />
             </div>
-            <div class="bg">
+            <div class="bgWhite">
               <h3>其他字段</h3>
               <el-form-item label="文章摘要" prop="abstract">
                 <el-input
@@ -96,7 +96,7 @@ import {
   watch,
 } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import { useRouter, onBeforeRouteLeave } from "vue-router";
 import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { ElNotification } from "element-plus";
@@ -207,7 +207,7 @@ export default defineComponent({
               const data = new FormData();
               data.append("files", file);
               proxy.$axios
-                .post("/common/enclosure",data)
+                .post("/common/enclosure", data)
                 .then((resp: any) => rev(resp))
                 .catch((error: any) => rej(error));
             });
@@ -277,12 +277,36 @@ export default defineComponent({
         router.push({ name: "login" });
       }
       state.article.categoryUuids = state.categoryList[0].uuid;
+      window.onbeforeunload = (e) => {
+        e = e || window.event;
+        if (e) {
+          e.returnValue = "关闭提示";
+        }
+        return "关闭提示";
+      };
+    });
+    // 单页面导航守卫
+    onBeforeRouteLeave((to, from, next) => {
+      const answer = window.confirm("你真的想离开吗? 您有未保存的更改!");
+      // 清除窗口绑定，及提交activeIndex导航
+      if (answer) {
+        store.commit("backstage/setActiveIndex", to.fullPath);
+        window.onbeforeunload = null;
+        next();
+      } else {// 取消导航并停留在同一页面上
+        store.commit("backstage/setActiveIndex", "/backstage/writingArticles");
+        next(false);
+      }
     });
 
     return {
       ...toRefs(state),
       methods,
     };
+  },
+  destroyed() {
+    // 清除窗口绑定事件
+    window.onbeforeunload = null;
   },
 });
 </script>
@@ -308,7 +332,7 @@ export default defineComponent({
         width: 75%;
         position: relative;
         .el-form {
-          .bg {
+          .bgWhite {
             background-color: #fff;
             padding: 0% 3% 5%;
             border: 1px solid rgb(224, 224, 224);

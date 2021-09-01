@@ -6,7 +6,7 @@ var path = require('path'); //路径
 var uuid = require('node-uuid'); //uuid
 var Promise = require("bluebird");
 var multer = require('multer'); //文件上传
-var config = require('config-lite'); //配置
+var config = require('../config/default'); //配置文件
 
 module.exports = {
     /**
@@ -135,4 +135,16 @@ module.exports = {
         }
         return result;
     },
+    getFileName: function () {
+        let components = [];
+        var fpath = path.join(__dirname, '../public/attchments/wallpaper/')
+        const files = fs.readdirSync(fpath);
+        files.forEach(function (item, index) {
+            let stat = fs.lstatSync(fpath + item)
+            if (stat.isDirectory() !== true) {
+                components.push(item)
+            }
+        })
+        return components;
+    }
 };

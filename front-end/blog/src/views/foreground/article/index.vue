@@ -18,34 +18,34 @@
                 <p>
                   {{ article.title }}
                 </p>
-                <p>浏览 {{ article.pageview }} | 评论 {{ commentSumber }}</p>
+                <p>浏览 {{ article?.pageview }} | 评论 {{ commentSumber }}</p>
               </div>
             </div>
           </div>
           <div class="article-author">
             <el-image
-              :src="isArticleShow ? article.user.userInfo.face : ''"
+              :src="isArticleShow ? article?.user?.userInfo?.face : ''"
               fit="cover"
             ></el-image>
             <p>
-              {{ isArticleShow ? article.user.userInfo.nickName : "" }}
+              {{ isArticleShow ? article?.user?.userInfo?.nickName : "" }}
             </p>
             <p>
-              {{ article.createDate }}
+              {{ article?.createDate }}
             </p>
           </div>
 
           <div class="article-text">
-            <div v-html="article.content"></div>
+            <div v-html="article?.content"></div>
 
             <blockquote class="moe-post-card-copy">
-              本文作者：{{ isArticleShow ? article.user.userInfo.nickName : ""
+              本文作者：{{ isArticleShow ? article?.user?.userInfo?.nickName : ""
               }}<br />
               本文链接：<a :href="articleLink" data-pjax-state>{{
                 articleLink
               }}</a
               ><br />
-              最后修改时间：{{ article.updateDate }}<br />
+              最后修改时间：{{ article?.updateDate }}<br />
               本站未注明转载的文章均为原创，并采用
               <a
                 href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh"
@@ -582,7 +582,7 @@ export default defineComponent({
           }
         }
 
-        h2 {
+        h1,h2 {
           position: relative;
           margin: 0.8em 0 0.6em;
           &::before {

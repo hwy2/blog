@@ -19,9 +19,9 @@ var configs = {
         secretOrPrivateKey: 'iboomer', // 秘钥
     },
     email: { //默认邮箱
-        service: "xxxxxx@qq.com",
-        spassword: "xxxxxx",
-        admin: "xxxxxx@qq.com",
+        service: "1833121448@qq.com",
+        spassword: "dcsosrkhkvsifcjh",
+        admin: "1833121448@qq.com",
     },
     page: { //默认分页
         currPage: 1,
@@ -49,9 +49,10 @@ var configs = {
     fileAbsolute: { //文件绝对路径
         default: 'http://localhost:3000/attchments/default/',
         face: 'http://localhost:3000/attchments/face/',
+        wallpaper: 'http://localhost:3000/attchments/wallpaper/'
     },
     weather: {
-        key: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",//高德地图的key
+        key: "d2a66877783ac05400f583f04ececd0d",
         citycode: '440113' //番禺区
     },
     isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库

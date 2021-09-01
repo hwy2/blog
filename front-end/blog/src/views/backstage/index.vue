@@ -193,7 +193,11 @@ export default defineComponent({
       document.title = "博客后台";
     });
     onMounted(() => {
-      state.user = JSON.parse(proxy.$Cookies.get("user"));
+      if (proxy.$Cookies.get("user")) {
+        state.user = JSON.parse(proxy.$Cookies.get("user"));
+      }else{
+        router.push({name:'login'})
+      }
       methods.getDataSummaryList();
       methods.getCategoryList();
     });

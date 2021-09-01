@@ -177,7 +177,7 @@ module.exports = {
         var categoryUuids = utils.handleArray(params.categoryUuids);
         console.log(categoryUuids)
 
-        if (!title && !content && !userUuid) {
+        if (!title || !content || !userUuid || !categoryUuids) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__("pleasePassParamsComplete")
@@ -232,12 +232,11 @@ module.exports = {
      * 修改文章
      * 
      */
-    updateArticle: async function (req, res, next) {
+    updateArticle: function (req, res, next) {
         var params = req.body || req.params;
         var article = JSON.parse(params.article);
         var articleUuid = utils.trim(article.uuid);
         var categoryUuids = utils.handleArray(params.categoryUuids);
-        var works = await Mysql.transaction(); //创建数据库事务
         // console.log("", works)
         if (!articleUuid || !categoryUuids) {
             utils.handleJson({
@@ -248,60 +247,31 @@ module.exports = {
         }
 
         co(function* () {
-
-            var articleResult = yield Article.destroy({
+            // 查询是否有该记录
+            var article = yield Article.findOne({
                 where: {
                     uuid: articleUuid
-                },
-                transaction: works
+                }
             });
-            yield ArticleCategory.destroy({ //销毁不是uuid限制项，无法返回影响的条数
-                where: {
-                    articleUuid: articleUuid
-                },
-                force: true,
-                transaction: works
-            });
-            console.log("articleResult", articleResult);
-            if (!articleResult) {
-                yield works.rollback();
+            if (!article) {
                 utils.handleJson({
                     response: res,
-                    msg: i18n.__('updateArticleFail')
+                    msg: i18n.__('articleNotExist')
                 });
                 return;
             }
-            articleResult = yield Article.create({
-                uuid: articleUuid,
-                title: article.title,
-                photo: article.photo,
-                content: article.content,
-                state: article.state,
-                abstract: article.abstract,
-                ishot: article.ishot,
-                userUuid: article.userUuid,
-                updateDate: dateFormat(new Date(), 'yyyy-mm-dd hh:MM:ss')
-            }, {
-                transaction: works
+            var articleResult = yield Article.update(article, {
+                where: {
+                    uuid: articleUuid
+                }
             });
             var categoryResult = yield Category.findAll({
                 where: {
                     uuid: categoryUuids
                 },
-                transaction: works
             });
-
-            if (!articleResult || !categoryResult) {
-                utils.handleJson({
-                    response: res,
-                    msg: i18n.__('updateArticleFail')
-                });
-                yield works.rollback();
-                return;
-            }
-            yield works.commit();
-            //通过addCategory方法在ArticleCategory表添加记录
-            yield articleResult.addCategory(categoryResult);
+            console.log(article);
+            article.setCategories(categoryResult)
 
             utils.handleJson({
                 response: res,
@@ -309,7 +279,6 @@ module.exports = {
                 result: "+1"
             })
         }).catch(async function (error) {
-            await works.rollback();
             utils.handleError({
                 response: res,
                 error: error

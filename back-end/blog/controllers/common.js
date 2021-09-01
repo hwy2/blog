@@ -4,7 +4,9 @@ var i18n = require('i18n'); //i18n国际化
 var utils = require('../libs/utils'); //工具类
 var Attachment = require('../models/index').Attachment; //附件
 var fileService = require('../services/file'); //文件服务
-
+var fs = require('fs');
+var config = require('../config/default'); //配置文件
+const router = require('../routes/common');
 module.exports = {
     /**
      * 文件上传
@@ -12,7 +14,7 @@ module.exports = {
     uploadEnclosure: function (req, res, next) {
         var files = req.files;
         console.log("files", files);
-        if (!files && !files.length) {
+        if (!files || !files.length) {
             //err
             utils.handleError({
                 response: res,
@@ -47,5 +49,13 @@ module.exports = {
                 error: error
             })
         })
+    },
+    returnRandomPictures: function (req, res, next) {
+        var picturesList = fileService.getFileName();
+        var random = Math.floor(Math.random() * (picturesList.length - 1 + 1) + 1);
+        // 重定向为新的链接
+        res.location(config.fileAbsolute.wallpaper + picturesList[random]);
+        res.send(302);
+
     }
 }

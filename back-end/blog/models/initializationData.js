@@ -29,7 +29,7 @@ module.exports = {
         }]);
         var article = await Article.create({
             title: "hello world",
-            photo: "https://api.ohmyga.cn/wallpaper/?rand=645",
+            photo: "http://localhost:3000/common/wallpaper",
             content: "这是自动程序插入的数据库的内容，看到这个，代表你已经成功启动blog!",
             state: 1,
             abstract: "hello world",

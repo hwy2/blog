@@ -19,9 +19,9 @@ var configs = {
         secretOrPrivateKey: 'iboomer', // 秘钥
     },
     email: { //默认邮箱
-        service: "1833121448@qq.com",
-        spassword: "dcsosrkhkvsifcjh",
-        admin: "1833121448@qq.com",
+        service: "xxxx@qq.com",
+        spassword: "xxxx",
+        admin: "xxxx@qq.com",
     },
     page: { //默认分页
         currPage: 1,
@@ -52,7 +52,7 @@ var configs = {
         wallpaper: 'http://localhost:3000/attchments/wallpaper/'
     },
     weather: {
-        key: "d2a66877783ac05400f583f04ececd0d",
+        key: "xxxx",
         citycode: '440113' //番禺区
     },
     isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库

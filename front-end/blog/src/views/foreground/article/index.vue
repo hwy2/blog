@@ -39,7 +39,8 @@
             <div v-html="article?.content"></div>
 
             <blockquote class="moe-post-card-copy">
-              本文作者：{{ isArticleShow ? article?.user?.userInfo?.nickName : ""
+              本文作者：{{
+                isArticleShow ? article?.user?.userInfo?.nickName : ""
               }}<br />
               本文链接：<a :href="articleLink" data-pjax-state>{{
                 articleLink
@@ -239,6 +240,7 @@ import {
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { ElNotification,ElLoading } from "element-plus";
+import  marked from 'marked'
 export default defineComponent({
   setup: () => {
     const router = useRouter();
@@ -290,6 +292,7 @@ export default defineComponent({
               "yyyy-MM-dd hh:mm:ss"
             );
             state.article = res.result.article;
+            (state.article as any).content =  marked((state.article as any).content)
             state.isArticleShow = true;
             methods.setArticlePageview(res.result.article.pageview);
             loading.close();
@@ -581,7 +584,8 @@ export default defineComponent({
           }
         }
 
-        h1,h2 {
+        h1,
+        h2 {
           position: relative;
           margin: 0.8em 0 0.6em;
           &::before {
@@ -604,6 +608,15 @@ export default defineComponent({
           font-family: monospace, monospace;
           font-size: 1em;
           margin: 0.8em 0 0.6em;
+          
+          &::before{
+            content: "";
+            background: url("../../../assets/images/pre.png") 10px 10px / 40px no-repeat #2b2b2b;
+            height: 32px;
+            width: 100%;
+            display: block;
+            border-radius: 5px 5px 0 0;
+          }
 
           code {
             box-sizing: border-box;
@@ -611,7 +624,7 @@ export default defineComponent({
             margin: 0;
             width: 100%;
             display: block;
-            padding: 0.5em;
+            padding: 1em;
             font-size: 15px;
             overflow-x: auto;
             font-weight: 200;
@@ -621,7 +634,8 @@ export default defineComponent({
             color: #bababa;
             overflow: auto;
             max-height: 300px;
-            border-radius: 5px;
+            border-radius:0 0 5px 5px;
+
             ol {
               padding: 0;
               list-style: decimal;

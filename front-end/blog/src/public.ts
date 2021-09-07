@@ -10,13 +10,19 @@ export default {
      * @param data 搜索参数 {}
      * @param format 时间格式化参数 例如 'yyyy年MM月dd日'
      */
-    getAricleList(data: any, format: string = 'yyyy年MM月dd日') {
+    getAricleList(data: any={}, format: string = 'yyyy年MM月dd日') {
         const loading = ElLoading.service({ fullscreen: true });
         axios.get("/article/list", data)
             .then((res: any) => {
                 console.log(res);
                 for (const item of res.result.list) {
                     item.createDate = dateFormat(item.createDate, format);
+                    item.updateDate = dateFormat(item.updateDate, format);
+                    const category = [];
+                    for (const iterator of item.categories) {
+                        category.push(iterator.title);
+                    }
+                    item.category = category.join(',')
                 }
 
                 store.commit("foreground/setArticleList", res.result.list);

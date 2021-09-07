@@ -52,7 +52,7 @@ module.exports = {
     },
     returnRandomPictures: function (req, res, next) {
         var picturesList = fileService.getFileName();
-        var random = Math.floor(Math.random() * (picturesList.length - 1 + 1) + 1);
+        var random = parseInt(Math.floor(Math.random() * (picturesList.length - 1 + 1) + 1));
         // 重定向为新的链接
         res.location(config.fileAbsolute.wallpaper + picturesList[random]);
         res.send(302);

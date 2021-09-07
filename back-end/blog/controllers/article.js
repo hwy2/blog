@@ -84,10 +84,18 @@ module.exports = {
         var params = req.query || req.params;
         var categoryTitle = utils.trim(params.categoryTitle);
         var articleVague = utils.trim(params.articleVague);
+        var state = utils.trim(params.state);
         var categoryCondition = {},
-            condition = {};
+            condition = {
+                state: {
+                    [Op.or]: [1, 2],
+                }
+            };
         if (categoryTitle) {
             categoryCondition.title = categoryTitle
+        }
+        if (state) {
+            condition.state = state
         }
         if (articleVague) {
             condition.content = {
@@ -233,11 +241,12 @@ module.exports = {
      * 
      */
     updateArticle: function (req, res, next) {
-        var params = req.body || req.params;
+        var params = req.query || req.params;
+
         var article = JSON.parse(params.article);
+
         var articleUuid = utils.trim(article.uuid);
-        var categoryUuids = utils.handleArray(params.categoryUuids);
-        // console.log("", works)
+        var categoryUuids = utils.handleArray(article.categoryUuids);
         if (!articleUuid || !categoryUuids) {
             utils.handleJson({
                 response: res,
@@ -248,18 +257,20 @@ module.exports = {
 
         co(function* () {
             // 查询是否有该记录
-            var article = yield Article.findOne({
+            var articlefindOne = yield Article.findOne({
                 where: {
                     uuid: articleUuid
                 }
             });
-            if (!article) {
+            if (!articlefindOne) {
                 utils.handleJson({
                     response: res,
                     msg: i18n.__('articleNotExist')
                 });
                 return;
             }
+
+            delete article.categoryUuids;
             var articleResult = yield Article.update(article, {
                 where: {
                     uuid: articleUuid
@@ -271,7 +282,7 @@ module.exports = {
                 },
             });
             console.log(article);
-            article.setCategories(categoryResult)
+            articlefindOne.setCategories(categoryResult)
 
             utils.handleJson({
                 response: res,

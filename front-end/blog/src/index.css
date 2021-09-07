@@ -58,6 +58,7 @@ body::-webkit-scrollbar-corner {
 :root {
   --trueGray: #484945;
   --hover:rgb(185, 184, 184);
+  --borderColor:#D9D9D6;
 }
 
 *,

@@ -163,7 +163,7 @@ export default defineComponent({
        * 返回首页
        */
       fackHome() {
-        router.go(-1);
+        router.push({ name: "home" });
       },
     };
     onBeforeMount(() => {

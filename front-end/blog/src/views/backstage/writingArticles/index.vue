@@ -95,11 +95,12 @@ import {
   onBeforeMount,
   watch,
 } from "vue";
+import dateFormat from "/@/assets/js/dateFormat.js";
 import { useStore } from "vuex";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import { ElNotification } from "element-plus";
+import { ElNotification, ElLoading } from "element-plus";
 export default defineComponent({
   name: "home",
   components: {
@@ -113,6 +114,7 @@ export default defineComponent({
       // vue2.x的data参数
       content: "", // 富文本编辑框
       checkboxGroup: ["默认"],
+      saveStatus: false,
       article: {
         title: "",
         content: "",
@@ -183,18 +185,15 @@ export default defineComponent({
        */
       saveHtml(html: string) {
         console.log(html);
-        state.article.content = html;
+        state.article.content = state.content;
       },
       /**
        * 保存当前数据
        */
       saveValue(v: string) {
         console.log(v);
-        ElNotification({
-          title: "成功",
-          message: "保存成功",
-          type: "success",
-        });
+        state.saveStatus = true;
+        methods.submitArticleForm("articleForm", true);
       },
       /**
        * 上传图片文件
@@ -220,6 +219,7 @@ export default defineComponent({
        * 提交表单
        */
       submitArticleForm(formName: string, isdraft: boolean) {
+        state.saveStatus = true;
         if (state.article.abstract === "") {
           state.article.abstract = state.content.substr(0, 100);
         }
@@ -236,12 +236,21 @@ export default defineComponent({
               .then((res: any) => {
                 console.log(res);
                 if (res.code === "200") {
-                  ElNotification({
-                    title: "成功",
-                    message: "",
-                    type: "success",
-                  });
-                  // 跳转到文章列表页面
+                  if (isdraft) {
+                    ElNotification({
+                      title: "成功",
+                      message: "保存成功",
+                      type: "success",
+                    });
+                  } else {
+                    ElNotification({
+                      title: "成功",
+                      message: "",
+                      type: "success",
+                    });
+                    // 跳转到文章列表页面
+                    router.push({ name: "articleList" });
+                  }
                 } else {
                   ElNotification({
                     title: "错误",
@@ -262,6 +271,33 @@ export default defineComponent({
             return false;
           }
         });
+      },
+      /**
+       * 获取文章内容
+       */
+      getArticleInfo(uuid: any) {
+        const loading = ElLoading.service({ fullscreen: true });
+        proxy.$axios
+          .get("/article/info", { articleUuid: uuid })
+          .then((res: any) => {
+            console.log(res);
+            document.title = "编辑" + res.result.article.title;
+            res.result.article.createDate = dateFormat(
+              res.result.article.createDate,
+              "yyyy年MM月dd日"
+            );
+            res.result.article.updateDate = dateFormat(
+              res.result.article.updateDate,
+              "yyyy-MM-dd hh:mm:ss"
+            );
+            state.article = res.result.article;
+            state.content = res.result.article.content;
+            loading.close();
+          })
+          .catch((error: any) => {
+            console.log(error);
+            loading.close();
+          });
       },
     };
     onBeforeMount(() => {
@@ -284,18 +320,32 @@ export default defineComponent({
         }
         return "关闭提示";
       };
+      if (router.currentRoute.value.params.uuid) {
+        const paramsUuid = router.currentRoute.value.params.uuid;
+        methods.getArticleInfo(paramsUuid);
+      }
     });
     // 单页面导航守卫
+
     onBeforeRouteLeave((to, from, next) => {
-      const answer = window.confirm("你真的想离开吗? 您有未保存的更改!");
-      // 清除窗口绑定，及提交activeIndex导航
-      if (answer) {
-        store.commit("backstage/setActiveIndex", to.fullPath);
+      if (!state.saveStatus) {
+        const answer = window.confirm("你真的想离开吗? 您有未保存的更改!");
+        // 清除窗口绑定，及提交activeIndex导航
+        if (answer) {
+          store.commit("backstage/setActiveIndex", to.fullPath);
+          window.onbeforeunload = null;
+          next();
+        } else {
+          // 取消导航并停留在同一页面上
+          store.commit(
+            "backstage/setActiveIndex",
+            "/backstage/writingArticles"
+          );
+          next(false);
+        }
+      } else {
         window.onbeforeunload = null;
-        next();
-      } else {// 取消导航并停留在同一页面上
-        store.commit("backstage/setActiveIndex", "/backstage/writingArticles");
-        next(false);
+        next(true);
       }
     });
 

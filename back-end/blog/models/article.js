@@ -23,7 +23,7 @@ var Article = Mysql.define('article', {
         type: Sequelize.TEXT,
         allowNull: false,
     },
-    state: { //文章状态 （0已删除、1已发布、2草稿、3页面）
+    state: { //文章状态 （0已删除、1已发布、2草稿、3待审核、4页面）
         type: Sequelize.STRING(2),
         defaultValue: "1", //默认值
     },

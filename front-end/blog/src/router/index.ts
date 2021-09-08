@@ -33,7 +33,22 @@ const routes: RouteRecordRaw[] = [
                         path: '/404',
                         name: '404',
                         component: () => import('/@/views/notFind/index.vue'),
-                    }
+                    },
+                    {
+                        path: '/home/archiveArticles',
+                        name: 'archiveArticles',
+                        component: () => import('/@/views/foreground/archiveArticles/index.vue'),
+                    },
+                    {
+                        path: '/home/friendlyLink',
+                        name: 'friendlyLink',
+                        component: () => import('/@/views/foreground/friendlyLink/index.vue'),
+                    },
+                    {
+                        path: '/home/privacyPolicy',
+                        name: 'privacyPolicy',
+                        component: () => import('/@/views/foreground/privacyPolicy/index.vue'),
+                    },
                 ]
             },
             {
@@ -73,6 +88,41 @@ const routes: RouteRecordRaw[] = [
                         path: '/backstage/articleList',
                         name: 'articleList',
                         component: () => import('../views/backstage/articleList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/commentList',
+                        name: 'commentList',
+                        component: () => import('../views/backstage/commentList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/pageList',
+                        name: 'pageList',
+                        component: () => import('../views/backstage/pageList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/categoryList',
+                        name: 'categoryList',
+                        component: () => import('../views/backstage/categoryList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/fileList',
+                        name: 'fileList',
+                        component: () => import('../views/backstage/fileList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/userList',
+                        name: 'userList',
+                        component: () => import('../views/backstage/userList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/linkList',
+                        name: 'linkList',
+                        component: () => import('../views/backstage/linkList/index.vue'),
+                    },
+                    {
+                        path: '/backstage/createPage',
+                        name: 'createPage',
+                        component: () => import('../views/backstage/createPage/index.vue'),
                     },
                 ]
             },

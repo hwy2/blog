@@ -22,23 +22,23 @@
             <el-menu-item index="/backstage/writingArticles"
               >撰写文章</el-menu-item
             >
-            <el-menu-item index="2-2">创建页面</el-menu-item>
-            <el-submenu index="2-4">
+            <el-menu-item index="/backstage/createPage">创建页面</el-menu-item>
+            <!-- <el-submenu index="2-4">
               <template #title>选项4</template>
               <el-menu-item index="2-4-1">选项1</el-menu-item>
               <el-menu-item index="2-4-2">选项2</el-menu-item>
               <el-menu-item index="2-4-3">选项3</el-menu-item>
-            </el-submenu>
+            </el-submenu> -->
           </el-submenu>
           <el-submenu index="3">
             <template #title>管理</template>
             <el-menu-item index="/backstage/articleList">文章</el-menu-item>
-            <el-menu-item index="3-2">页面</el-menu-item>
-            <el-menu-item index="3-3">评论</el-menu-item>
-            <el-menu-item index="3-4">分类</el-menu-item>
-            <el-menu-item index="3-5">文件</el-menu-item>
-            <el-menu-item index="3-6">用户</el-menu-item>
-            <el-menu-item index="3-7">友情链接</el-menu-item>
+            <el-menu-item index="/backstage/pageList">页面</el-menu-item>
+            <el-menu-item index="/backstage/commentList">评论</el-menu-item>
+            <el-menu-item index="/backstage/categoryList">分类</el-menu-item>
+            <el-menu-item index="/backstage/fileList">文件</el-menu-item>
+            <el-menu-item index="/backstage/userList">用户</el-menu-item>
+            <el-menu-item index="/backstage/linkList">友情链接</el-menu-item>
           </el-submenu>
           <el-submenu index="4">
             <template #title>设置</template>

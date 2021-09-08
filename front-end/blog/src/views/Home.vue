@@ -38,13 +38,17 @@
 
         <div class="recordInfo">
           <p v-if="recordMIIT">
-            <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">
+            <a
+              href="https://beian.miit.gov.cn/#/Integrated/index"
+              target="_blank"
+            >
               {{ recordMIIT }}</a
             >
           </p>
           <p v-if="internetAlert">
             <a
-              href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=" target="_blank"
+              href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode="
+              target="_blank"
             >
               {{ internetAlert }}</a
             >
@@ -132,6 +136,29 @@
               :class="[isPageNone ? 'anti-rotation' : 'rotate']"
             ></i>
           </div>
+          <ul
+            class="secondary-warp"
+            :style="[isPageNone ? 'height:0;' : 'height:auto;']"
+          >
+            <li class="secondary-item">
+              <p>
+                <router-link to="/home/archiveArticles">归档文章</router-link>
+              </p>
+              <p><span> </span></p>
+            </li>
+            <li class="secondary-item">
+              <p>
+                <router-link to="/home/friendlyLink">友情链接</router-link>
+              </p>
+              <p><span> </span></p>
+            </li>
+             <li class="secondary-item">
+              <p>
+                <router-link to="/home/privacyPolicy">隐私政策</router-link>
+              </p>
+              <p><span> </span></p>
+            </li>
+          </ul>
         </li>
         <div class="summary">
           <p><i class="iconfont iconhuizong"></i>数据汇总</p>
@@ -410,9 +437,9 @@ export default defineComponent({
       methods,
     };
   },
-  created(){
-    sessionStorage.removeItem('store');
-  }
+  created() {
+    sessionStorage.removeItem("store");
+  },
 });
 </script>
 <style lang="scss">
@@ -663,6 +690,7 @@ export default defineComponent({
           padding: 16px 0 16px 32px;
           font-size: 16px;
           line-height: 1;
+          user-select: none;
         }
 
         i:nth-of-type(1) {
@@ -737,6 +765,11 @@ export default defineComponent({
               line-height: 1;
               text-align: left;
               flex-grow: 1;
+              user-select: none;
+              a {
+                min-height: unset;
+                padding: unset;
+              }
             }
 
             p:nth-child(2) {

@@ -68,6 +68,7 @@
           @next-click="methods.handleChangePage"
           @prev-click="methods.handleChangePage"
           @current-change="methods.handleChangePage"
+          :hide-on-single-page="hidePage"
           :page-size="condition.pageSize"
           :pager-count="11"
           layout="prev, pager, next"
@@ -103,6 +104,10 @@ export default defineComponent({
       // vue2.x的data参数
       aricleList: computed(() => store.state.foreground.articleLists),
       total: computed(() => store.state.foreground.totals),
+      hidePage: computed(() => {
+        if (store.state.foreground.articleLists > 7) return false;
+        return true;
+      }),
       condition: computed({
         get: () => {
           return store.state.foreground.condition;
@@ -138,7 +143,7 @@ export default defineComponent({
         state.condition.currPage = val;
         proxy.getAricleList(state.condition);
         scrollTo(0, 0); // 回到页面顶部
-      }
+      },
     };
     onBeforeMount(() => {
       // 挂载开始之前

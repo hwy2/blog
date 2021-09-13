@@ -175,35 +175,66 @@ module.exports = {
      */
     createArticle: function (req, res, next) {
         var params = req.body || req.params;
-        var title = utils.trim(params.title);
-        var photo = utils.trim(params.photo);
-        var content = utils.trim(params.content);
-        var state = utils.trim(params.state) || "0";
-        var abstract = utils.trim(params.abstract);
-        var ishot = utils.trim(params.ishot) || false;
-        var userUuid = utils.trim(params.userUuid);
+        var article = {
+            title: utils.trim(params.title),
+            photo: utils.trim(params.photo),
+            content: utils.trim(params.content),
+            state: parseInt(utils.trim(params.state)) || 0,
+            abstract: utils.trim(params.abstract),
+            ishot: utils.trim(params.ishot) || false,
+            template: parseInt(params.template),
+            pageOrder: parseInt(params.pageOrder),
+            userUuid: utils.trim(params.userUuid)
+        }
         var categoryUuids = utils.handleArray(params.categoryUuids);
-        console.log(categoryUuids)
-
-        if (!title || !content || !userUuid || !categoryUuids) {
+        console.log(article.state);
+        // 文章必须有作者
+        if (!article.userUuid) {
             utils.handleJson({
                 response: res,
-                msg: i18n.__("pleasePassParamsComplete")
+                msg: i18n.__("userUuidNotNull")
             });
 
             return;
         }
+        // 文章类型为页面时
+        if (article.state == 4) {
+            if (!article.template || article.template == 0) {
+                console.log(categoryUuids);
+                if (!article.title || !article.content || !article.abstract || !categoryUuids) {
+                    utils.handleJson({
+                        response: res,
+                        msg: i18n.__("pleasePassParamsComplete")
+                    });
+
+                    return;
+                }
+            } else {
+                if (!article.title || !article.template || !categoryUuids) {
+                    utils.handleJson({
+                        response: res,
+                        msg: i18n.__("pleasePassParamsComplete")
+                    });
+
+                    return;
+                }
+            }
+
+        }
+        // 文章类型为正常时
+        if (article.state == 1) {
+            if (!article.title || !article.content || !article.abstract || !categoryUuids) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__("pleasePassParamsComplete")
+                });
+
+                return;
+            }
+        }
 
         co(function* () {
-            var articleResult = yield Article.create({
-                title: title,
-                photo: photo,
-                content: content,
-                state: state,
-                abstract: abstract,
-                ishot: ishot,
-                userUuid: userUuid
-            });
+            var articleResult = yield Article.create(article);
             var categoryResult = yield Category.findAll({
                 where: {
                     uuid: categoryUuids
@@ -242,11 +273,10 @@ module.exports = {
      */
     updateArticle: function (req, res, next) {
         var params = req.query || req.params;
-
         var article = JSON.parse(params.article);
-
         var articleUuid = utils.trim(article.uuid);
         var categoryUuids = utils.handleArray(article.categoryUuids);
+        article.state = parseInt(article.state);
         if (!articleUuid || !categoryUuids) {
             utils.handleJson({
                 response: res,

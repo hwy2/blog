@@ -24,13 +24,21 @@ var Article = Mysql.define('article', {
         allowNull: false,
     },
     state: { //文章状态 （0已删除、1已发布、2草稿、3待审核、4页面）
-        type: Sequelize.STRING(2),
-        defaultValue: "1", //默认值
+        type: Sequelize.INTEGER,
+        defaultValue: 1, //默认值
     },
     abstract: Sequelize.STRING,
     pageview: { // 阅读次数
         type: Sequelize.INTEGER,
-        defaultValue:0
+        defaultValue: 0
+    },
+    template: {//自定义模板序号
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+    },
+    pageOrder: {//页面序号
+        type: Sequelize.INTEGER,
+        defaultValue: 0
     },
     ishot: { //是否热文
         type: Sequelize.BOOLEAN,

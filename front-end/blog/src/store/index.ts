@@ -14,7 +14,7 @@ export default createStore({
                     categoriesTotal: 0
                 },
                 activeIndex: "/backstage/outline",
-                categoryList:[]
+                categoryList: []
             },
             getters: {
                 getDataSummary(state) {
@@ -52,7 +52,8 @@ export default createStore({
                     pageSize: 7,
                     currPage: 1,
                     categoryTitle: "",
-                    articleVague: ''
+                    articleVague: '',
+                    state: "1"
                 },
                 search: {
                     categoryFlag: false,

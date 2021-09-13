@@ -17,15 +17,17 @@
             <el-form-item label="标题" prop="title">
               <el-input v-model="article.title"></el-input>
             </el-form-item>
-            <div class="md-editor">
-              <md-editor
-                v-model="content"
-                @onHtmlChanged="methods.saveHtml"
-                @onSave="methods.saveValue"
-                @onUploadImg="methods.uploadImg"
-                :preview="false"
-              />
-            </div>
+            <el-form-item prop="content">
+              <div class="md-editor">
+                <md-editor
+                  v-model="content"
+                  @onHtmlChanged="methods.saveHtml"
+                  @onSave="methods.saveValue"
+                  @onUploadImg="methods.uploadImg"
+                  :preview="false"
+                />
+              </div>
+            </el-form-item>
             <div class="bgWhite">
               <h3>其他字段</h3>
               <el-form-item label="文章摘要" prop="abstract">
@@ -60,15 +62,6 @@
             </el-form-item>
             <div class="clear"></div>
           </el-form>
-          <!-- <div class="md-editors">
-            <md-editor
-              v-model="content"
-              @onHtmlChanged="methods.saveHtml"
-              @onSave="methods.saveValue"
-              @onUploadImg="methods.uploadImg"
-              :preview="false"
-            />
-          </div> -->
         </div>
         <div class="content-right">
           <div class="title">分类</div>
@@ -114,7 +107,7 @@ export default defineComponent({
       // vue2.x的data参数
       content: "", // 富文本编辑框
       checkboxGroup: ["默认"],
-      saveStatus: false,
+      saveStatus: true,
       article: {
         title: "",
         content: "",
@@ -123,8 +116,16 @@ export default defineComponent({
         abstract: "",
         pageview: 0,
         ishot: false,
-        userUuid: "",
-        categoryUuids: "",
+        userUuid: computed(() => {
+          if (proxy.$Cookies.get("user")) {
+            const user = JSON.parse(proxy.$Cookies.get("user"));
+            return user.uuid;
+          }
+          return "";
+        }),
+        categoryUuids: computed(
+          () => store.state.backstage.categoryList[0].uuid
+        ),
       },
       rulesArticle: {
         title: [
@@ -138,7 +139,7 @@ export default defineComponent({
         content: [
           { required: true, message: "请输入文章内容", trigger: "blur" },
         ],
-        photo: [{ required: false, message: "请输入链接", trigger: "blur" }],
+        photo: [{ required: true, message: "请输入链接", trigger: "blur" }],
         abstract: [
           { required: true, message: "请输入摘要", trigger: "blur" },
           {
@@ -159,6 +160,39 @@ export default defineComponent({
       draft, // 草稿
       page, // 页面
     }
+    // .5s后再监听article对象的变化，
+    setTimeout(() => {
+      watch(
+        () => state.article,
+        (newValue: any, oldValue: any) => {
+          console.log(newValue);
+          console.log(oldValue);
+          state.saveStatus = false;
+        },
+        {
+          deep: true, // 深度监听的参数
+        }
+      );
+    }, 500);
+    watch(
+      () => state.saveStatus,
+      (newValue: any, oldValue: any) => {
+        console.log(newValue);
+        if (newValue) {
+          // 清除窗口事件
+          window.onbeforeunload = null;
+        } else {
+          // 添加刷新提示
+          window.onbeforeunload = (e) => {
+            e = e || window.event;
+            if (e) {
+              e.returnValue = "关闭提示";
+            }
+            return "关闭提示";
+          };
+        }
+      }
+    );
     watch(
       () => [...state.checkboxGroup],
       (newValue: any, oldValue: any) => {
@@ -231,37 +265,11 @@ export default defineComponent({
           }
 
           if (valid && state.article.content !== "") {
-            proxy.$axios
-              .post("/article/create", state.article)
-              .then((res: any) => {
-                console.log(res);
-                if (res.code === "200") {
-                  if (isdraft) {
-                    ElNotification({
-                      title: "成功",
-                      message: "保存成功",
-                      type: "success",
-                    });
-                  } else {
-                    ElNotification({
-                      title: "成功",
-                      message: "",
-                      type: "success",
-                    });
-                    // 跳转到文章列表页面
-                    router.push({ name: "articleList" });
-                  }
-                } else {
-                  ElNotification({
-                    title: "错误",
-                    message: res.msg,
-                    type: "error",
-                  });
-                }
-              })
-              .catch((err: any) => {
-                console.log(err);
-              });
+            if (router.currentRoute.value.params.uuid) {
+              methods.updateArticle(isdraft);
+            } else {
+              methods.createArticle(isdraft);
+            }
           } else {
             ElNotification({
               title: "错误",
@@ -271,6 +279,88 @@ export default defineComponent({
             return false;
           }
         });
+      },
+      createArticle(isdraft: boolean) {
+        proxy.$axios
+          .post("/article/create", state.article)
+          .then((res: any) => {
+            console.log(res);
+            if (res.code === "200") {
+              if (isdraft) {
+                ElNotification({
+                  title: "成功",
+                  message: "保存成功",
+                  type: "success",
+                });
+              } else {
+                ElNotification({
+                  title: "成功",
+                  message: "文章创建成功",
+                  type: "success",
+                });
+                state.saveStatus = true;
+                // 跳转到文章列表页面
+                setTimeout(() => {
+                  router.push({ name: "articleList" });
+                  store.commit(
+                    "backstage/setActiveIndex",
+                    "/backstage/articleList"
+                  );
+                }, 1000);
+              }
+            } else {
+              state.saveStatus = false;
+              ElNotification({
+                title: "错误",
+                message: res.msg,
+                type: "error",
+              });
+            }
+          })
+          .catch((err: any) => {
+            console.log(err);
+          });
+      },
+      updateArticle(isdraft: boolean) {
+        proxy.$axios
+          .put("/article/update", { article: state.article })
+          .then((res: any) => {
+            console.log(res);
+            if (res.code === "200") {
+              state.saveStatus = true;
+              if (isdraft) {
+                ElNotification({
+                  title: "成功",
+                  message: "保存成功",
+                  type: "success",
+                });
+              } else {
+                ElNotification({
+                  title: "成功",
+                  message: "文章修改成功",
+                  type: "success",
+                });
+                // 跳转到文章列表页面
+                setTimeout(() => {
+                  router.push({ name: "articleList" });
+                  store.commit(
+                    "backstage/setActiveIndex",
+                    "/backstage/articleList"
+                  );
+                }, 1000);
+              }
+            } else {
+              state.saveStatus = false;
+              ElNotification({
+                title: "错误",
+                message: res.msg,
+                type: "error",
+              });
+            }
+          })
+          .catch((err: any) => {
+            console.log(err);
+          });
       },
       /**
        * 获取文章内容
@@ -290,7 +380,29 @@ export default defineComponent({
               res.result.article.updateDate,
               "yyyy-MM-dd hh:mm:ss"
             );
-            state.article = res.result.article;
+            state.article = {
+              title: res.result.article.title,
+              content: res.result.article.content,
+              photo: res.result.article.photo,
+              state: res.result.article.state,
+              abstract: res.result.article.abstract,
+              pageview: res.result.article.pageview,
+              ishot: res.result.article.ishot,
+              userUuid: res.result.article.user.uuid,
+              categoryUuids: "",
+            };
+            (state.article as any).uuid = res.result.article.uuid;
+            const list: string[] = [];
+            const list2: string[] = [];
+            for (const item of res.result.article.categories) {
+              console.log(item);
+              list.push(item.uuid);
+              list2.push(item.title);
+            }
+            state.article.categoryUuids = list.join(",");
+            state.checkboxGroup = list2;
+
+            //  res.result.article;
             state.content = res.result.article.content;
             loading.close();
           })
@@ -306,27 +418,17 @@ export default defineComponent({
     });
     onMounted(() => {
       // 挂载之后
-      if (proxy.$Cookies.get("user")) {
-        const user = JSON.parse(proxy.$Cookies.get("user"));
-        state.article.userUuid = user.uuid;
-      } else {
+      if (!proxy.$Cookies.get("accessToken")) {
         router.push({ name: "login" });
       }
-      state.article.categoryUuids = state.categoryList[0].uuid;
-      window.onbeforeunload = (e) => {
-        e = e || window.event;
-        if (e) {
-          e.returnValue = "关闭提示";
-        }
-        return "关闭提示";
-      };
+
+      // 如果路由中携带有文章的uuid，默认认为是修改文章
       if (router.currentRoute.value.params.uuid) {
         const paramsUuid = router.currentRoute.value.params.uuid;
         methods.getArticleInfo(paramsUuid);
       }
     });
     // 单页面导航守卫
-
     onBeforeRouteLeave((to, from, next) => {
       if (!state.saveStatus) {
         const answer = window.confirm("你真的想离开吗? 您有未保存的更改!");

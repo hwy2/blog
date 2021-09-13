@@ -19,6 +19,7 @@
             </p>
             <p @click="methods.selectState($event, '待审核')">待审核</p>
             <p @click="methods.selectState($event, '草稿')">草稿</p>
+            <p @click="methods.selectState($event, '已删除')">已删除</p>
           </div>
           <div class="right"></div>
         </div>
@@ -35,20 +36,29 @@
             </el-table-column>
             <el-table-column label="标题" style="color: rgb(70, 123, 150)">
               <template #default="scope">
-                <span
-                  @click="methods.handleEdit(scope.$index, scope.row)"
-                  style="margin-left: 10px; user-select: none"
-                  >{{ scope.row.title }}</span
-                >
-                <span
-                  style="margin: 0 0 0 8px; color: #999"
-                  v-if="scope.row.state === '2'"
-                  >{{ scope.row.state === "2" ? "草稿" : "" }}</span
-                >
-                <i
-                  style="color: rgb(70, 123, 150); font-size: 0.5em"
-                  class="iconfont iconccgl-shujuzidianxiugaijilu-"
-                ></i>
+                <p @click="methods.handleEdit(scope.$index, scope.row)">
+                  <span
+                    style="
+                      user-select: none;
+                      color: rgb(70, 123, 150);
+                    "
+                    >{{ scope.row.title }}</span
+                  >&nbsp;
+                  <span
+                    style="margin: 0 0 0 8px; color: #999"
+                    v-if="scope.row.state === '2'"
+                    >{{ scope.row.state === "2" ? "草稿" : "" }}</span
+                  >
+                  <span
+                    style="margin: 0 0 0 8px; color: #999"
+                    v-if="scope.row.state === '0'"
+                    >{{ scope.row.state === "0" ? "已删除" : "" }}</span
+                  >
+                  <i
+                    style="color: rgb(70, 123, 150); font-size: 0.5em"
+                    class="iconfont iconccgl-shujuzidianxiugaijilu-"
+                  ></i>
+                </p>
               </template>
             </el-table-column>
             <el-table-column
@@ -62,18 +72,19 @@
             <el-table-column label="日期" prop="updateDate" width="150">
             </el-table-column>
             <el-table-column align="right" width="260">
-              <template #header style="display:flex;">
+              <template #header style="display: flex">
                 <el-input
                   title="根据标题搜索"
                   v-model="search"
                   size="mini"
                   placeholder="输入关键字搜索"
+                  style="width: 70%"
                 />
                 <el-select
                   size="mini"
                   v-model="categoryValue"
                   placeholder="请选择"
-                  style="width: 54%"
+                  style="width: 30%"
                 >
                   <el-option
                     v-for="item in categoryList"
@@ -86,11 +97,20 @@
               </template>
               <template #default="scope">
                 <el-button
+                  title="状态改为删除态"
                   size="mini"
                   type="danger"
-                  style="margin-left: auto"
+                  style="margin-left: auto; width: 22%"
                   @click="methods.handleDelete(scope.$index, scope.row)"
                   >删除</el-button
+                >
+                <el-button
+                  title="永久从数据库删除"
+                  size="mini"
+                  type="danger"
+                  style="width: 22%"
+                  @click="methods.handleForeverDelete(scope.$index, scope.row)"
+                  >永除</el-button
                 >
               </template>
             </el-table-column>
@@ -118,6 +138,23 @@
       </div>
     </div>
   </div>
+  <el-dialog
+    title="警告"
+    v-model="centerDialogVisible"
+    width="30%"
+    destroy-on-close
+    center
+  >
+    <span>你确定要删除吗？这将永远在数据库中删除该记录！</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="centerDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="methods.deleteArticle(article.uuid)"
+          >确 定</el-button
+        >
+      </span>
+    </template>
+  </el-dialog>
 </template>
 <script lang="ts">
 import {
@@ -144,7 +181,9 @@ export default defineComponent({
       tableData: computed(() => store.state.foreground.articleLists),
       search: "",
       multipleSelection: [],
-      categoryList: computed(() => store.state.backstage.categoryList),
+      centerDialogVisible: false,
+      categoryValue: "",
+      article: {},
       condition: {
         pageSize: 10,
         currPage: 1,
@@ -152,8 +191,8 @@ export default defineComponent({
         articleVague: "",
         state: "",
       },
+      categoryList: computed(() => store.state.backstage.categoryList),
       articleTotal: computed(() => store.state.foreground.totals),
-      categoryValue: "",
       hideDeletebtn: computed(() => {
         if (store.state.foreground.totals > 1) return true;
         return false;
@@ -183,7 +222,7 @@ export default defineComponent({
         });
       },
       /**
-       * 删除
+       * 删除（修改文章状态为删除）
        */
       handleDelete(index: number, row: any) {
         console.log(row);
@@ -223,6 +262,13 @@ export default defineComponent({
           });
       },
       /**
+       * 弹窗
+       */
+      handleForeverDelete(index: number, row: any) {
+        state.centerDialogVisible = true;
+        state.article = row;
+      },
+      /**
        * 批量删除
        */
       handleBatchDelete() {
@@ -251,18 +297,36 @@ export default defineComponent({
             event.target.nextElementSibling.nextElementSibling.classList.remove(
               "active"
             );
+            event.target.nextElementSibling.nextElementSibling.nextElementSibling.classList.remove(
+              "active"
+            );
             break;
           case "待审核":
             state.condition.state = "3";
             event.target.classList.add("active");
             event.target.previousElementSibling.classList.remove("active");
+            event.target.nextElementSibling.nextElementSibling.classList.remove(
+              "active"
+            );
             event.target.nextElementSibling.classList.remove("active");
             break;
           case "草稿":
             state.condition.state = "2";
             event.target.classList.add("active");
+            event.target.nextElementSibling.classList.remove("active");
             event.target.previousElementSibling.classList.remove("active");
             event.target.previousElementSibling.previousElementSibling.classList.remove(
+              "active"
+            );
+            break;
+          case "已删除":
+            state.condition.state = "0";
+            event.target.classList.add("active");
+            event.target.previousElementSibling.classList.remove("active");
+            event.target.previousElementSibling.previousElementSibling.classList.remove(
+              "active"
+            );
+            event.target.previousElementSibling.previousElementSibling.previousElementSibling.classList.remove(
               "active"
             );
             break;
@@ -278,6 +342,35 @@ export default defineComponent({
         state.condition.currPage = val;
         proxy.getAricleList(state.condition);
         scrollTo(0, 0); // 回到页面顶部
+      },
+      /**
+       * 永久删除文章
+       */
+      deleteArticle(uuid: string) {
+        proxy.$axios
+          .get("/article/del", { articleUuid: uuid })
+          .then((resp: any) => {
+            state.centerDialogVisible = false;
+            if (resp.code === "200") {
+              ElNotification({
+                title: "成功",
+                message: "删除成功",
+                type: "success",
+              });
+              state.article = {};
+              proxy.getAricleList(state.condition);
+            } else {
+              ElNotification({
+                title: "失败",
+                message: resp.msg,
+                type: "error",
+              });
+            }
+          })
+          .catch((error: any) => {
+            state.centerDialogVisible = false;
+            console.log(error);
+          });
       },
     };
     watch(
@@ -371,7 +464,6 @@ export default defineComponent({
             }
             i {
               font-size: 0.5em;
-              margin-left: 8px;
             }
           }
         }

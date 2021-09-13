@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Cookies from 'js-cookie'
 import { ElLoading } from 'element-plus';
-import pubfunt from '/@/public'
+import pubfunt from '/@/public';
+import store from '/@/store'
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
@@ -153,6 +154,7 @@ router.beforeEach((to, from, next) => {
             if (Cookies.get('accessToken')) {
                 loading.close();
                 next();
+                store.commit("backstage/setActiveIndex", to.path);
             } else {
                 loading.close();
                 next('/login')

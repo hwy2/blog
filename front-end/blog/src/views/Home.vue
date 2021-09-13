@@ -613,7 +613,6 @@ export default defineComponent({
 .el-drawer {
   transition: all 0.3s cubic-bezier(0, 0, 0.2, 1);
   background-color: rgb(248, 247, 247);
-
   .sidebar-header {
     height: 190px;
     background: url("/@/assets/images/sidebar.jpg") no-repeat center center;
@@ -674,6 +673,7 @@ export default defineComponent({
     height: 80vh;
     overflow: hidden;
     overflow-y: auto;
+    padding-bottom: 50%;
     ul {
       padding: 10px 0;
       a {

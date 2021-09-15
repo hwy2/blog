@@ -150,6 +150,7 @@ export default defineComponent({
     });
     onMounted(() => {
       // 挂载之后
+      state.condition.state = 1;
       proxy.getAricleList(state.condition);
       const category =
         router.currentRoute.value?.params?.category ||

@@ -110,7 +110,8 @@ export default defineComponent({
        * 导航栏选中index
        */
       handleSelect(key: string, keyPath: string) {
-        state.activeIndex = key;
+        // console.log(key, keyPath);
+        state.activeIndex=key;
       },
       /**
        * 获取类别列表
@@ -195,8 +196,8 @@ export default defineComponent({
     onMounted(() => {
       if (proxy.$Cookies.get("user")) {
         state.user = JSON.parse(proxy.$Cookies.get("user"));
-      }else{
-        router.push({name:'login'})
+      } else {
+        router.push({ name: "login" });
       }
       methods.getDataSummaryList();
       methods.getCategoryList();

@@ -167,6 +167,7 @@ export default defineComponent({
     onMounted(() => {
       state.condition.pageSize = 7;
       state.condition.currPage = 1;
+      state.condition.state = 1;
       state.condition.categoryTitle = "";
       proxy.getAricleList(state.condition, "MM-dd");
       methods.getCommentList();

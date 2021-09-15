@@ -17,7 +17,7 @@
             <el-form-item label="标题" prop="title">
               <el-input v-model="article.title"></el-input>
             </el-form-item>
-            <el-form-item prop="content">
+            <el-form-item prop="content" label="文章内容">
               <div class="md-editor">
                 <md-editor
                   v-model="content"
@@ -423,8 +423,8 @@ export default defineComponent({
       }
 
       // 如果路由中携带有文章的uuid，默认认为是修改文章
-      if (router.currentRoute.value.params.uuid) {
-        const paramsUuid = router.currentRoute.value.params.uuid;
+      if (router.currentRoute.value.query.uuid) {
+        const paramsUuid = router.currentRoute.value.query.uuid;
         methods.getArticleInfo(paramsUuid);
       }
     });

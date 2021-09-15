@@ -93,7 +93,7 @@ export default {
             axios({
                 method: 'put',
                 url,
-                params: data,
+                data,
             })
                 .then(res => {
                     resolve(res.data)

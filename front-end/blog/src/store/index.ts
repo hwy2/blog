@@ -48,19 +48,21 @@ export default createStore({
                 article: {},
                 articleLists: {},
                 totals: 0,
+                pageTtotals: 0,
+                dataSummary: {},
                 condition: {
                     pageSize: 7,
                     currPage: 1,
                     categoryTitle: "",
                     articleVague: '',
-                    state: "1"
+                    state: 1
                 },
                 search: {
                     categoryFlag: false,
                     searchFlag: false,
                     words: "",
                 },
-                dataSummary: {},
+                pageList: {}
             },
             getters: {
                 getToken(state) {
@@ -81,6 +83,9 @@ export default createStore({
                 getTotal(state) {
                     return state.totals
                 },
+                getPageTtotals(state) {
+                    return state.pageTtotals
+                },
                 getCondition(state) {
                     return state.condition
                 },
@@ -89,6 +94,9 @@ export default createStore({
                 },
                 getDataSummary(state) {
                     return state.dataSummary
+                },
+                getPageList(state) {
+                    return state.pageList
                 }
             },
             mutations: {
@@ -110,6 +118,9 @@ export default createStore({
                 setTotal(state, status) {
                     state.totals = status
                 },
+                setPageTtotals(state, status) {
+                    state.pageTtotals = status
+                },
                 setCondition(state, status) {
                     state.condition = status
                 },
@@ -118,6 +129,9 @@ export default createStore({
                 },
                 setDataSummary(state, status) {
                     state.dataSummary = status
+                },
+                setPageList(state, status) {
+                    state.pageList = status
                 }
             },
         }

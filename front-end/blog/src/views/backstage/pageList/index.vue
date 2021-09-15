@@ -14,13 +14,7 @@
       <div class="page-main">
         <div class="list">
           <el-table
-            :data="
-              tableData.filter(
-                (data) =>
-                  !search ||
-                  data.title.toLowerCase().includes(search.toLowerCase())
-              )
-            "
+            :data="tableData"
             style="width: 100%"
             @selection-change="methods.handleSelectionChange"
           >
@@ -33,7 +27,8 @@
                 <p @click="methods.handleEdit(scope.$index, scope.row)">
                   <span style="user-select: none; color: rgb(70, 123, 150)">{{
                     scope.row.title
-                  }}</span>&nbsp;
+                  }}</span
+                  >&nbsp;
 
                   <i
                     style="color: rgb(70, 123, 150); font-size: 0.5em"
@@ -81,7 +76,7 @@
             <el-pagination
               :hide-on-single-page="hidePage"
               layout="prev, pager, next"
-              :total="articleTotal"
+              :total="pageTtotals"
               @next-click="methods.handleChangePage"
               @prev-click="methods.handleChangePage"
               @current-change="methods.handleChangePage"
@@ -119,6 +114,7 @@ import {
   getCurrentInstance,
   computed,
   onBeforeMount,
+  watch,
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -133,7 +129,8 @@ export default defineComponent({
       search: "",
       centerDialogVisible: false, // 提示框
       article: {},
-      tableData: computed(() => store.state.foreground.articleLists),
+      pageTtotals: computed(() => store.state.foreground.pageTtotals),
+      tableData: computed(()=>store.state.foreground.pageList),
       multipleSelection: [],
       condition: {
         pageSize: 10,
@@ -143,14 +140,24 @@ export default defineComponent({
         state: 4,
       },
       hideDeletebtn: computed(() => {
-        if (store.state.foreground.totals > 1) return true;
+        if (store.state.foreground.pageTtotals > 1) return true;
         return false;
       }),
       hidePage: computed(() => {
-        if (store.state.foreground.totals > 10) return false;
+        if (store.state.foreground.pageTtotals > 10) return false;
         return true;
       }),
     });
+    watch(
+      () => state.search,
+      (newValue: any, oldValue: any) => {
+        state.tableData.filter(
+          (data: any) =>
+            !newValue ||
+            data.title.toLowerCase().includes(newValue.toLowerCase())
+        );
+      }
+    );
     const methods = {
       /**
        * 修改导航
@@ -166,7 +173,7 @@ export default defineComponent({
         methods.changeIndex("/backstage/createPage");
         router.push({
           name: "createPage",
-          params: { uuid: row.uuid },
+          query: { uuid: row.uuid },
         });
       },
       /**

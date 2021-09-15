@@ -45,15 +45,16 @@
                     >{{ scope.row.title }}</span
                   >&nbsp;
                   <span
-                    style="margin: 0 0 0 8px; color: #999"
-                    v-if="scope.row.state === '2'"
-                    >{{ scope.row.state === "2" ? "草稿" : "" }}</span
+                    style="user-select: none;  color: #999"
+                    v-if="scope.row.state === 2"
+                    >{{ scope.row.state === 2 ? "草稿" : "" }}</span
                   >
+                  &nbsp;
                   <span
-                    style="margin: 0 0 0 8px; color: #999"
-                    v-if="scope.row.state === '0'"
-                    >{{ scope.row.state === "0" ? "已删除" : "" }}</span
-                  >
+                    style="user-select: none; color: #999"
+                    v-if="scope.row.state === 0"
+                    >{{ scope.row.state === 0 ? "已删除" : "" }}</span
+                  > &nbsp;
                   <i
                     style="color: rgb(70, 123, 150); font-size: 0.5em"
                     class="iconfont iconccgl-shujuzidianxiugaijilu-"
@@ -218,7 +219,7 @@ export default defineComponent({
         methods.changeIndex("/backstage/writingArticles");
         router.push({
           name: "writingArticles",
-          params: { uuid: row.uuid },
+          query: { uuid: row.uuid },
         });
       },
       /**

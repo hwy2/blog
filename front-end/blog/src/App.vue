@@ -3,17 +3,27 @@
 </template>
 
 <script  lang='ts'>
-import { onMounted, onBeforeMount, getCurrentInstance } from "vue";
+import {
+  onMounted,
+  onBeforeMount,
+  getCurrentInstance,
+  reactive,
+  toRefs,
+  computed,
+} from "vue";
 import snowfall from "./assets/js/snowfall.min.js";
 import { useStore } from "vuex";
-import router from "./router/index.js";
+import { useRouter } from "vue-router";
 export default {
   name: "App",
   components: {},
   setup() {
     const { proxy }: any = getCurrentInstance();
     const store = useStore();
+    const router: any = useRouter();
     const methods = {};
+    const state = reactive({
+    });
     onBeforeMount(() => {
       // 修改网页title
       const title = document.title;
@@ -70,6 +80,10 @@ export default {
         //   flakeCount: 30,
         // });
       });
+    return {
+      ...toRefs(state),
+      methods,
+    };
   },
   created() {
     const store = useStore();

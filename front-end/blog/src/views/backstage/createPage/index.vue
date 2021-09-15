@@ -363,7 +363,7 @@ export default defineComponent({
         proxy.$axios
           .get("/article/info", { articleUuid: uuid })
           .then((res: any) => {
-            console.log(res);
+            console.log(res.result.article.content);
             document.title = "编辑" + res.result.article.title;
             res.result.article.createDate = dateFormat(
               res.result.article.createDate,
@@ -407,8 +407,8 @@ export default defineComponent({
       }
 
       // 如果路由中携带有文章的uuid，默认认为是修改文章
-      if (router.currentRoute.value.params.uuid) {
-        const paramsUuid = router.currentRoute.value.params.uuid;
+      if (router.currentRoute.value.query.uuid) {
+        const paramsUuid = router.currentRoute.value.query.uuid;
         methods.getArticleInfo(paramsUuid);
       }
     });

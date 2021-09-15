@@ -46,9 +46,9 @@ const routes: RouteRecordRaw[] = [
                         component: () => import('/@/views/foreground/friendlyLink/index.vue'),
                     },
                     {
-                        path: '/home/privacyPolicy',
-                        name: 'privacyPolicy',
-                        component: () => import('/@/views/foreground/privacyPolicy/index.vue'),
+                        path: '/home/normalPage/:uuid',
+                        name: 'normalPage',
+                        component: () => import('/@/views/foreground/normalPage/index.vue'),
                     },
                 ]
             },
@@ -154,6 +154,7 @@ router.beforeEach((to, from, next) => {
             if (Cookies.get('accessToken')) {
                 loading.close();
                 next();
+                console.log(to.path);
                 store.commit("backstage/setActiveIndex", to.path);
             } else {
                 loading.close();

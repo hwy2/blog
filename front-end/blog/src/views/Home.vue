@@ -22,7 +22,7 @@
     </el-affix>
     <transition name="slide-fade">
       <el-main>
-        <router-view></router-view>
+        <router-view v-if="isRouterAlive"></router-view>
       </el-main>
     </transition>
     <el-footer height="">
@@ -84,7 +84,9 @@
     <div class="sidebar-toolbar">
       <ul>
         <a
-          href="/"
+          href="javascript:void(0)"
+          @click="methods.home()"
+          F
           :class="isCategoryNone ? 'collapse-item-none' : 'collapse-item-block'"
         >
           <div class="ripple">
@@ -140,24 +142,29 @@
             class="secondary-warp"
             :style="[isPageNone ? 'height:0;' : 'height:auto;']"
           >
-            <li class="secondary-item">
+            <li
+              class="secondary-item"
+              v-for="(item, index) in pageList"
+              :key="index"
+              @click="drawer = false"
+            >
               <p>
-                <router-link to="/home/archiveArticles">归档文章</router-link>
+                <router-link :to="item.to">{{ item.title }}</router-link>
               </p>
               <p><span> </span></p>
             </li>
-            <li class="secondary-item">
+            <!-- <li class="secondary-item">
               <p>
                 <router-link to="/home/friendlyLink">友情链接</router-link>
               </p>
               <p><span> </span></p>
             </li>
-             <li class="secondary-item">
+            <li class="secondary-item">
               <p>
                 <router-link to="/home/privacyPolicy">隐私政策</router-link>
               </p>
               <p><span> </span></p>
-            </li>
+            </li> -->
           </ul>
         </li>
         <div class="summary">
@@ -218,6 +225,7 @@ import {
   getCurrentInstance,
   computed,
   onBeforeMount,
+  nextTick,
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -253,6 +261,8 @@ export default defineComponent({
       isScroll: false,
       searchDialogVisible: false,
       loading: true,
+      isRouterAlive: true,
+      pageList: computed(() => store.state.foreground.pageList),
       condition: computed({
         get: () => {
           return store.state.foreground.condition;
@@ -327,6 +337,10 @@ export default defineComponent({
               return item.name === "categoriesTotal";
             })[0].value; // 分类总数
 
+            state.pagesTotal = res.result.list.filter((item: any) => {
+              return item.name === "pagesTotal";
+            })[0].value; // 页面总数
+
             state.categoryList = res.result.list.filter((item: any) => {
               return item.type === 1;
             });
@@ -380,6 +394,7 @@ export default defineComponent({
         state.condition.pageSize = 7;
         state.condition.categoryTitle = categoryTitle;
         state.condition.articleVague = ""; // 不联合搜索
+        state.condition.state = 1;
         proxy.getAricleList(state.condition);
         state.search.words = categoryTitle;
         state.search.categoryFlag = true;
@@ -394,6 +409,7 @@ export default defineComponent({
       /** 监听搜索框回车事件 */
       listenSearch() {
         // 只模糊搜索文章内容
+        state.condition.state = 1;
         state.condition.categoryTitle = "";
         proxy.getAricleList(state.condition);
         state.search.words = state.condition.articleVague;
@@ -408,13 +424,24 @@ export default defineComponent({
       login() {
         router.push("/login");
       },
+      async reload() {
+        state.isRouterAlive = false;
+        await nextTick(() => {
+          state.isRouterAlive = true;
+        });
+      },
       /** 搜索项恢复默认值并跳转到首页 */
       home() {
         state.condition.currPage = 1;
         state.condition.pageSize = 7;
         state.condition.articleVague = "";
         state.condition.categoryTitle = "";
-        window.location.href = "/";
+        state.condition.state = 1;
+        if (router.currentRoute.value.path === "/home/index") {
+          methods.reload();
+          return;
+        }
+        router.push('/home/index')
       },
     };
     onBeforeMount(() => {
@@ -430,6 +457,10 @@ export default defineComponent({
       state.search.words = "";
       state.search.searchFlag = false;
       state.loading = false;
+      setTimeout(() => {
+        state.condition.state = 4;
+        proxy.getAricleList(state.condition);
+      }, 1000);
     });
 
     return {
@@ -518,7 +549,7 @@ export default defineComponent({
 }
 .el-main {
   padding: 20px 0;
-  min-height: 74.8vh;
+  min-height: 73.9vh;
 }
 .el-affix {
   width: 100%;
@@ -760,7 +791,7 @@ export default defineComponent({
 
             p:nth-child(1) {
               display: inline-block;
-              padding: 16px 0;
+
               font-size: 16px;
               line-height: 1;
               text-align: left;
@@ -769,6 +800,7 @@ export default defineComponent({
               a {
                 min-height: unset;
                 padding: unset;
+                padding: 16px 0;
               }
             }
 

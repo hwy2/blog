@@ -12,7 +12,6 @@
     "doFail": "do fail",
     "tokenUpdate": "token Update",
     "pleasePassUuid": "please pass uuid",
-    "userInfoNull": "user info null",
     "updateUserInfoFail": "update user info fail",
     "updateUserInfoSuccess": "update user info success",
     "pleasePassParamsComplete": "please pass params complete",
@@ -32,5 +31,6 @@
     "categoryAlreadyExists": "category already exists",
     "updateArticleFail":"update article fail",
     "creationFailed":"creation failed",
-    "siteName&&siteAddress": "siteName&&siteAddress not null"
+    "siteName&&siteAddress": "siteName&&siteAddress not null",
+    "noInformationFound": "no information found"
 }

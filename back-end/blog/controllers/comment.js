@@ -17,18 +17,18 @@ module.exports = {
     createComment: function (req, res, next) {
         let _this = this;
         var params = req.body || req.params;
-        var nickName = utils.trim(params.nickName);
-        var ip = utils.trim(params.ip);
-        var agent = utils.trim(params.agent);
-        var email = utils.trim(params.email);
-        var comments = utils.trim(params.comments);
-        var articleUuid = utils.trim(params.articleUuid);
-        var faceUrl = utils.getGravatarURL(email);
-        var link = utils.trim(params.link);
-        if (!nickName || !email || !comments) {
-            console.log("nickName", nickName);
-            console.log("email", email);
-            console.log("comments", comments);
+        var comment = {
+            nickName: utils.trim(params.nickName),
+            ip: utils.trim(params.ip),
+            agent: utils.trim(params.agent),
+            email: utils.trim(params.email),
+            comments: utils.trim(params.comments),
+            articleUuid: utils.trim(params.articleUuid),
+            faceUrl: utils.getGravatarURL(email),
+            link: utils.trim(params.link),
+        }
+
+        if (!comment.nickName || !comment.email || !comment.comments) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__("pleasePassParamsComplete")
@@ -38,16 +38,7 @@ module.exports = {
         }
 
         co(function* () {
-            var commentResult = yield Comment.create({
-                nickName: nickName,
-                ip: ip,
-                agent: agent,
-                email: email,
-                comments: comments,
-                articleUuid: articleUuid,
-                faceUrl: faceUrl,
-                link: link
-            });
+            var commentResult = yield Comment.create(comment);
 
             if (!commentResult) {
                 utils.handleJson({
@@ -134,7 +125,7 @@ module.exports = {
      */
     updateComment: function (req, res, next) {
         var params = req.body || req.params;
-        var comment = utils.handleArray(params.comment);
+        var comment = utils.trim(params.comment);
         var checkFlag = utils.validateMandatory(comment);
         if (!checkFlag) {
             utils.handleJson({
@@ -147,6 +138,18 @@ module.exports = {
         var commentUuid = utils.trim(comment.uuid);
 
         co(function* () {
+            var commentFindOne = yield Comment.findOne({
+                where: {
+                    uuid: commentUuid
+                }
+            });
+            if (!commentFindOne) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('noInformationFound')
+                });
+                return;
+            }
             var commentResult = yield Comment.update(comment, {
                 where: {
                     uuid: commentUuid
@@ -181,8 +184,8 @@ module.exports = {
      */
     deleteComment: function (req, res, next) {
         var params = req.query || req.params;
-        var comment = utils.trim(params.commentUuid);
-        if (!comment) {
+        var commentUuid = utils.trim(params.commentUuid);
+        if (!commentUuid) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__("pleasePassUuid")
@@ -191,6 +194,18 @@ module.exports = {
         }
 
         co(function* () {
+            var commentFindOne = yield Comment.findOne({
+                where: {
+                    uuid: commentUuid
+                }
+            });
+            if (!commentFindOne) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('noInformationFound')
+                });
+                return;
+            }
             var commentResult = yield Comment.destroy({
                 where: {
                     uuid: commentUuid
@@ -291,10 +306,10 @@ module.exports = {
     /**
      * 发送新评论邮件
      */
-    getEmailInformation:async function (commen, articleUuid, req, res, next) {
+    getEmailInformation: async function (commen, articleUuid, req, res, next) {
 
-         var webConfigResult = await WebConfig.findOne({});
-         var webConfig = webConfigResult.dataValues;
+        var webConfigResult = await WebConfig.findOne({});
+        var webConfig = webConfigResult.dataValues;
         var object = ` <div id="contentDiv" onmouseover="getTop().stopPropagation(event);"
         onclick="getTop().preSwapLink(event, 'html', 'ZC2010-kTkPZlCCgcLTTSBBibaHRb8');"
         style="position:relative;font-size:14px;height:auto;padding:15px 15px 10px 15px;z-index:1;zoom:1;line-height:1.7;"

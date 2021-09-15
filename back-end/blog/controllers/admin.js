@@ -96,9 +96,9 @@ module.exports = {
      * }
      */
     updateAccessToken: function (req, res, next) {
-        var params = req.query || req.params;
-        var token = params.token;
-        var userUuid = params.userUuid;
+        var params = req.body || req.params;
+        var token = utils.trim(params.token);
+        var userUuid = utils.trim(params.userUuid);
 
         if (!token || !userUuid) {
             utils.handleJson({

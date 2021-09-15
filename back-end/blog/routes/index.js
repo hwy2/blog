@@ -13,7 +13,8 @@ module.exports = function (app) {
   app.use('/article', require('./article'));
   app.use('/webConfig', require('./webConfig'));
   app.use('/comment', require('./comment'));
-  app.use('/dataSummary',require('./dataSummary'))
+  app.use('/dataSummary', require('./dataSummary'));
+  app.use('/links', require('./links'));
   // app.use('/', function (req, res, next) {
   //   res.send('respond with a resource');
   // });

@@ -115,7 +115,8 @@ module.exports = {
                     where: categoryCondition
                 }],
                 where: condition
-            })
+            });
+            
             // 由于findAndCountAll计数器的不正确性，所以需要先查询所有的条数再分页
             var articleResult = yield Article.findAll({
                 include: [{
@@ -272,8 +273,8 @@ module.exports = {
      * 
      */
     updateArticle: function (req, res, next) {
-        var params = req.query || req.params;
-        var article = JSON.parse(params.article);
+        var params = req.body || req.params;
+        var article = utils.trim(params.article);
         var articleUuid = utils.trim(article.uuid);
         var categoryUuids = utils.handleArray(article.categoryUuids);
         article.state = parseInt(article.state);

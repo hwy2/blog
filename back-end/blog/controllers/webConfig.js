@@ -7,14 +7,17 @@ module.exports = {
     // 创建webConfig配置文件
     createWebConfig: function (req, res, next) {
         var params = req.body || req.params;
-        var siteName = utils.trim(params.siteName);
-        var siteAddress = utils.trim(params.siteAddress);
-        var siteDescription = utils.trim(params.siteDescription);
-        var keyWord = utils.trim(params.keyWord);
-        var recordNumber = utils.trim(params.recordNumber);
-        var internetAlert = utils.trim(params.internetAlert);
+        var webConfig = {
+            siteName: utils.trim(params.siteName),
+            siteAddress: utils.trim(params.siteAddress),
+            siteDescription: utils.trim(params.siteDescription),
+            keyWord: utils.trim(params.keyWord),
+            recordNumber: utils.trim(params.recordNumber),
+            internetAlert: utils.trim(params.internetAlert),
+        };
 
-        if (!siteName || !siteAddress) {
+
+        if (!webConfig.siteName || !webConfig.siteAddress) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('siteName&&siteAddress')
@@ -24,14 +27,7 @@ module.exports = {
         }
 
         co(function* () {
-            var webConfigResult = yield WebConfig.create({
-                siteName: siteName,
-                siteAddress: siteAddress,
-                siteDescription: siteDescription,
-                keyWord: keyWord,
-                recordNumber: recordNumber,
-                internetAlert: internetAlert
-            });
+            var webConfigResult = yield WebConfig.create(webConfig);
 
             if (!webConfigResult) {
                 utils.handleJson({
@@ -41,12 +37,12 @@ module.exports = {
                 return;
             }
 
-            var webConfig = webConfigResult.dataValues;
+            var webConfigOne = webConfigResult.dataValues;
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
                 result: {
-                    webConfig: webConfig
+                    webConfig: webConfigOne
                 }
             })
 
@@ -88,8 +84,8 @@ module.exports = {
     },
     // 更新webConfig配置文件
     updateWebConfig: function (req, res, next) {
-        var params = req.query || req.params;
-        var webConfig = JSON.parse(params.webConfig);
+        var params = req.body || req.params;
+        var webConfig = utils.trim(params.webConfig);
         console.log(webConfig);
         var webConfigUuid = utils.trim(webConfig.uuid);
         if (!webConfigUuid) {

@@ -13,6 +13,7 @@ var Article = require('./article'); //文章表
 var Comment = require('./comment'); //评论表
 var Category = require('./category'); //文章类别表
 var ArticleCategory = require('./articleCategory'); //文章类别中间表
+var Links = require('./links'); //数据汇总表
 var Attachment = require('./attachment'); //附件表
 var WebConfig = require('./webConfig'); //网站配置表
 var DataSummary = require('./dataSummary'); //数据汇总表
@@ -21,7 +22,6 @@ var DataSummary = require('./dataSummary'); //数据汇总表
  */
 //用户-用户资料
 User.hasOne(UserInfo); //1:1
-
 
 //用户-文章
 User.hasMany(Article); //1:N
@@ -68,7 +68,7 @@ if (config.isFirstTimeInstall) {
         force: true, //是否清空数据库表
     }).then(async function () {
         console.log('创建数据表 ok！');
-        Initialization.init(User, UserInfo, Category, WebConfig, DataSummary, Article, ArticleCategory, Comment);
+        Initialization.init(User, UserInfo, Category, WebConfig, DataSummary, Article, ArticleCategory, Comment, Links);
     }).catch(function (error) {
         console.log("error", error)
     });
@@ -84,5 +84,6 @@ module.exports = {
     Category: Category,
     ArticleCategory: ArticleCategory,
     WebConfig: WebConfig,
-    DataSummary: DataSummary
+    DataSummary: DataSummary,
+    Links: Links,
 };

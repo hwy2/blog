@@ -10,14 +10,17 @@ module.exports = {
 
     createUserInfo: function (req, res, next) {
         var params = req.body || req.params;
-        var userUuid = utils.trim(params.userUuid);
-        var nickName = utils.trim(params.nickName);
-        var birth = utils.trim(params.birth);
-        var sex = utils.trim(params.sex);
-        var face = utils.trim(params.face);
-        var city = utils.trim(params.city);
-        var address = utils.trim(params.address);
-        if (!userUuid) {
+        var userInfo = {
+            userUuid: utils.trim(params.userUuid),
+            nickName: utils.trim(params.nickName),
+            birth: utils.trim(params.birth),
+            sex: utils.trim(params.sex),
+            face: utils.trim(params.face),
+            city: utils.trim(params.city),
+            address: utils.trim(params.address),
+        }
+
+        if (!userInfo.userUuid) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('userUuidNotNull')
@@ -28,7 +31,7 @@ module.exports = {
         co(function* () {
             var userInfoResult = yield UserInfo.findOne({
                 where: {
-                    userUuid: userUuid
+                    userUuid: userInfo.userUuid
                 }
             });
             console.log("userInfoResult", userInfoResult);
@@ -42,15 +45,7 @@ module.exports = {
             }
 
             // 不存在则创建
-            userInfoResult = yield UserInfo.create({
-                userUuid: userUuid,
-                nickName: nickName,
-                birth: birth,
-                sex: sex,
-                face: face,
-                city: city,
-                address: address
-            });
+            userInfoResult = yield UserInfo.create(userInfo);
 
             if (!userInfoResult) {
                 utils.handleJson({
@@ -61,13 +56,13 @@ module.exports = {
                 return;
             }
 
-            var userInfo = userInfoResult.dataValues;
+            var userInfoOne = userInfoResult.dataValues;
 
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
                 result: {
-                    userInfo: userInfo
+                    userInfo: userInfoOne
                 }
             })
 
@@ -131,8 +126,8 @@ module.exports = {
      * 更新用户信息
      */
     updateUserInfo: function (req, res, next) {
-        var params = req.query || req.params;
-        var userInfo = JSON.parse(params.userInfo);
+        var params = req.body || req.params;
+        var userInfo = utils.trim(params.userInfo);
         var userInfoUuid = utils.trim(userInfo.uuid);
         if (!userInfoUuid) {
             utils.handleJson({
@@ -149,7 +144,7 @@ module.exports = {
                     uuid: userInfoUuid
                 }
             });
-            console.log( userInfoResult);
+            console.log(userInfoResult);
             if (!userInfoResult) {
                 utils.handleJson({
                     response: res,

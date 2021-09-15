@@ -254,9 +254,9 @@ module.exports = {
      * put
      */
     updateAccessToken: function (req, res, next, isAdmin) {
-        var params = req.query || req.params;
-        var userUuid = params.userUuid;
-        var token = params.token;
+        var params = req.body || req.params;
+        var userUuid = utils.trim(params.userUuid);
+        var token = utils.trim(params.token);
         console.log(userUuid, token)
         if (!userUuid || !token) {
             //fail
@@ -425,7 +425,7 @@ module.exports = {
             } else {
                 utils.handleJson({
                     response: res,
-                    msg: i18n.__('userInfoNull')
+                    msg: i18n.__('userInfoNotExist')
                 })
             }
 
@@ -484,7 +484,7 @@ module.exports = {
      * 修改密码 put
      */
     updateUserPwd: function (req, res, next) {
-        var params = req.query || req.params;
+        var params = req.body || req.params;
         // 检查数据
         var checkFlag = utils.validateMandatory(params);
         if (!checkFlag) {
@@ -560,7 +560,6 @@ module.exports = {
     /**
      * 删除
      */
-
     deleteUser: function (req, res, next) {
         var params = req.query || req.params;
         var userUuid = utils.trim(params.userUuid);

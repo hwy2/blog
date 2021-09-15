@@ -15,7 +15,7 @@ module.exports = {
      */
     categoryInfo: function (req, res, next) {
         var params = req.query || req.params;
-        var categoryUuid = params.categoryUuid;
+        var categoryUuid = utils.trim(params.categoryUuid);
         if (!categoryUuid) {
             utils.handleJson({
                 response: res,
@@ -184,7 +184,7 @@ module.exports = {
      */
     categoryUpdate: function (req, res, next) {
         var params = req.body || req.params;
-        var category = params.category;
+        var category = utils.trim(params.category);
         var categoryUuid = utils.trim(category.uuid);
         if (!categoryUuid) {
             utils.handleJson({

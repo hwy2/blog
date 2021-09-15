@@ -5,6 +5,8 @@ var DataSummary = require('../models/index').DataSummary; //数据汇总表
 var Article = require('../models/index').Article; //文章
 var Category = require('../models/index').Category; //类别
 var Comment = require('../models/index').Comment; //类别
+var Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 module.exports = {
     getDataSummaryList: function (req, res, next) {
 
@@ -54,13 +56,41 @@ module.exports = {
     },
     summaryAricle: function (req, res, next) {
         co(function* () {
-            var articleResult = yield Article.findAndCountAll({});
+            var articleResult = yield Article.findAndCountAll({
+                where: {
+                    state: {
+                        [Op.or]: [1, 2],
+                    }
+                }
+            });
             var articlesTotal = articleResult.count;
             yield DataSummary.update({
                 value: articlesTotal
             }, {
                 where: {
                     name: "articlesTotal"
+                }
+            });
+        }).catch(function (error) {
+            utils.handleJson({
+                response: res,
+                error: error
+            })
+        })
+    },
+    summaryPage: function (req, res, next) {
+        co(function* () {
+            var articleResult = yield Article.findAndCountAll({
+                where: {
+                    state: 4
+                }
+            });
+            var pagesTotal = articleResult.count;
+            yield DataSummary.update({
+                value: pagesTotal
+            }, {
+                where: {
+                    name: "pagesTotal"
                 }
             });
         }).catch(function (error) {
@@ -125,7 +155,14 @@ module.exports = {
 
                 for (let i = 0; i < categoryCount.length; i++) {
                     let result = yield Category.findAll({
-                        include: Article,
+                        include: {
+                            model: Article,
+                            where: {
+                                state: {
+                                    [Op.or]: [1, 2],
+                                }
+                            }
+                        },
                         where: {
                             title: categoryCount[i].dataValues.title
                         }
@@ -149,15 +186,20 @@ module.exports = {
         })
     },
     updateDataSummaryCategory: function (req, res, next) {
-        co(function*(){
+        co(function* () {
             var categoryList = yield Category.findAll({
-                attributes: ['title' ]
+                attributes: ['title']
             });
 
             for (let i = 0; i < categoryList.length; i++) {
                 let result = yield Category.findAll({
                     include: {
                         model: Article,
+                        where: {
+                            state: {
+                                [Op.or]: [1, 2],
+                            }
+                        },
                         attributes: ['title']
                     },
                     where: {
@@ -166,17 +208,17 @@ module.exports = {
                 });
                 yield DataSummary.update({
                     value: result[0].dataValues.articles.length
-                },{
-                    where:{
+                }, {
+                    where: {
                         name: result[0].dataValues.title
                     }
                 });
             }
 
-        }).catch(function(error){
+        }).catch(function (error) {
             utils.handleError({
-                response:res,
-                error:error
+                response: res,
+                error: error
             })
         })
     },
@@ -186,5 +228,6 @@ module.exports = {
         this.summaryComment(req, res, next);
         this.createDataSummaryCategory(req, res, next);
         this.updateDataSummaryCategory(req, res, next);
+        this.summaryPage(req, res, next);
     }
 }

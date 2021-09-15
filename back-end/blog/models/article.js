@@ -32,7 +32,7 @@ var Article = Mysql.define('article', {
         type: Sequelize.INTEGER,
         defaultValue: 0
     },
-    template: {//自定义模板序号
+    template: {//自定义模板序号 0普通页面，1归档页面，2友链页面
         type: Sequelize.INTEGER,
         defaultValue: 0
     },

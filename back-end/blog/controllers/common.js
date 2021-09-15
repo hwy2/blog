@@ -13,7 +13,6 @@ module.exports = {
      */
     uploadEnclosure: function (req, res, next) {
         var files = req.files;
-        console.log("files", files);
         if (!files || !files.length) {
             //err
             utils.handleError({

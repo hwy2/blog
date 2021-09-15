@@ -12,7 +12,6 @@
 	"doFail": "失败",
 	"tokenUpdate": "token 更新",
 	"pleasePassUuid": "请传递uuid",
-	"userInfoNull": "用户信息为空",
 	"updateUserInfoFail": "更新用户信息失败",
 	"updateUserInfoSuccess": "更新用户信息成功",
 	"pleasePassParamsComplete": "请传递完整参数",
@@ -33,5 +32,6 @@
 	"articleNotExist":"文章不存在",
 	"updateArticleFail":"更新文章内容失败",
 	"creationFailed":"创建失败",
-	"siteName&&siteAddress":"网站名称或网站地址不能为空"
+	"siteName&&siteAddress":"网站名称或网站地址不能为空",
+	"noInformationFound":"查无信息"
 }

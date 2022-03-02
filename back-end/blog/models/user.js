@@ -12,6 +12,11 @@ var User = Mysql.define('user', {
         primaryKey: true, //主键
         defaultValue: Sequelize.UUIDV1, //默认值
     }, //uuid
+    name:{
+        type:Sequelize.STRING,
+        allowNull:false,
+        defaultValue:'admin',
+    },
     email: { //邮箱
         type: Sequelize.STRING,
         allowNull: false,

@@ -15,7 +15,7 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
 export default defineComponent({
-  name: "outline",
+  name: "commentList",
   setup: () => {
     const store = useStore();
     const router = useRouter();

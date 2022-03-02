@@ -6,6 +6,8 @@ var utils = require('../libs/utils'); //工具类
 var User = require('../models/index').User; //用户
 var tokenService = require('../services/token'); //token服务
 const UserInfo = require('../models/index').UserInfo;
+var Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 module.exports = {
 
@@ -66,10 +68,24 @@ module.exports = {
      */
     reg: function (req, res, next) {
         var params = req.body || req.query || req.params;
-        var email = utils.trim(params.email);
-        var password = utils.trim(params.password);
-
-        if (!email || !password) {
+        var userDao = {
+            name: params.name,
+            email: params.email,
+            role: params.role || "2",
+            password: md5(params.password),
+            state: params.state || '0',
+        }
+        const userInfo = {
+            nickName: utils.trim(params.nickName),
+            birth: utils.trim(params.birth),
+            sex: utils.trim(params.sex),
+            face: utils.trim(params.face),
+            city: utils.trim(params.city),
+            address: utils.trim(params.address),
+            userUuid: ''
+        }
+        const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+        if (!userDao.email || !userDao.password || !reg.test(userDao.email) || !userInfo.nickName || !userInfo.face) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('emailOrPwdNull')
@@ -78,9 +94,10 @@ module.exports = {
         }
 
         co(function* () {
+
             var userResult = yield User.findOne({
                 where: {
-                    email: email
+                    email: userDao.email
                 }
             });
 
@@ -94,12 +111,7 @@ module.exports = {
                 return;
             }
 
-            userResult = yield User.create({
-                email: email,
-                password: md5(password),
-                state: "1" //先默认已激活状态 //状态 0未激活邮箱、1已激活邮箱
-            });
-
+            userResult = yield User.create(userDao);
 
             if (!userResult) { //注册失败
                 utils.handleJson({
@@ -115,6 +127,16 @@ module.exports = {
             //删除密码
             delete user.password;
 
+            userInfo.userUuid = user.uuid;
+            var userInfoResult = yield UserInfo.create(userInfo)
+            if (!userInfoResult) { //注册失败
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('regFail')
+                })
+                return;
+            }
+            user.userInfo = userInfoResult;
             utils.handleJson({
                 response: res,
                 msg: i18n.__('regSuccess'),
@@ -312,19 +334,19 @@ module.exports = {
     getUserList: function (req, res, next) {
         var params = req.query || req.params;
         var email = utils.trim(params.email);
-        var nickName = utils.trim(params.nickName);
+        var name = utils.trim(params.name);
         var role = utils.trim(params.role);
         var condition = {};
 
         if (email) {
             condition.email = {
-                '$like': '%' + email + '%'
+                [Op.like]: '%' + email + '%'
             }
         }
 
-        if (nickName) {
-            condition.nickName = {
-                '$like': '%' + nickName + '%'
+        if (name) {
+            condition.name = {
+                [Op.like]: '%' + name + '%'
             }
         }
 
@@ -346,6 +368,7 @@ module.exports = {
                 attributes: {
                     exclude: ['password']
                 },
+                include: UserInfo,
                 limit: page.pageSize, //每页多少条
                 offset: page.pageSize * (page.currPage - 1), //偏移量
                 order: [ //排序
@@ -442,8 +465,11 @@ module.exports = {
      */
     updateUserInfo: function (req, res, next) {
         var params = req.body || req.params;
-        var user = params.user;
+        var user = utils.trim(params.user);
+        var userInfo = utils.trim(params.userInfo);
         var userUuid = utils.trim(user.uuid);
+        var userInfoUuid = utils.trim(userInfo.uuid);
+
         if (!userUuid) {
             utils.handleJson({
                 response: res,
@@ -452,6 +478,7 @@ module.exports = {
             return;
         }
         co(function* () {
+            var userInfoResults = '';
             var userResult = yield User.update(user, {
                 where: {
                     uuid: userUuid
@@ -466,6 +493,18 @@ module.exports = {
 
                 return;
             }
+
+            if (userInfoUuid && userInfo.nickName) {
+                yield UserInfo.update(userInfo, {
+                    where: {
+                        uuid: userInfoUuid
+                    }
+                })
+            } else if (!userInfoUuid && userInfo.nickName) {
+                userInfo.userUuid = userUuid;
+                userInfoResults = yield UserInfo.create(userInfo);
+            } else {}
+            
             utils.handleJson({
                 response: res,
                 msg: i18n.__('updateUserInfoSuccess'),
@@ -574,6 +613,15 @@ module.exports = {
 
         co(function* () {
             // 删除
+            var oneUser = yield User.findAndCountAll();
+            if (oneUser.count < 2) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('notDeleteLastAccount')
+                });
+
+                return;
+            }
             var userResult = yield User.findOne({
                 where: {
                     uuid: userUuid

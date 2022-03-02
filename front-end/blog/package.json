@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^1.2.4",
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "element-plus": "^1.0.2-beta.54",
     "js-cookie": "^3.0.0",
     "marked": "^3.0.2",

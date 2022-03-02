@@ -15,7 +15,7 @@ export default {
         const loading = ElLoading.service({ fullscreen: true });
         axios.get("/article/list", data)
             .then((res: any) => {
-                console.log(res);
+                // console.log(res);
                 for (const item of res?.result?.list) {
                     item.createDate = dateFormat(item.createDate, format);
                     item.updateDate = dateFormat(item.updateDate, format);
@@ -25,7 +25,6 @@ export default {
                     }
                     item.category = category.join(',')
                 }
-                console.log('jin');
                 if (data.state === 4) {
                     // 有序号的页面
                     const orderly = res.result.list.filter((item: any) => {
@@ -131,7 +130,7 @@ export default {
             token: accessToken
         })
             .then((res: any) => {
-                console.log(res);
+                // console.log(res);
                 Cookies.set("accessToken", res.result.accessToken.token, {
                     expires: new Date(res.result.accessToken.expiresIn),
                 });

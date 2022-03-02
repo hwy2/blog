@@ -100,7 +100,7 @@ import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { ElNotification, ElLoading } from "element-plus";
 export default defineComponent({
-  name: "home",
+  name: "createPage",
   components: {
     MdEditor,
   },

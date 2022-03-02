@@ -1,5 +1,5 @@
 <template>
-  <div id="outline">
+  <div id="outline" :style="clientHeight">
     <div class="container">
       <div class="synopsis">
         <div class="title">
@@ -125,6 +125,11 @@ export default defineComponent({
         set: (val) => {
           store.commit("backstage/setActiveIndex", val);
         },
+      }),
+      clientHeight: computed(() => {
+        let height: number = document.documentElement.clientHeight;
+        height = height - 68;
+        return "min-height:" + height + "px";
       }),
     });
     const methods = {

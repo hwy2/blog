@@ -32,5 +32,6 @@
     "updateArticleFail":"update article fail",
     "creationFailed":"creation failed",
     "siteName&&siteAddress": "siteName&&siteAddress not null",
-    "noInformationFound": "no information found"
+    "noInformationFound": "no information found",
+    "notDeleteLastAccount": "It is forbidden to delete the last account"
 }

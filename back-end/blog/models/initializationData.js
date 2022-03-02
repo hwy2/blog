@@ -16,7 +16,8 @@ module.exports = {
         var user = await User.create({
             email: "admin@admin.com",
             password: md5("123456"),
-            role: "1"
+            role: "1",
+            name:'admin'
         });
         await UserInfo.create({
             userUuid: user.dataValues.uuid,
@@ -127,7 +128,7 @@ module.exports = {
                 type: 0
             }, {
                 name: "pagesTotal",
-                value: 2,
+                value: 3,
                 type: 0
             }, {
                 name: "categoriesTotal",
@@ -156,7 +157,8 @@ module.exports = {
             name: "黄文勇的技术站",
             URL: "https://www.3dcw.cn",
             sort: "个人博客",
-            image: "https://www.3dcw.cn/usr/themes/Castle/static/img/avatar.jpg",
+            image: 'https://www.3dcw.cn/usr/themes/Castle/static/img/avatar.jpg',
+            state:1,
             description: "黄文勇的技术交流站是，一个技术分享个人博客，博主不定时更新，记录博主的技术问题"
         })
 

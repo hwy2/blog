@@ -21,10 +21,11 @@
       </el-header>
     </el-affix>
     <transition name="slide-fade">
-      <el-main>
+      <el-main :style="clientHeight">
         <router-view v-if="isRouterAlive"></router-view>
       </el-main>
     </transition>
+
     <el-footer height="">
       <div class="footer-box">
         <div class="copyright">
@@ -238,6 +239,11 @@ export default defineComponent({
     const { proxy }: any = getCurrentInstance();
     const state = reactive({
       // vue2.x的data参数
+      clientHeight: computed(() => {
+        let height: number = document.documentElement.clientHeight;
+        height = height - 237;
+        return "min-height:" + height + "px";
+      }),
       blogTitle: computed(() => store.state.foreground.blogTitle), // 网站title
       siteName: computed(() => store.state.foreground.webConfig.siteName),
       runningTime: "", // 运行时间
@@ -323,7 +329,7 @@ export default defineComponent({
         proxy.$axios
           .get("/dataSummary/list")
           .then((res: any) => {
-            console.log(res);
+            // console.log(res);
             store.commit("foreground/setDataSummary", res.result.list);
             state.articlesTotal = res.result.list.filter((item: any) => {
               return item.name === "articlesTotal";
@@ -441,7 +447,7 @@ export default defineComponent({
           methods.reload();
           return;
         }
-        router.push('/home/index')
+        router.push("/home/index");
       },
     };
     onBeforeMount(() => {
@@ -549,8 +555,10 @@ export default defineComponent({
 }
 .el-main {
   padding: 20px 0;
-  min-height: 73.9vh;
+  box-sizing: border-box;
+  // min-height: 73.5vh;
 }
+
 .el-affix {
   width: 100%;
   height: 68px;

@@ -7,7 +7,15 @@ var linksDao = require('../controllers/links'); //友链处理
  * 创建友链信息
  */
 router.post("/create", checkToken, function (req, res, next) {
-    linksDao.createLinks(req, res, next);
+    linksDao.createLinks(req, res, next,false);
+});
+
+/**
+ * apply
+ * 创建友链信息
+ */
+router.post("/apply", function (req, res, next) {
+    linksDao.createLinks(req, res, next,true);
 });
 
 /**
@@ -17,6 +25,15 @@ router.post("/create", checkToken, function (req, res, next) {
 router.get('/info', function (req, res, next) {
     linksDao.readLinks(req, res, next);
 });
+
+/**
+ * list
+ * 查询全部友链信息
+ */
+router.get('/list', function (req, res, next) {
+    linksDao.readLinksList(req, res, next);
+});
+
 
 /**
  * update

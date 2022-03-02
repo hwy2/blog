@@ -46,10 +46,10 @@ export default createStore({
                 webConfig: {},
                 blogTitle: '',
                 article: {},
-                articleLists: {},
+                articleLists: [],
                 totals: 0,
                 pageTtotals: 0,
-                dataSummary: {},
+                dataSummary: [],
                 condition: {
                     pageSize: 7,
                     currPage: 1,
@@ -62,7 +62,7 @@ export default createStore({
                     searchFlag: false,
                     words: "",
                 },
-                pageList: {}
+                pageList: []
             },
             getters: {
                 getToken(state) {

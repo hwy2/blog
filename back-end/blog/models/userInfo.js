@@ -14,7 +14,10 @@ var UserInfo = Mysql.define("userInfo", {
         primaryKey: true, //主键
         defaultValue: Sequelize.UUIDV1, //默认值
     }, //uuid
-    nickName: Sequelize.STRING, //昵称
+    nickName: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }, //昵称
     birth: Sequelize.DATE, //出生日期
     sex: { //性别 1男 2女 0未知
         type: Sequelize.STRING(2),

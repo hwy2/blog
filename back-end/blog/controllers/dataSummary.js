@@ -192,7 +192,7 @@ module.exports = {
             });
 
             for (let i = 0; i < categoryList.length; i++) {
-                let result = yield Category.findAll({
+                var result = yield Category.findOne({
                     include: {
                         model: Article,
                         where: {
@@ -206,11 +206,21 @@ module.exports = {
                         title: categoryList[i].dataValues.title
                     }
                 });
+                if (!result) {
+                    yield DataSummary.update({
+                        value: 0
+                    }, {
+                        where: {
+                            name: categoryList[i].dataValues.title
+                        }
+                    });
+                    return;
+                }
                 yield DataSummary.update({
-                    value: result[0].dataValues.articles.length
+                    value: result.dataValues.articles.length
                 }, {
                     where: {
-                        name: result[0].dataValues.title
+                        name: result.dataValues.title
                     }
                 });
             }

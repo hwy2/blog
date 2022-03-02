@@ -21,13 +21,18 @@ var Links = Mysql.define('Links', {
         allowNull: false,
     },
     sort: { //分类 建议以英文字母开头，只包含字母与数字
-        type: Sequelize.STRING, 
+        type: Sequelize.STRING,
     },
     image: { //图片
         type: Sequelize.STRING,
     },
     description: { //描述
         type: Sequelize.STRING,
+    },
+    state: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
     }
 }, {
     freezeTableName: true, //开启自定义表名

@@ -120,7 +120,7 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
 export default defineComponent({
-  name: "outline",
+  name: "pageList",
   setup: () => {
     const store = useStore();
     const router = useRouter();
@@ -130,7 +130,7 @@ export default defineComponent({
       centerDialogVisible: false, // 提示框
       article: {},
       pageTtotals: computed(() => store.state.foreground.pageTtotals),
-      tableData: computed(()=>store.state.foreground.pageList),
+      tableData: computed(() => store.state.foreground.pageList),
       multipleSelection: [],
       condition: {
         pageSize: 10,
@@ -189,7 +189,7 @@ export default defineComponent({
        */
       handleBatchDelete() {
         Array.from(state.multipleSelection).map((item: any) => {
-          methods.handleDelete(1, item);
+          methods.deleteArticle(item.uuid);
         });
         proxy.getAricleList();
       },
@@ -200,6 +200,7 @@ export default defineComponent({
         console.log(val);
         state.multipleSelection = val;
       },
+      /** 删除请求 */
       deleteArticle(uuid: string) {
         proxy.$axios
           .get("/article/del", { articleUuid: uuid })
@@ -225,6 +226,14 @@ export default defineComponent({
             state.centerDialogVisible = false;
             console.log(error);
           });
+      },
+      /**
+       * 分页跳转
+       */
+      handleChangePage(val: any) {
+        state.condition.currPage = val;
+        proxy.getAricleList(state.condition);
+        scrollTo(0, 0); // 回到页面顶部
       },
     };
     onBeforeMount(() => {

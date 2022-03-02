@@ -33,5 +33,6 @@
 	"updateArticleFail":"更新文章内容失败",
 	"creationFailed":"创建失败",
 	"siteName&&siteAddress":"网站名称或网站地址不能为空",
-	"noInformationFound":"查无信息"
+	"noInformationFound":"查无信息",
+	"notDeleteLastAccount":"禁止删除最后一个账户"
 }

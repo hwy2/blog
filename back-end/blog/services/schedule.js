@@ -89,7 +89,7 @@ module.exports = {
      * 数据统计
      */
     statisticalData: async function () {
-        schedule.scheduleJob('0 00 09 * * *', async function () {
+        schedule.scheduleJob('0 18 11 * * *', async function () {
             dataSummary.updateDataSummary();
         })
     },

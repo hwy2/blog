@@ -125,7 +125,7 @@ export default defineComponent({
             trigger: "change",
           },
         ],
-        runningTime: [{ required: true, message: "建站时间S", trigger: "blur" }],
+        runningTime: [{ type:'date', required: true, message: "建站时间", trigger: "blur" }],
         siteDescription: [
           { required: false, message: "站点描述", trigger: "blur" },
           {

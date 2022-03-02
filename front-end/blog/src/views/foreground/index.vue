@@ -6,7 +6,7 @@
           <el-row>
             <el-col
               :md="{ span: 14, offset: 5 }"
-              :xs="24"
+              :xs="{ span: 22, offset: 1 }"
               v-if="search.categoryFlag || search.searchFlag"
             >
               <el-card shadow="hover">
@@ -198,6 +198,7 @@ export default defineComponent({
             .is-hover-shadow:hover {
               box-shadow: 2px 2px 20px #000;
               transform: scale(1.03);
+              border-radius: 4px;
             }
             .el-card {
               padding: 0;
@@ -343,27 +344,54 @@ export default defineComponent({
       }
     }
   }
-
-  @media (max-width: 800px) {
+}
+@media (max-width: 800px) {
+  #postIndex {
     .content {
       width: 94%;
       margin: 0 auto;
-    }
+      .main {
+        .el-scrollbar {
+          .item {
+            .aricleTitle {
+              padding: 15px 15px 10px;
 
-    .main {
-      .el-scrollbar {
-        .item {
-          .aricleTitle {
-            padding: 15px;
-
-            h2 {
-              font-size: 1.5em;
+              .left-icon {
+                margin: 0px 25px 8px 0px;
+                width: 40px;
+                height: 40px;
+              }
+              .abstract {
+                margin-block-end: 0.5em;
+                margin-inline-end: 0;
+                margin-block-start: 0.5em;
+                margin-inline-start: 0;
+                line-height: 1.5em;
+                p{
+                  font-size: 13px;
+                }
+              }
+              .userInfo {
+                padding: 10px 0 0 ;
+                color: rgba(0, 0, 0, 0.68);
+                i {
+                  vertical-align: middle;
+                  margin-right: 5px;
+                }
+                span {
+                  padding-right: 15px;
+                  font-size: 14px;
+                }
+              }
+              h2 {
+                font-size: 1.3em;
+              }
             }
-          }
 
-          .search-hint {
-            p {
-              font-size: 1.3em !important;
+            .search-hint {
+              p {
+                font-size: 1.3em !important;
+              }
             }
           }
         }

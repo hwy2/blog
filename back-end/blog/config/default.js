@@ -10,7 +10,7 @@ var configs = {
         port: 3306, //端口
     },
     cors: { //跨域请求
-        origin: ['http://localhost:8080', 'http://localhost:5001'],
+        origin: ['http://localhost:8080', 'http://localhost:5001', 'http://localhost'],
     },
     pwd: { //密码
         salt: 10, //密码强度
@@ -19,9 +19,9 @@ var configs = {
         secretOrPrivateKey: 'iboomer', // 秘钥
     },
     email: { //默认邮箱
-        service: "xxxx@qq.com",
-        spassword: "xxxx",
-        admin: "xxxx@qq.com",
+        service: "1833121448@qq.com",
+        spassword: "dcsosrkhkvsifcjh",
+        admin: "1833121448@qq.com",
     },
     page: { //默认分页
         currPage: 1,
@@ -52,7 +52,7 @@ var configs = {
         wallpaper: 'http://localhost:3000/attchments/wallpaper/'
     },
     weather: {
-        key: "xxxx",
+        key: "d2a66877783ac05400f583f04ececd0d", //高德地图的key
         citycode: '440113' //番禺区
     },
     isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库

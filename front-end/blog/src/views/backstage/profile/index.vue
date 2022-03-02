@@ -1,5 +1,5 @@
 <template>
-  <div id="profile">
+  <div id="profile" :style="clientHeight">
     <div class="container">
       <div class="pageTitle">
         <h2>个人设置</h2>
@@ -46,7 +46,7 @@
                 用户昵称可以与用户名不同, 用于前台显示. 如果你将此项留空,
                 将默认使用用户名.
               </p>
-              <el-form-item label="生日">
+              <el-form-item label="生日" prop='birth'>
                 <el-date-picker
                   v-model="formUserInfo.birth"
                   type="date"
@@ -166,6 +166,14 @@ export default defineComponent({
             trigger: "blur",
           },
         ],
+        birth: [
+          {
+            type: "date",
+            required: true,
+            message: "请选择日期",
+            trigger: "change",
+          },
+        ],
         city: [
           { required: true, message: "请输入城市", trigger: "blur" },
           {
@@ -216,6 +224,11 @@ export default defineComponent({
         set: (val) => {
           store.commit("backstage/setDataSummary", val);
         },
+      }),
+      clientHeight: computed(() => {
+        let height: number = document.documentElement.clientHeight;
+        height = height - 68;
+        return "min-height:" + height + "px";
       }),
     });
     const methods = {

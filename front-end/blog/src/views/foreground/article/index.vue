@@ -2,7 +2,7 @@
   <div id="article-main">
     <div class="content">
       <el-row>
-        <el-col :md="{ span: 14, offset: 5 }" :xs="24">
+        <el-col :md="{ span: 14, offset: 5 }"  :xs="{ span: 24, offset: 0 }" style="padding:0 5px;">
           <div class="article-header">
             <div class="photo">
               <el-image :src="article.photo" fit="cover">

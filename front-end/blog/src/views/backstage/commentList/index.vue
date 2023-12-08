@@ -152,7 +152,6 @@
       v-model="editDialog"
       :title="dialogTitle"
       width="50%"
-      :before-close="handleClose"
     >
       <el-form
         label-position="top"
@@ -436,19 +435,6 @@ const handleChangePage = (val: any) => {
   condition.currPage = val;
   getCommentData(condition);
   scrollTo(0, 0); // 回到页面顶部
-};
-/**
- * 窗口关闭之前
- * @param done
- */
-const handleClose = (done: () => void) => {
-  ElMessageBox.confirm("你确定要关闭窗口吗?")
-    .then(() => {
-      done();
-    })
-    .catch(() => {
-      // catch error
-    });
 };
 /**
  * 修改弹窗弹出
@@ -740,15 +726,15 @@ watch(commentStatus, (newval: any) => {
             }
           }
           .operation {
-            opacity: 0;
+            opacity: 1;
             transition: all 0.3s;
             height: 34px;
           }
-          &:hover {
-            .operation {
-              opacity: 1;
-            }
-          }
+          // &:hover {
+          //   .operation {
+          //     opacity: 1;
+          //   }
+          // }
         }
       }
     }

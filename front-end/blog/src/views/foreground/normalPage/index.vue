@@ -343,7 +343,7 @@ const createComments = () => {
   const loading = ElLoading.service({ fullscreen: true });
   proxy.$axios
     .post("/comment/create", {
-      ip: localStorage.getItem("Ip"),
+      ip: '',
       agent: navigator.userAgent,
       email: formLabelAlign.email,
       nickName: formLabelAlign.niceName,

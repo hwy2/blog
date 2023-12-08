@@ -17,7 +17,6 @@
     "js-cookie": "^3.0.1",
     "marked": "^4.2.12",
     "md-editor-v3": "^2.9.3",
-    "moment": "^2.29.4",
     "nprogress": "^0.2.0",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",

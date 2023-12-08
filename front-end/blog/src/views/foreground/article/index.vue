@@ -394,7 +394,7 @@ const createComments = () => {
   const loading = ElLoading.service({ fullscreen: true });
   proxy.$axios
     .post("/comment/create", {
-      ip: localStorage.getItem("Ip"),
+      ip: '',
       vestingPlace:'',
       agent: navigator.userAgent,
       email: formLabelAlign.email,

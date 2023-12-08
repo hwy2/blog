@@ -8,13 +8,11 @@ import './index.scss'
 import * as publicMethods from '@/public'
 import Cookies from 'js-cookie'
 import VueLazyload from 'vue3-lazy' // vue-lazyload
-import moment from 'moment'
 
 // 挂载到实例
 const app = createApp(App)
 app.config.globalProperties.$axios = axios;
 app.config.globalProperties.$Cookies = Cookies;
-app.config.globalProperties.$moment = moment;
 // 分环境处理
 // if (process.env.NODE_ENV === 'development') {
 //     if ('__VUE_DEVTOOLS_GLOBAL_HOOK__' in window) {

@@ -16,7 +16,7 @@ module.exports = {
     /**
      * 创建评论
      */
-    createComment: function (req, res, next) {
+    createComment: function (req, res, next,status=1) {
         _this = this
         var params = req.body || req.params;
 
@@ -30,7 +30,7 @@ module.exports = {
             faceUrl: utils.getGravatarURL(email),
             link: utils.trim(params.link),
             vestingPlace: utils.trim(params.vestingPlace),
-            status: 1,
+            status: status
         }
 
         if (!comment.nickName || !comment.email || !comment.comments) {
@@ -74,6 +74,12 @@ module.exports = {
             })
         })
 
+    },
+    /**
+     * 回复评论
+     */
+    recoverComment: function (req, res, next) {
+       this.createComment(req, res, next,0)
     },
     /**
      * 审核评论

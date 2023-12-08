@@ -16,6 +16,14 @@ router.post("/create", function (req, res, next) {
     req.body.vestingPlace = vestingPlace.country+vestingPlace.province+vestingPlace.city
     commentDao.createComment(req, res, next);
 });
+router.post("/recover", function (req, res, next) {
+    let ip = utils.getClientIp(req)
+    console.log(ip)
+    let vestingPlace = utils.getIP2Region(ip)
+    req.body.ip = ip
+    req.body.vestingPlace = vestingPlace.country + vestingPlace.province + vestingPlace.city
+    commentDao.recoverComment(req, res, next);
+});
 
 /**
  * 修改评论
@@ -47,6 +55,9 @@ router.get("/list", function (req, res, next) {
     commentDao.getCommentList(req, res, next);
 });
 
+/**
+ 获取用户评论信息
+ */
 router.get("/userCommentList", async function (req, res, next) {
     var userUuid = (req.query || req.query || req.params).userUuid
     var token = req.headers.accesstoken;
@@ -63,6 +74,9 @@ router.get("/userCommentList", async function (req, res, next) {
     }
 });
 
+/**
+ * 修改评论的状态
+ */
 router.post('/updateCommentStatus', function (req, res, next){
     commentDao.updateCommentStatus(req, res, next)
 })

@@ -159,7 +159,7 @@
         label-width="80px"
         :model="formLabelAlign"
         class="clearfix"
-        ref="validateForm"
+        ref="validateFormRef"
       >
         <div class="item">
           <el-form-item
@@ -246,7 +246,14 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="editDialog = false">取消</el-button>
-          <el-button type="primary" @click="updateComments()">
+          <el-button
+            type="primary"
+            @click="updateComments()"
+            v-if="btnName == '修改'"
+          >
+            {{ btnName }}
+          </el-button>
+          <el-button v-else type="primary" @click="recoverComments()">
             {{ btnName }}
           </el-button>
         </span>
@@ -266,7 +273,12 @@ import {
 } from "vue";
 // import { useStore } from "vuex";
 // import { useRouter } from "vue-router";
-import { ElNotification, ElMessageBox, ElMessage } from "element-plus";
+import {
+  ElNotification,
+  ElMessageBox,
+  ElMessage,
+  FormInstance
+} from "element-plus";
 import dateFormat from "@/assets/js/dateFormat.js";
 import { Check, Delete, Edit, InfoFilled } from "@element-plus/icons-vue";
 
@@ -305,7 +317,8 @@ const formLabelAlign = reactive({
 const user = ref<any>({}); //用户信息
 const dialogTitle = ref<string>("编辑评论"); //弹窗标题
 const btnName = ref<string>("修改"); //弹窗提交按钮的文字
-
+const article = ref<any>(); //当前文章对象
+const validateFormRef = ref<FormInstance>();
 /**
  * 获取评论数据
  */
@@ -461,6 +474,7 @@ const restore = (data: any) => {
   dialogTitle.value = "回复评论";
   btnName.value = "回复";
   editDialog.value = true;
+  article.value = data.article;
   setTimeout(() => {
     const comments: any = proxy.$refs.comments;
     comments.innerHTML = `<span contenteditable='false' class='nickName'>@${data.nickName}&nbsp;</span>`;
@@ -499,29 +513,86 @@ const makeExpandingArea = () => {
  * 提交修改
  */
 const updateComments = () => {
-  proxy.$axios
-    .put("/comment/update", { comment: formLabelAlign })
-    .then((resp: any) => {
-      console.log(resp, "");
-      if (resp.code == "200") {
-        ElNotification({
-          title: "成功",
-          message: "修改成功",
-          type: "success"
+  (validateFormRef.value as any).validate((valid: any, fields: any) => {
+    console.log(valid, fields);
+    if (valid) {
+      proxy.$axios
+        .put("/comment/update", { comment: formLabelAlign })
+        .then((resp: any) => {
+          console.log(resp, "");
+          if (resp.code == "200") {
+            ElNotification({
+              title: "成功",
+              message: "修改成功",
+              type: "success"
+            });
+            editDialog.value = false;
+            getCommentData(condition);
+          } else {
+            ElNotification({
+              title: "失败",
+              message: resp.msg,
+              type: "error"
+            });
+          }
+        })
+        .catch((error: any) => {
+          console.log(error);
         });
-        editDialog.value = false;
-        getCommentData(condition);
-      } else {
-        ElNotification({
-          title: "失败",
-          message: resp.msg,
-          type: "error"
+    } else {
+      ElNotification({
+        title: "失败",
+        message: "请填写完整",
+        type: "error"
+      });
+    }
+  });
+};
+//
+const recoverComments = () => {
+  (validateFormRef.value as any).validate((valid: any, fields: any) => {
+    console.log(valid, fields);
+    if (valid) {
+      proxy.$axios
+        .post("/comment/recover", {
+          ip: "",
+          vestingPlace: "",
+          agent: navigator.userAgent,
+          email: formLabelAlign.email,
+          nickName: formLabelAlign.nickName,
+          comments: formLabelAlign.comments,
+          articleUuid: article.value.uuid,
+          link: ""
+        })
+        .then((resp: any) => {
+          console.log(resp, "");
+          if (resp.code == "200") {
+            ElNotification({
+              title: "成功",
+              message: "修改成功",
+              type: "success"
+            });
+            editDialog.value = false;
+            getCommentData(condition);
+          } else {
+            ElNotification({
+              title: "失败",
+              message: resp.msg,
+              type: "error"
+            });
+          }
+        })
+        .catch((error: any) => {
+          console.log(error);
         });
-      }
-    })
-    .catch((error: any) => {
-      console.log(error);
-    });
+    } else {
+      ElNotification({
+        title: "失败",
+        message: "请填写完整",
+        type: "error"
+      });
+    }
+  });
 };
 
 onBeforeMount(() => {

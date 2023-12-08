@@ -1,8 +1,8 @@
-<template >
+<template>
   <div id="article-main">
     <div class="content">
       <el-row>
-        <el-col :md="{ span: 14, offset: 5 }" :xs="24">
+        <el-col :md="{ span: 22, offset: 1 }" :xs="24">
           <div class="article-header">
             <div class="photo">
               <el-image :src="article.photo" fit="cover">
@@ -78,7 +78,7 @@
                   :rules="{
                     required: true,
                     message: '评论内容不能为空',
-                    trigger: 'blur',
+                    trigger: 'blur'
                   }"
                 >
                   <el-input
@@ -95,9 +95,9 @@
                       tabindex="0"
                       ref="comments"
                       contenteditable="true"
-                      @focus="methods.revise($event, 'focus')"
-                      @blur="methods.revise($event, 'blur')"
-                      @keyup="methods.makeExpandingArea()"
+                      @focus="revise($event, 'focus')"
+                      @blur="revise($event, 'blur')"
+                      @keyup="makeExpandingArea()"
                     ></div>
                   </div>
                 </el-form-item>
@@ -110,21 +110,21 @@
                     {
                       required: true,
                       message: '昵称不能为空',
-                      trigger: 'blur',
+                      trigger: 'blur'
                     },
                     {
                       min: 3,
                       max: 255,
                       message: '长度在 3 到 255 个字符',
-                      trigger: 'blur',
-                    },
+                      trigger: 'blur'
+                    }
                   ]"
                 >
                   <el-input
                     v-model="formLabelAlign.niceName"
                     placeholder=""
-                    @focus="methods.revise($event, 'focus')"
-                    @blur="methods.revise($event, 'blur')"
+                    @focus="revise($event, 'focus')"
+                    @blur="revise($event, 'blur')"
                   ></el-input>
                 </el-form-item>
               </div>
@@ -136,21 +136,21 @@
                     {
                       required: true,
                       message: '请输入邮箱地址',
-                      trigger: 'blur',
+                      trigger: 'blur'
                     },
                     {
                       max: 255,
                       type: 'email',
                       message: '请输入正确的邮箱地址',
-                      trigger: ['blur', 'change'],
-                    },
+                      trigger: ['blur', 'change']
+                    }
                   ]"
                 >
                   <el-input
                     v-model="formLabelAlign.email"
                     placeholder=""
-                    @focus="methods.revise($event, 'focus')"
-                    @blur="methods.revise($event, 'blur')"
+                    @focus="revise($event, 'focus')"
+                    @blur="revise($event, 'blur')"
                   ></el-input>
                 </el-form-item>
               </div>
@@ -159,7 +159,7 @@
                 <el-button
                   type="primary"
                   title="发送评论"
-                  @click="methods.submitForm()"
+                  @click="submitForm()"
                   ><i class="iconfont iconfasong"></i
                 ></el-button>
               </el-form-item>
@@ -195,7 +195,7 @@
                     </div>
                     <div class="time">
                       {{
-                        methods.getdateFormat(
+                        getdateFormat(
                           item.createDate,
                           "yyyy-MM-dd hh:mm:ss"
                         )
@@ -210,7 +210,7 @@
                     <a
                       href="javascript:void(0)"
                       @click="
-                        methods.changeCommentFlag(item.nickName, item.uuid)
+                        changeCommentFlag(item.nickName, item.uuid)
                       "
                     >
                       <button>回复</button>
@@ -226,234 +226,226 @@
   </div>
 </template>
 
-<script lang="ts">
-import dateFormat from "/@/assets/js/dateFormat.js";
+<script lang="ts" setup>
+import dateFormat from "@/assets/js/dateFormat.js";
 import {
-  toRefs,
+  ref,
   reactive,
   onBeforeMount,
   onMounted,
-  defineComponent,
   getCurrentInstance,
-  computed,
+  computed
 } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ElNotification,ElLoading } from "element-plus";
-import  marked from 'marked'
-export default defineComponent({
-  setup: () => {
-    const router = useRouter();
-    const { proxy }: any = getCurrentInstance();
-    const store = useStore();
+import { ElNotification, ElLoading } from "element-plus";
+import { marked } from "marked";
 
-    // vue2.x的data参数
-    const state = reactive({
-      uuid: router.currentRoute.value.params.uuid,
-      article: {},
-      articleLink: "http://" + location.host + router.currentRoute.value.path,
-      isArticleShow: false,
-      formLabelAlign: {
-        niceName: "",
-        email: "",
-        comments: "",
-      },
-    });
-    /**
-     * 评论条数
-     */
-    const commentSumber = computed(() => {
-      if ((state.article as any).comments) {
-        return (state.article as any).comments.length;
-      } else {
-        return 0;
-      }
-    });
+const router = useRouter();
+const { proxy }: any = getCurrentInstance();
+const store = useStore();
 
-    // 方法
-    const methods = {
-      /**
-       * 获取文章内容
-       */
-      getArticleInfo() {
-        const loading = ElLoading.service({ fullscreen: true });
-        proxy.$axios
-          .get("/article/info", { articleUuid: state.uuid })
-          .then((res: any) => {
-            console.log(res);
-            document.title=res.result.article.title ;
-            store.commit("foreground/setArticle", res.result.article);
-            res.result.article.createDate = dateFormat(
-              res.result.article.createDate,
-              "yyyy年MM月dd日"
-            );
-            res.result.article.updateDate = dateFormat(
-              res.result.article.updateDate,
-              "yyyy-MM-dd hh:mm:ss"
-            );
-            state.article = res.result.article;
-            (state.article as any).content =  marked((state.article as any).content)
-            state.isArticleShow = true;
-            methods.setArticlePageview(res.result.article.pageview);
-            loading.close();
-          })
-          .catch((error: any) => {
-            console.log(error);
-            state.isArticleShow = false;
-            loading.close();
-          });
-      },
-      /**
-       * 修改文章阅读数
-       */
-      setArticlePageview(pageview: number) {
-        proxy.$axios
-          .get("/article/addPageViews", {
-            articleUuid: state.uuid,
-            articlePageview: pageview,
-          })
-          .then((res: any) => {
-            console.log(res);
-          })
-          .catch((error: any) => {
-            console.log(error);
-            state.isArticleShow = false;
-          });
-      },
-      /**
-       * 校验评论表单数据
-       */
-      submitForm() {
-        proxy.$refs.validateForm.validate((valid: any) => {
-          if (valid) {
-            methods.createComments();
-          } else {
-            ElNotification({
-              title: "错误",
-              message: `请按格式填写数据`,
-              type: "error",
-            });
-            return false;
-          }
+// vue2.x的data参数
+
+const uuid = computed(() => router.currentRoute.value.params.uuid);
+const article = ref<any>({});
+const articleLink = ref<string>(
+  "http://" + location.host + router.currentRoute.value.path
+);
+const isArticleShow = ref<boolean>(false);
+const formLabelAlign = reactive({
+  niceName: "",
+  email: "",
+  comments: ""
+});
+
+/**
+ * 评论条数
+ */
+const commentSumber = computed(() => {
+  if ((article as any).comments) {
+    return (article as any).comments.length;
+  } else {
+    return 0;
+  }
+});
+
+// 方法
+/**
+ * 获取文章内容
+ */
+const getArticleInfo = () => {
+  const loading = ElLoading.service({ fullscreen: true });
+  proxy.$axios
+    .get("/article/info", { articleUuid: uuid.value })
+    .then((res: any) => {
+      console.log(res);
+      document.title = res.result.article.title;
+      store.commit("foreground/setArticle", res.result.article);
+      res.result.article.createDate = dateFormat(
+        res.result.article.createDate,
+        "yyyy年MM月dd日"
+      );
+      res.result.article.updateDate = dateFormat(
+        res.result.article.updateDate,
+        "yyyy-MM-dd hh:mm:ss"
+      );
+      article.value = res.result.article;
+      (article.value as any).content = marked((article.value as any).content);
+      isArticleShow.value = true;
+      setArticlePageview(res.result.article.pageview);
+      loading.close();
+    })
+    .catch((error: any) => {
+      console.log(error);
+      isArticleShow.value = false;
+      loading.close();
+    });
+};
+/**
+ * 修改文章阅读数
+ */
+const setArticlePageview = (pageview: number) => {
+  proxy.$axios
+    .get("/article/addPageViews", {
+      articleUuid: uuid.value,
+      articlePageview: pageview
+    })
+    .then((res: any) => {
+      console.log(res);
+    })
+    .catch((error: any) => {
+      console.log(error);
+      isArticleShow.value = false;
+    });
+};
+/**
+ * 校验评论表单数据
+ */
+const submitForm = () => {
+  proxy.$refs.validateForm.validate((valid: any) => {
+    if (valid) {
+      createComments();
+    } else {
+      ElNotification({
+        title: "错误",
+        message: `请按格式填写数据`,
+        type: "error"
+      });
+      return false;
+    }
+  });
+};
+/**
+ * 创建评论
+ */
+const createComments = () => {
+  const loading = ElLoading.service({ fullscreen: true });
+  proxy.$axios
+    .post("/comment/create", {
+      ip: localStorage.getItem("Ip"),
+      agent: navigator.userAgent,
+      email: formLabelAlign.email,
+      nickName: formLabelAlign.niceName,
+      comments: formLabelAlign.comments,
+      articleUuid: (article.value as any).uuid,
+      link: articleLink.value
+    })
+    .then((res: any) => {
+      console.log(res);
+      loading.close();
+      if (res.code === "200") {
+        ElNotification({
+          title: "成功",
+          message: `评论成功！`,
+          type: "success"
         });
-      },
-      /**
-       * 创建评论
-       */
-      createComments() {
-        const loading = ElLoading.service({ fullscreen: true });
-        proxy.$axios
-          .post("/comment/create", {
-            ip: localStorage.getItem("Ip"),
-            agent: navigator.userAgent,
-            email: state.formLabelAlign.email,
-            nickName: state.formLabelAlign.niceName,
-            comments: state.formLabelAlign.comments,
-            articleUuid: (state.article as any).uuid,
-            link: state.articleLink,
-          })
-          .then((res: any) => {
-            console.log(res);
-            loading.close();
-            if (res.code === "200") {
-              ElNotification({
-                title: "成功",
-                message: `评论成功！`,
-                type: "success",
-              });
 
-              state.formLabelAlign.email = "";
-              state.formLabelAlign.comments = "";
-              state.formLabelAlign.niceName = "";
-              proxy.$refs.comments.innerText = "";
-              methods.getArticleInfo();
-            } else {
-              ElNotification({
-                title: "失败",
-                message: res.msg,
-                type: "error",
-              });
-            }
-          })
-          .catch((error: any) => {
-            console.log(error);
-            loading.close();
-          });
-      },
-      /**
-       * 输入框自动高度
-       */
-      makeExpandingArea() {
-        // 控制输入框自动高度
-        const text: any = document.getElementById("textarea");
-        text.style.height = "auto";
-        text.scrollTop = 0;
-        text.style.height = text.scrollHeight + "px";
-        state.formLabelAlign.comments = text?.innerHTML;
-      },
-      /**
-       * 提示文字上移
-       */
-      revise(e: any, type: string) {
-        const formItem =
-          e.target.parentElement.parentElement.parentElement.parentElement;
-        switch (type) {
-          case "focus":
-            formItem.classList.add("not-empty");
-            break;
-          case "blur":
-            if (e.target.value || e.target.innerText !== "") {
-              formItem.classList.add("not-empty");
-            } else {
-              formItem.classList.remove("not-empty");
-            }
-            break;
-          default:
-            formItem.classList.remove("not-empty");
-            break;
-        }
-      },
-      /**
-       * @评论
-       */
-      changeCommentFlag(nickName: string, uuid: string) {
-        const comments: any = proxy.$refs.comments;
-        comments.innerHTML = `<span contenteditable='false'>@${nickName}&nbsp;</span>`;
-        comments.focus();
-        const range = document.createRange();
-        range.selectNodeContents(comments);
-        range.collapse(false);
-        const sel: any = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-      },
-      /**
-       * 时间格式化
-       */
-      getdateFormat(data: string, format: string) {
-        return dateFormat(data, format);
-      },
-    };
+        formLabelAlign.email = "";
+        formLabelAlign.comments = "";
+        formLabelAlign.niceName = "";
+        proxy.$refs.comments.innerText = "";
+        getArticleInfo();
+      } else {
+        ElNotification({
+          title: "失败",
+          message: res.msg,
+          type: "error"
+        });
+      }
+    })
+    .catch((error: any) => {
+      console.log(error);
+      loading.close();
+    });
+};
+/**
+ * 输入框自动高度
+ */
+const makeExpandingArea = () => {
+  // 控制输入框自动高度
+  const text: any = document.getElementById("textarea");
+  text.style.height = "auto";
+  text.scrollTop = 0;
+  text.style.height = text.scrollHeight + "px";
+  formLabelAlign.comments = text?.innerHTML;
+};
+/**
+ * 提示文字上移
+ */
+const revise = (e: any, type: string) => {
+  const formItem =
+    e.target.parentElement.parentElement.parentElement.parentElement;
+  switch (type) {
+    case "focus":
+      formItem.classList.add("not-empty");
+      break;
+    case "blur":
+      if (e.target.value || e.target.innerText !== "") {
+        formItem.classList.add("not-empty");
+      } else {
+        formItem.classList.remove("not-empty");
+      }
+      break;
+    default:
+      formItem.classList.remove("not-empty");
+      break;
+  }
+};
+/**
+ * @评论
+ */
+const changeCommentFlag = (nickName: string, uuid: string) => {
+  const comments: any = proxy.$refs.comments;
+  comments.innerHTML = `<span contenteditable='false'>@${nickName}&nbsp;</span>`;
+  comments.focus();
+  const range = document.createRange();
+  range.selectNodeContents(comments);
+  range.collapse(false);
+  const sel: any = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+};
+/**
+ * 时间格式化
+ */
+const getdateFormat = (data: string, format: string) => {
+  return dateFormat(data, format);
+};
 
-    onBeforeMount(() => {
-      // 挂载开始之前
-      methods.getArticleInfo();
-    });
-    onMounted(() => {
-      // 挂载之后
-    });
-    return {
-      ...toRefs(state),
-      methods,
-      commentSumber,
-    };
-  },
+onBeforeMount(() => {
+  // 挂载开始之前
+  getArticleInfo();
+});
+onMounted(() => {
+  // 挂载之后
 });
 </script>
 
 <style lang="scss">
 #article-main {
   min-height: 47.8vh;
+  padding: 20px 0;
   .content {
     .el-col {
       background-color: unset;
@@ -608,10 +600,11 @@ export default defineComponent({
           font-family: monospace, monospace;
           font-size: 1em;
           margin: 0.8em 0 0.6em;
-          
-          &::before{
+
+          &::before {
             content: "";
-            background: url("../../../assets/images/pre.png") 10px 10px / 40px no-repeat #2b2b2b;
+            background: url("../../../assets/images/pre.png") 10px 10px / 40px
+              no-repeat #2b2b2b;
             height: 32px;
             width: 100%;
             display: block;
@@ -634,7 +627,7 @@ export default defineComponent({
             color: #bababa;
             overflow: auto;
             max-height: 300px;
-            border-radius:0 0 5px 5px;
+            border-radius: 0 0 5px 5px;
 
             ol {
               padding: 0;

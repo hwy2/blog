@@ -2,7 +2,7 @@ var i18n = require("i18n");
 var co = require("co");
 var utils = require("../libs/utils");
 var WebConfig = require('../models/index').WebConfig; //web配置表
-var dataSummary = require('./dataSummary');
+// var dataSummary = require('./dataSummary');
 module.exports = {
     // 创建webConfig配置文件
     createWebConfig: function (req, res, next) {
@@ -85,8 +85,7 @@ module.exports = {
     // 更新webConfig配置文件
     updateWebConfig: function (req, res, next) {
         var params = req.body || req.params;
-        var webConfig = utils.trim(params.webConfig);
-        console.log(webConfig);
+        var webConfig = params.webConfig;
         var webConfigUuid = utils.trim(webConfig.uuid);
         if (!webConfigUuid) {
             utils.handleJson({

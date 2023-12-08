@@ -1,11 +1,19 @@
 var express = require('express');
 var router = express.Router();
 var commentDao = require('../controllers/comment');
-
+const utils = require('../libs/utils');
+var checkToken = require('../middlewares/check').checkToken; //检查token的中间件
+var checkAdminToken = require('../middlewares/check').checkAdminToken; //检验管
+var verifyAdminToken = require('../services/token').verifyAdminToken;//验证管理员
 /**
  * 创建评论
  */
 router.post("/create", function (req, res, next) {
+    let ip = utils.getClientIp(req)
+    console.log(ip)
+    let vestingPlace = utils.getIP2Region(ip)
+    req.body.ip = ip
+    req.body.vestingPlace = vestingPlace.country+vestingPlace.province+vestingPlace.city
     commentDao.createComment(req, res, next);
 });
 
@@ -38,6 +46,27 @@ router.post("/approved", function (req, res, next) {
 router.get("/list", function (req, res, next) {
     commentDao.getCommentList(req, res, next);
 });
+
+router.get("/userCommentList", async function (req, res, next) {
+    var userUuid = (req.query || req.query || req.params).userUuid
+    var token = req.headers.accesstoken;
+
+    try {
+        const result = await verifyAdminToken(token, userUuid)
+        if (result == 'ok') {
+            commentDao.getCommentList(req, res, next)
+        }else{
+            commentDao.getUserCommentList(req, res, next)
+        }
+    } catch (error) {
+        commentDao.getUserCommentList(req, res, next)
+    }
+});
+
+router.post('/updateCommentStatus', function (req, res, next){
+    commentDao.updateCommentStatus(req, res, next)
+})
+
 
 
 module.exports = router;

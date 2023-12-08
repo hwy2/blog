@@ -19,7 +19,7 @@
             {{ user?.userInfo?.nickName }}
           </p>
           <p>
-            {{ user?.role }}
+           角色： {{ user?.role==1?"管理员":"用户" }}
           </p>
           <p>
             目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
@@ -46,7 +46,7 @@
                 用户昵称可以与用户名不同, 用于前台显示. 如果你将此项留空,
                 将默认使用用户名.
               </p>
-              <el-form-item label="生日" prop='birth'>
+              <el-form-item label="生日" prop="birth">
                 <el-date-picker
                   v-model="formUserInfo.birth"
                   type="date"
@@ -72,14 +72,14 @@
                 <el-input v-model="formUserInfo.address"></el-input>
               </el-form-item>
               <el-form-item>
-                <el-button
-                  type="primary"
-                  @click="methods.submitForm('ruleForm')"
+                <el-button type="primary" @click="submitForm('ruleForm')"
                   >更新个人信息</el-button
                 >
               </el-form-item>
             </el-form>
           </div>
+        </div>
+        <div class="content-right">
           <div class="update-password">
             <div class="title">
               <p>密码修改</p>
@@ -103,9 +103,7 @@
                 建议使用特殊字符与字母、数字的混编样式,以增加系统安全性.
               </p>
               <el-form-item>
-                <el-button
-                  type="primary"
-                  @click="methods.submitPwdForm('passwordForm')"
+                <el-button type="primary" @click="submitPwdForm('passwordForm')"
                   >更新密码</el-button
                 >
               </el-form-item>
@@ -117,247 +115,230 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup name="profile">
 import {
-  defineComponent,
   reactive,
-  toRefs,
+  ref,
   onMounted,
   getCurrentInstance,
   computed,
-  onBeforeMount,
+  onBeforeMount
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
-export default defineComponent({
-  name: "profile",
-  setup: () => {
-    const store = useStore();
-    const router = useRouter();
-    const { proxy }: any = getCurrentInstance();
-    const state = reactive({
-      user: {},
-      formUserInfo: {
-        uuid: "",
-        nickName: "",
-        birth: "",
-        sex: 0,
-        face: "",
-        city: "",
-        address: "",
-      },
-      rules: {
-        nickName: [
-          { required: true, message: "请输入昵称", trigger: "blur" },
-          {
-            min: 3,
-            max: 255,
-            message: "长度在 3 到 255 个字符",
-            trigger: "blur",
-          },
-        ],
-        face: [
-          { required: true, message: "请输入头像链接", trigger: "blur" },
-          {
-            min: 3,
-            max: 255,
-            message: "长度在 3 到 255 个字符",
-            trigger: "blur",
-          },
-        ],
-        birth: [
-          {
-            type: "date",
-            required: true,
-            message: "请选择日期",
-            trigger: "change",
-          },
-        ],
-        city: [
-          { required: true, message: "请输入城市", trigger: "blur" },
-          {
-            min: 2,
-            max: 255,
-            message: "长度在 2 到 255 个字符",
-            trigger: "blur",
-          },
-        ],
-        address: [
-          { required: true, message: "请输入地址", trigger: "blur" },
-          {
-            min: 2,
-            max: 255,
-            message: "长度在 2 到 255 个字符",
-            trigger: "blur",
-          },
-        ],
-      },
-      formUser: {
-        oldPwd: "",
-        newPwd: "",
-      },
-      rulesPwd: {
-        oldPwd: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          {
-            min: 6,
-            max: 255,
-            message: "长度在 6 到 255 个字符",
-            trigger: "blur",
-          },
-        ],
-        newPwd: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          {
-            min: 6,
-            max: 255,
-            message: "长度在 6 到 255 个字符",
-            trigger: "blur",
-          },
-        ],
-      },
-      dataSummary: computed({
-        get: () => {
-          return store.state.backstage.dataSummary;
-        },
-        set: (val) => {
-          store.commit("backstage/setDataSummary", val);
-        },
-      }),
-      clientHeight: computed(() => {
-        let height: number = document.documentElement.clientHeight;
-        height = height - 68;
-        return "min-height:" + height + "px";
-      }),
-    });
-    const methods = {
-      /**
-       * 修改个人信息
-       */
-      submitForm(formName: string) {
-        proxy.$refs[formName].validate((valid: any) => {
-          if (valid) {
-            proxy.$axios
-              .put("/userInfo/upinfo", {
-                userInfo: state.formUserInfo,
-              })
-              .then((res: any) => {
-                console.log(res);
-                if (res.code === "200") {
-                  ElNotification({
-                    title: "成功",
-                    message: "用户信息更新成功",
-                    type: "success",
-                  });
-                  methods.getUserInfo();
-                } else {
-                  ElNotification({
-                    title: "错误",
-                    message: res.msg,
-                    type: "error",
-                  });
-                }
-              })
-              .catch((err: any) => {
-                console.log(err);
-              });
-          } else {
-            ElNotification({
-              title: "错误",
-              message: "必填项不能为空",
-              type: "error",
-            });
-            return false;
-          }
-        });
-      },
-      /**
-       * 获取用户信息
-       */
-      getUserInfo() {
-        proxy.$axios
-          .get("/user/info", { userUuid: (state.user as any).uuid })
-          .then((res: any) => {
-            if (res.code === "200") {
-              proxy.$Cookies.set("user", JSON.stringify(res.result.user));
-              state.user = res.result.user;
-              location.reload();
-            }
-            console.log(res);
-          })
-          .catch((err: any) => {
-            console.log(err);
-          });
-      },
-      /**
-       * 修改密码
-       */
-      submitPwdForm(formName: string) {
-        proxy.$refs[formName].validate((valid: any) => {
-          if (valid) {
-            proxy.$axios
-              .put("/user/pwd", {
-                userUuid: (state.user as any).uuid,
-                oldPwd: state.formUser.oldPwd,
-                newPwd: state.formUser.newPwd,
-              })
-              .then((res: any) => {
-                if (res.code === "200") {
-                  ElNotification({
-                    title: "成功",
-                    message: "密码修改成功",
-                    type: "success",
-                  });
-                  state.formUser.oldPwd = "";
-                  state.formUser.newPwd = "";
-                } else {
-                  ElNotification({
-                    title: "失败",
-                    message: res.msg,
-                    type: "error",
-                  });
-                }
-              })
-              .catch((err: any) => {
-                console.log(err);
-              });
-          } else {
-            ElNotification({
-              title: "错误",
-              message: "必填项不能为空",
-              type: "error",
-            });
-            return false;
-          }
-        });
-      },
-    };
-    onBeforeMount(() => {
-      document.title = "个人设置";
-    });
-    onMounted(() => {
-      if (proxy.$Cookies.get("user")) {
-        state.user = JSON.parse(proxy.$Cookies.get("user"));
-      } else {
-        router.push({ name: "login" });
-      }
-      state.formUserInfo = {
-        uuid: (state.user as any).userInfo.uuid,
-        nickName: (state.user as any).userInfo.nickName,
-        birth: (state.user as any).userInfo.birth,
-        sex: (state.user as any).userInfo.sex,
-        face: (state.user as any).userInfo.face,
-        city: (state.user as any).userInfo.city,
-        address: (state.user as any).userInfo.address,
-      };
-    });
-
-    return {
-      ...toRefs(state),
-      methods,
-    };
+const store = useStore();
+const router = useRouter();
+const { proxy }: any = getCurrentInstance();
+const user = ref<any>({});
+const formUserInfo = reactive({
+  uuid: "",
+  nickName: "",
+  birth: "",
+  sex: 0,
+  face: "",
+  city: "",
+  address: ""
+});
+const rules = reactive({
+  nickName: [
+    { required: true, message: "请输入昵称", trigger: "blur" },
+    {
+      min: 3,
+      max: 255,
+      message: "长度在 3 到 255 个字符",
+      trigger: "blur"
+    }
+  ],
+  face: [
+    { required: true, message: "请输入头像链接", trigger: "blur" },
+    {
+      min: 3,
+      max: 255,
+      message: "长度在 3 到 255 个字符",
+      trigger: "blur"
+    }
+  ],
+  birth: [
+    {
+      type: "date",
+      required: true,
+      message: "请选择日期",
+      trigger: "change"
+    }
+  ],
+  city: [
+    { required: true, message: "请输入城市", trigger: "blur" },
+    {
+      min: 2,
+      max: 255,
+      message: "长度在 2 到 255 个字符",
+      trigger: "blur"
+    }
+  ],
+  address: [
+    { required: true, message: "请输入地址", trigger: "blur" },
+    {
+      min: 2,
+      max: 255,
+      message: "长度在 2 到 255 个字符",
+      trigger: "blur"
+    }
+  ]
+});
+const formUser = reactive({
+  oldPwd: "",
+  newPwd: ""
+});
+const rulesPwd = reactive({
+  oldPwd: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    {
+      min: 6,
+      max: 255,
+      message: "长度在 6 到 255 个字符",
+      trigger: "blur"
+    }
+  ],
+  newPwd: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    {
+      min: 6,
+      max: 255,
+      message: "长度在 6 到 255 个字符",
+      trigger: "blur"
+    }
+  ]
+});
+const dataSummary: any = computed({
+  get: () => {
+    return store.state.backstage.dataSummary;
   },
+  set: (val) => {
+    store.commit("backstage/setDataSummary", val);
+  }
+});
+const clientHeight = computed(() => {
+  let height: number = document.documentElement.clientHeight;
+  height = height - 68;
+  return "min-height:" + height + "px";
+});
+/**
+ * 修改个人信息
+ */
+const submitForm = (formName: string) => {
+  proxy.$refs[formName].validate((valid: any) => {
+    if (valid) {
+      proxy.$axios
+        .put("/userInfo/upinfo", {
+          userInfo: formUserInfo
+        })
+        .then((res: any) => {
+          console.log(res);
+          if (res.code === "200") {
+            ElNotification({
+              title: "成功",
+              message: "用户信息更新成功",
+              type: "success"
+            });
+            getUserInfo();
+          } else {
+            ElNotification({
+              title: "错误",
+              message: res.msg,
+              type: "error"
+            });
+          }
+        })
+        .catch((err: any) => {
+          console.log(err);
+        });
+    } else {
+      ElNotification({
+        title: "错误",
+        message: "必填项不能为空",
+        type: "error"
+      });
+      return false;
+    }
+  });
+};
+/**
+ * 获取用户信息
+ */
+const getUserInfo = () => {
+  proxy.$axios
+    .get("/user/info", { userUuid: (user.value as any).uuid })
+    .then((res: any) => {
+      if (res.code === "200") {
+        proxy.$Cookies.set("user", JSON.stringify(res.result.user));
+        user.value = res.result.user;
+        location.reload();
+      }
+      console.log(res);
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+/**
+ * 修改密码
+ */
+const submitPwdForm = (formName: string) => {
+  proxy.$refs[formName].validate((valid: any) => {
+    if (valid) {
+      proxy.$axios
+        .put("/user/pwd", {
+          userUuid: (user.value as any).uuid,
+          oldPwd: formUser.oldPwd,
+          newPwd: formUser.newPwd
+        })
+        .then((res: any) => {
+          if (res.code === "200") {
+            ElNotification({
+              title: "成功",
+              message: "密码修改成功",
+              type: "success"
+            });
+            formUser.oldPwd = "";
+            formUser.newPwd = "";
+          } else {
+            ElNotification({
+              title: "失败",
+              message: res.msg,
+              type: "error"
+            });
+          }
+        })
+        .catch((err: any) => {
+          console.log(err);
+        });
+    } else {
+      ElNotification({
+        title: "错误",
+        message: "必填项不能为空",
+        type: "error"
+      });
+      return false;
+    }
+  });
+};
+onBeforeMount(() => {
+  document.title = "个人设置";
+});
+onMounted(() => {
+  if (proxy.$Cookies.get("user")) {
+    user.value = JSON.parse(proxy.$Cookies.get("user"));
+  } else {
+    router.push({ name: "login" });
+  }
+  formUserInfo.uuid = (user.value as any).userInfo.uuid;
+  formUserInfo.nickName = (user.value as any).userInfo.nickName;
+  formUserInfo.birth = (user.value as any).userInfo.birth;
+  formUserInfo.sex = (user.value as any).userInfo.sex;
+  formUserInfo.face = (user.value as any).userInfo.face;
+  formUserInfo.city = (user.value as any).userInfo.city;
+  formUserInfo.address = (user.value as any).userInfo.address;
 });
 </script>
 
@@ -369,7 +350,7 @@ export default defineComponent({
   padding-bottom: 10%;
 
   .container {
-    width: 70%;
+    width: 95%;
     margin: 0 auto;
     .pageTitle {
       padding: 1.5% 0;
@@ -380,9 +361,9 @@ export default defineComponent({
 
     .page-main {
       display: flex;
-      .content-pane {
-        width: 70%;
-        padding-right: 20%;
+      .content-pane,.content-right {
+        width: 50%;
+        padding-right: 30px;
         box-sizing: border-box;
         .title {
           p {
@@ -411,8 +392,8 @@ export default defineComponent({
         }
       }
       .content-left {
-        width: 30%;
-        padding-right: 10%;
+        width: 25%;
+        padding-right: 30px;
         box-sizing: border-box;
 
         p {
@@ -439,6 +420,10 @@ export default defineComponent({
         p:nth-of-type(3) {
           padding: 1% 0;
         }
+      }
+      .content-right {
+        width: 25%;
+        padding-right: 0px;
       }
     }
   }

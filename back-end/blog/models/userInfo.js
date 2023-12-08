@@ -26,6 +26,10 @@ var UserInfo = Mysql.define("userInfo", {
     face: Sequelize.STRING, //头像
     city: Sequelize.STRING, //所在城市
     address: Sequelize.STRING, //住址
+    synopsis: { //性别 1男 2女 0未知
+        type: Sequelize.STRING(256),
+        defaultValue: "这个人很懒，没有留下任何信息！"
+    },
 }, {
     freezeTableName: true, //开启自定义表名
     tableName: 'UserInfo', //表名字

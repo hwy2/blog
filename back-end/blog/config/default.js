@@ -6,14 +6,15 @@ var configs = {
         host: '127.0.0.1',
         user: 'root', //数据库用户名
         password: '', //数据库密码
-        database: 'blog', //数据库名
+        database: 'hwy_blog', //数据库名
         port: 3306, //端口
     },
     cors: { //跨域请求
-        origin: ['http://localhost:8080', 'http://localhost:5001', 'http://localhost'],
+        origin: ['http://localhost:8080', 'http://127.0.0.1:8080', 'http://localhost'],
     },
     pwd: { //密码
         salt: 10, //密码强度
+
     },
     token: { //token https://github.com/auth0/node-jsonwebtoken
         secretOrPrivateKey: 'iboomer', // 秘钥
@@ -54,6 +55,9 @@ var configs = {
     weather: {
         key: "d2a66877783ac05400f583f04ececd0d", //高德地图的key
         citycode: '440113' //番禺区
+    },
+    aes:{
+        key:'mPgRpMHg4l7muudAJvn/Gaac6JMz9hsNSYCxWLUaFyQ='
     },
     isFirstTimeInstall: false, //第一次运行之后请确保是false，否则会重建数据库
 };

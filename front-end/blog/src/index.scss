@@ -1,3 +1,11 @@
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #005da6,
+    ),
+  ),
+);
+
 body {
   box-sizing: border-box;
   margin: 0;
@@ -5,13 +13,13 @@ body {
   width: 100%;
   position: relative;
   padding-right: 0 !important;
-  /* min-height: 100vh; */
+  min-height: 100vh;
 }
 
 /*修改滚动条样式*/
 body::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 0px;
+  height: 0px;
   /**/
 }
 
@@ -35,20 +43,14 @@ body::-webkit-scrollbar-corner {
 }
 
 @font-face {
-  font-family: 'roboto';
-  src: url('./assets/font/roboto.ttf');
+  font-family: "roboto";
+  src: url("./assets/font/roboto.ttf");
   font-weight: normal;
   font-style: normal;
 }
 
 #app {
-  font-family: "Helvetica Neue",
-    Helvetica,
-    "PingFang SC",
-    "Hiragino Sans GB",
-    "Microsoft YaHei",
-    "微软雅黑",
-    Arial,
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -56,9 +58,19 @@ body::-webkit-scrollbar-corner {
 }
 
 :root {
-  --trueGray: #484945;
-  --hover:rgb(185, 184, 184);
-  --borderColor:#D9D9D6;
+  --hover: #ff4081;
+  --color2: #ce4c9e;
+  --color3: #5c5a98;
+  --color4: #36547b;
+  --bgColor: #2f4858;
+  --font_color: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hover: #f9f871;
+    --bgColor: #333333;
+    --font_color: #fff;
+  }
 }
 
 *,
@@ -76,8 +88,9 @@ a,
 img {
   margin: 0;
   padding: 0;
-  margin-block-start:0;
-  margin-block-end:0;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  box-sizing: border-box;
 }
 
 a,
@@ -116,4 +129,31 @@ textarea {
 img {
   width: 100%;
   display: block;
+}
+
+div::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+::view-transition-old(pic) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  overflow: clip;
+  object-fit: contain;
+}
+::view-transition-new(pic) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  overflow: clip;
+  object-fit: cover;
+}
+
+.back::view-transition-old(pic) {
+   object-fit: cover;
+}
+.back::view-transition-new(pic) {
+  object-fit: contain;
 }

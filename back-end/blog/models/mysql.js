@@ -1,4 +1,4 @@
-var config = require('config-lite');
+var config = require('../config/default');
 var Sequelize = require('sequelize');
 
 var Mysql = new Sequelize(config.mysql.database, config.mysql.user, config.mysql.password, {
@@ -7,7 +7,8 @@ var Mysql = new Sequelize(config.mysql.database, config.mysql.user, config.mysql
     port: config.mysql.port,//端口
     operatorsAliases: 0, //去除Sequelize警告
     timezone: '+08:00', //东八时区
-    // logging: (...msg) => console.log(msg),
+    logging: (sql) => console.log(sql),
+    logging:false,
     pool: {//连接池
         max: 5,
         min: 0,

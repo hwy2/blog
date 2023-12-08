@@ -12,20 +12,25 @@ var WebConfig = Mysql.define('webConfig', {
         primaryKey: true, //主键
         defaultValue: Sequelize.UUIDV1, //默认值
     }, //uuid
-    siteName:{
+    siteName: {//站点名称   
         type: Sequelize.STRING,
         allowNull:false
     },
-    siteAddress: {
+    siteAddress: {//站点地址
         type: Sequelize.STRING,
         allowNull: false
     },
-    authorName:Sequelize.STRING,
-    runningTime: Sequelize.DATEONLY,
-    siteDescription: Sequelize.STRING,
-    keyWord: Sequelize.STRING,
-    recordNumber:Sequelize.STRING,
-    internetAlert:Sequelize.STRING
+    authorName: Sequelize.STRING,//网站作者
+    runningTime: Sequelize.DATEONLY,//建站时间
+    siteDescription: Sequelize.STRING,//站点描述
+    keyWord: Sequelize.STRING,//关键词
+    recordNumber: Sequelize.STRING,//工信部备案号
+    internetAlert: Sequelize.STRING,//网警备案号
+    isOpenCoverImage:{
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue:0
+    },//是否开启封面图
 }, {
     freezeTableName: true, //开启自定义表名
     tableName: 'WebConfig', //表名字

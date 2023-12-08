@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ElNotification } from 'element-plus';
 import cookies from 'js-cookie';
+import { declassificationAES, encryptedAES } from "../utils/index"
 
 // 基础URL
 axios.defaults.baseURL = 'http://localhost:3000'
@@ -15,6 +16,11 @@ axios.interceptors.request.use(
         if (accessToken) {
             config.headers.accessToken = accessToken;
         }
+        // 加密提交
+        if ((config.method === 'post' || config.method === 'put') && config.data)
+            config.data = {
+                data: encryptedAES(config.data)
+            }
         return config;
     },
     error => {
@@ -23,8 +29,10 @@ axios.interceptors.request.use(
 );
 
 axios.interceptors.response.use(
-    response => {
+    (response: any) => {
         if (response.status === 200) {
+            if (response.data.result)
+                response.data.result = declassificationAES(response.data.result)
             return Promise.resolve(response);
         } else {
             return Promise.reject(response);
@@ -38,6 +46,8 @@ axios.interceptors.response.use(
         });
     }
 );
+
+
 
 export default {
     /**

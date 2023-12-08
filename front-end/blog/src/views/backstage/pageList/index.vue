@@ -255,7 +255,7 @@ export default defineComponent({
   min-height: 93.3vh;
   width: 100%;
   .container {
-    width: 70%;
+    width: 95%;
     margin: 0 auto;
     color: #444;
     .page-title {

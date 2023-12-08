@@ -11,10 +11,10 @@ var {
     Comment
 } = require('../models/index'); //文章
 
-var Mysql = require('../models/mysql');
+// var Mysql = require('../models/mysql');
 var Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-var dateFormat = require("dateformat"); //时间格式化
+// var dateFormat = require("dateformat"); //时间格式化
 var dataSummary = require('./dataSummary');
 module.exports = {
     /**
@@ -36,20 +36,20 @@ module.exports = {
                     uuid: articleUuid
                 },
                 include: [{
-                        model: Category,
-                        attributes: ['uuid', 'title']
-                    },
-                    {
-                        model: User,
-                        attributes: ['uuid', 'email'],
-                        include: [{
-                            model: UserInfo,
-                            attributes: ['uuid', 'nickName', 'face']
-                        }]
-                    },
-                    {
-                        model: Comment
-                    }
+                    model: Category,
+                    attributes: ['uuid', 'title']
+                },
+                {
+                    model: User,
+                    attributes: ['uuid', 'email'],
+                    include: [{
+                        model: UserInfo,
+                        attributes: ['uuid', 'nickName', 'face', 'synopsis']
+                    }]
+                },
+                {
+                    model: Comment,
+                }
                 ]
             });
 
@@ -61,6 +61,11 @@ module.exports = {
                 return;
             }
             var article = articleResult.dataValues;
+            article.comments = article.comments.filter(item => {
+                if (item.dataValues.status == '0') {
+                    return item
+                }
+            })
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
@@ -85,12 +90,12 @@ module.exports = {
         var categoryTitle = utils.trim(params.categoryTitle);
         var articleVague = utils.trim(params.articleVague);
         var state = utils.trim(params.state);
+        var userUuid = utils.trim(params.userUuid);
         var categoryCondition = {},
             condition = {
-                state: {
-                    [Op.or]: [1, 2],
-                }
+
             };
+        condition.state = 1
         if (categoryTitle) {
             categoryCondition.title = categoryTitle
         }
@@ -98,9 +103,12 @@ module.exports = {
             condition.state = state
         }
         if (articleVague) {
-            condition.content = {
+            condition.title = {
                 [Op.like]: '%' + articleVague + '%'
             }
+        }
+        if (userUuid) {
+            condition.userUuid = userUuid
         }
         // 分页
         var page = {
@@ -109,6 +117,7 @@ module.exports = {
         }
 
         co(function* () {
+            // console.log(condition)
             var articleResultCount = yield Article.findAll({
                 include: [{
                     model: Category,
@@ -116,7 +125,34 @@ module.exports = {
                 }],
                 where: condition
             });
-            
+            // 获取置顶
+            var articleSticky = yield Article.findAll({
+                include: [{
+                    model: Category,
+                    where: categoryCondition
+                }, {
+                    model: User,
+                    attributes: ['uuid', 'email'],
+                    include: [{
+                        model: UserInfo,
+                        attributes: ['uuid', 'nickName', 'face']
+                    }]
+                }, {
+                    model: Comment,
+                    attributes: ['uuid']
+                }],
+                where: {
+                    sticky: true,
+                    state:'1'
+                },
+                limit: 10,
+                offset: 0,
+                order: [
+                    ['updateDate', 'DESC']
+                ]
+            });
+
+            console.log(condition)
             // 由于findAndCountAll计数器的不正确性，所以需要先查询所有的条数再分页
             var articleResult = yield Article.findAll({
                 include: [{
@@ -127,11 +163,11 @@ module.exports = {
                     attributes: ['uuid', 'email'],
                     include: [{
                         model: UserInfo,
-                        attributes: ['uuid', 'nickName']
+                        attributes: ['uuid', 'nickName', 'face']
                     }]
                 }, {
                     model: Comment,
-                    attributes: ['uuid']
+                    attributes: ['uuid', 'status'],
                 }],
                 where: condition,
                 limit: page.pageSize,
@@ -140,13 +176,21 @@ module.exports = {
                     ['createDate', 'DESC']
                 ]
             })
-
             if (!articleResult) {
                 utils.handleJson({
                     response: res,
                     msg: i18n.__('articleNotExist')
                 });
                 return;
+            }
+            // console.log(articleResult)
+            // 处理数据
+            for (const article of articleResult) {
+                article.dataValues.comments = article.dataValues.comments.filter(item => {
+                    if (item.dataValues.status == '0') {
+                        return item
+                    }
+                })
             }
             // 处理分页
             var pageResult = yield utils.handlePage({
@@ -157,6 +201,7 @@ module.exports = {
                 response: res,
                 msg: i18n.__('doSuccess'),
                 result: {
+                    articleSticky: articleSticky,
                     list: articleResult,
                     page: pageResult
                 }
@@ -188,7 +233,7 @@ module.exports = {
             userUuid: utils.trim(params.userUuid)
         }
         var categoryUuids = utils.handleArray(params.categoryUuids);
-        console.log(article.state);
+        // console.log(article.state);
         // 文章必须有作者
         if (!article.userUuid) {
             utils.handleJson({
@@ -201,7 +246,7 @@ module.exports = {
         // 文章类型为页面时
         if (article.state == 4) {
             if (!article.template || article.template == 0) {
-                console.log(categoryUuids);
+                // console.log(categoryUuids);
                 if (!article.title || !article.content || !article.abstract || !categoryUuids) {
                     utils.handleJson({
                         response: res,
@@ -274,7 +319,8 @@ module.exports = {
      */
     updateArticle: function (req, res, next) {
         var params = req.body || req.params;
-        var article = utils.trim(params.article);
+        // console.log(params.article)
+        var article = params.article;
         var articleUuid = utils.trim(article.uuid);
         var categoryUuids = utils.handleArray(article.categoryUuids);
         article.state = parseInt(article.state);
@@ -312,7 +358,7 @@ module.exports = {
                     uuid: categoryUuids
                 },
             });
-            console.log(article);
+            // console.log(article);
             articlefindOne.setCategories(categoryResult)
 
             utils.handleJson({
@@ -399,7 +445,7 @@ module.exports = {
         var articleUuid = utils.trim(params.articleUuid);
         var articlePageview = utils.trim(params.articlePageview);
 
-        console.log(req.ip);
+        // console.log(req.ip);
 
         if (!articleUuid || !articlePageview) {
             utils.handleJson({
@@ -440,4 +486,328 @@ module.exports = {
             })
         })
     }
+    ,
+    /**
+     * 文章浏览量倒叙
+     */
+    testimonialsArticlePageViews: function (req, res, next) {
+        var params = req.query || req.params;
+        // 分页
+        var page = {
+            currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
+            pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
+        }
+        co(function* () {
+            var articleResult = yield Article.findAll({
+                include: [{
+                    model: Category,
+                }, {
+                    model: User,
+                    attributes: ['uuid', 'email'],
+                    include: [{
+                        model: UserInfo,
+                        attributes: ['uuid', 'nickName']
+                    }]
+                }, {
+                    model: Comment,
+                    attributes: ['uuid']
+                }],
+                where: {
+                    state: 1
+                },
+                limit: page.pageSize,
+                offset: page.pageSize * (page.currPage - 1),
+                order: [
+                    ['pageview', 'DESC']
+                ]
+            })
+
+            if (!articleResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('articleNotExist')
+                });
+                return;
+            }
+            var pageResult = yield utils.handlePage({
+                count: articleResult.length,
+                page: page
+            });
+
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: {
+                    list: articleResult,
+                    page: pageResult
+                }
+            });
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    },
+    /**
+    * 热文章浏览量倒叙
+    */
+    hotArticle: function (req, res, next) {
+        var params = req.query || req.params;
+        var condition = {
+            ishot: true
+        };
+        // 分页
+        var page = {
+            currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
+            pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
+        }
+        co(function* () {
+            var articleResult = yield Article.findAll({
+                include: [{
+                    model: Category,
+                }, {
+                    model: User,
+                    attributes: ['uuid', 'email'],
+                    include: [{
+                        model: UserInfo,
+                        attributes: ['uuid', 'nickName']
+                    }]
+                }, {
+                    model: Comment,
+                    attributes: ['uuid']
+                }],
+                where: condition,
+                limit: page.pageSize,
+                offset: page.pageSize * (page.currPage - 1),
+                order: [
+                    ['createDate', 'DESC']
+                ]
+            })
+
+            if (!articleResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('articleNotExist')
+                });
+                return;
+            }
+            var pageResult = yield utils.handlePage({
+                count: articleResult.length,
+                page: page
+            });
+
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: {
+                    list: articleResult,
+                    page: pageResult
+                }
+            });
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    },
+    // 获取用户文章
+    getUserArticleList: function (req, res, next) {
+        var params = req.query || req.params;
+        // console.log('params', params)
+        var categoryTitle = utils.trim(params.categoryTitle);
+        var articleVague = utils.trim(params.articleVague);
+        var state = utils.trim(params.state);
+        var userUuid = utils.trim(params.userUuid);
+        var categoryCondition = {},
+            condition = {
+                state: {
+                    [Op.not]: [0, 4],
+                }
+            };
+        if (categoryTitle) {
+            categoryCondition.title = categoryTitle
+        }
+        if (state) {
+            if (state != 3)
+                condition.state = state
+        }
+        if (articleVague) {
+            condition.title = {
+                [Op.like]: '%' + articleVague + '%'
+            }
+        }
+        if (userUuid) {
+            condition.userUuid = userUuid
+        } else {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            });
+            return;
+        }
+        // 分页
+        var page = {
+            currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
+            pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
+        }
+
+        co(function* () {
+            // console.log(condition)
+            var articleResultCount = yield Article.findAll({
+                include: [{
+                    model: Category,
+                    where: categoryCondition
+                }],
+                where: condition
+            });
+
+            // 由于findAndCountAll计数器的不正确性，所以需要先查询所有的条数再分页
+            var articleResult = yield Article.findAll({
+                include: [{
+                    model: Category,
+                    where: categoryCondition
+                }, {
+                    model: User,
+                    attributes: ['uuid', 'email'],
+                    include: [{
+                        model: UserInfo,
+                        attributes: ['uuid', 'nickName', 'face']
+                    }]
+                }, {
+                    model: Comment,
+                    attributes: ['uuid']
+                }],
+                where: condition,
+                limit: page.pageSize,
+                offset: page.pageSize * (page.currPage - 1),
+                order: [
+                    ['createDate', 'DESC']
+                ]
+            })
+            if (!articleResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('articleNotExist')
+                });
+                return;
+            }
+            // 处理分页
+            var pageResult = yield utils.handlePage({
+                count: articleResultCount.length,
+                page: page
+            });
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: {
+                    list: articleResult,
+                    page: pageResult
+                }
+            });
+
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    },
+    // 修改置顶
+    setSticky: (req, res, next) => {
+        var params = req.body || req.params;
+        var sticky = params.sticky;
+        var articleUuid = params.articleUuid;
+        if (!sticky) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassParamsComplete')
+            });
+            return;
+        }
+        if (!articleUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            });
+            return;
+        }
+        co(function* () {
+            var result = yield Article.update({ sticky: sticky }, {
+                where: {
+                    uuid: articleUuid
+                }
+            })
+            // console.log('result',result)
+            utils.handleJson({
+                response: res,
+                msg: 'doSuccess',
+                result: 'u1'
+            })
+        }).catch(err => {
+            // console.log(err)
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+
+    },
+    setArticleState: (req, res, next) => {
+        var params = req.body || req.params;
+        var state = params.state;
+        var articleUuid = params.articleUuid;
+        if (!state.toString()) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassParamsComplete')
+            });
+            return;
+        }
+        if (!articleUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            });
+            return;
+        }
+        co(function* () {
+            var resultOne = yield Article.findOne({
+                where:{
+                    uuid: articleUuid
+                } 
+            })
+
+            if (!resultOne) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('articleNotExist')
+                });
+                return;
+            }
+
+            var result = yield Article.update({ state: state }, {
+                where: {
+                    uuid: articleUuid
+                }
+            })
+            // console.log('result',result)
+            utils.handleJson({
+                response: res,
+                msg: 'doSuccess',
+                result: 'u1'
+            })
+        }).catch(err => {
+            // console.log(err)
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+
+    },
 }

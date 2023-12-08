@@ -6,6 +6,12 @@ var config = require('config-lite'); //配置
 var i18n = require('i18n'); //i18n
 var underscore = require('underscore'); //js 工具函数
 var md5 = require('blueimp-md5'); //md5加密
+var config = require('../config/default'); //配置文件
+var CryptoJS = require("crypto-js");
+const IP2Region = require('ip2region').default;
+
+let key = config.aes.key
+key = CryptoJS.enc.Utf8.parse(key)
 module.exports = {
     /**
      * 工具类
@@ -20,10 +26,11 @@ module.exports = {
     handleJson: function (opts) { //json
         //-1失败、200成功
         if (opts.result) {
+            data = this.encryptedAES(opts.result)
             opts.response.json({
                 code: "200",
                 msg: opts.msg || i18n.__('doSuccess'),
-                result: opts.result,
+                result: data
             });
         } else {
             opts.response.json({
@@ -39,7 +46,7 @@ module.exports = {
     handleError: function (opts) {
         var that = this;
         var error = opts.error || "error";
-        console.log(error);
+        // console.log(error);
         if (error == "break") {
             return;
         }
@@ -142,7 +149,59 @@ module.exports = {
 
         const address = String(email).trim().toLowerCase();
         const hash = md5(address);
-        return `https://gravatar.loli.net/avatar/${ hash }`;
-    }
-
+        return `https://gravatar.loli.net/avatar/${hash}`;
+    },
+    // 加密
+    encryptedAES: function (data) {
+        const content = JSON.stringify(data);
+        const encryptedContent = CryptoJS.AES.encrypt(content, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return encryptedContent.ciphertext.toString();
+    },
+    // 解密
+    declassificationAES: function (encryptedData) {
+        const decryptedContent = CryptoJS.AES.decrypt(
+            CryptoJS.format.Hex.parse(encryptedData),
+            key,//注意：后面这里最好使用 CryptoJS.format.Utf8.parse(key) 
+            {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            }
+        );
+        return JSON.parse(CryptoJS.enc.Utf8.stringify(decryptedContent))
+    },
+    /**
+     * 获取Ip定位
+     * @param {*} ip 
+     */
+    getIP2Region: function (ip) {
+        // 创建一个IP2Region实例
+        const query = new IP2Region();
+        const ipAddress = query.search(ip);
+        // 打印查询结果
+        console.log('>>> ipAddress: ', ipAddress);
+        return ipAddress
+    },
+    /**
+     * ipv6转ipv4
+     * @param {*} ip 
+     * @returns 
+     */
+    ipv6ToV4: function (ip) {
+        if (ip.split(',').length > 0) {
+            ip = ip.split(',')[0]
+        }
+        ip = ip.substr(ip.lastIndexOf(':') + 1, ip.length);
+        return ip
+    },
+    getClientIp: function (req) {
+        return req.headers['x-forwarded-for'] ||
+            req.ip ||
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.connection.socket.remoteAddress ||
+            '';
+    },
 };

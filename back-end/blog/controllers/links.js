@@ -36,7 +36,7 @@ module.exports = {
             linkModel.image = config.fileAbsolute.face + "nopic.jpg"
         }
         co(function* () {
-            console.log(linkModel);
+            // console.log(linkModel);
             var LinksResult = yield Links.create(linkModel);
             if (!LinksResult) {
                 utils.handleJson({

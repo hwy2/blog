@@ -34,7 +34,7 @@ module.exports = {
                     userUuid: userInfo.userUuid
                 }
             });
-            console.log("userInfoResult", userInfoResult);
+            // console.log("userInfoResult", userInfoResult);
             if (userInfoResult) { //检查是否存在相同的userUuid
                 utils.handleJson({
                     response: res,
@@ -144,7 +144,7 @@ module.exports = {
                     uuid: userInfoUuid
                 }
             });
-            console.log(userInfoResult);
+            // console.log(userInfoResult);
             if (!userInfoResult) {
                 utils.handleJson({
                     response: res,

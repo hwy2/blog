@@ -44,6 +44,11 @@ var Article = Mysql.define('article', {
         type: Sequelize.BOOLEAN,
         defaultValue: false, //默认值
     },
+    sticky:{//是否置顶
+        type:Sequelize.BOOLEAN,
+        defaultValue:false
+    }
+
 }, {
     freezeTableName: true, // 自定义表名
     tableName: 'Article',

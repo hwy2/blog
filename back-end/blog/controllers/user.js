@@ -210,10 +210,10 @@ module.exports = {
                 delete user.password; //删除密码
                 user.isPwd = true;
             }
-            user.role = user.role === '1' ? '管理员' : '普通用户'
+            // user.role = user.role === '1' ? '管理员' : '普通用户'
             // 验证是否为管理员
-            if (user.role && user.role === '管理员') {
-                console.log("管理员登录");
+            if (user.role && user.role === '1') {
+                // console.log("管理员登录");
 
                 utils.handleJson({
                     response: res,
@@ -222,7 +222,8 @@ module.exports = {
                         user: user,
                         accessToken: tokenService.setToken({
                             uuid: user.uuid,
-                            isAdmin: true
+                            isAdmin: true,
+                            role: user.role
                         })
                     },
                 });
@@ -279,7 +280,7 @@ module.exports = {
         var params = req.body || req.params;
         var userUuid = utils.trim(params.userUuid);
         var token = utils.trim(params.token);
-        console.log(userUuid, token)
+        // console.log(userUuid, token)
         if (!userUuid || !token) {
             //fail
             utils.handleJson({
@@ -414,7 +415,7 @@ module.exports = {
      */
     getUserInfo: function (req, res, next) {
         var params = req.query || req.params;
-        console.log("params", params);
+        // console.log("params", params);
         var userUuid = utils.trim(params.userUuid);
 
         if (!userUuid) {
@@ -539,7 +540,7 @@ module.exports = {
         var userUuid = params.userUuid;
         var oldPwd = utils.trim(params.oldPwd);
         var newPwd = utils.trim(params.newPwd);
-        console.log(oldPwd, newPwd);
+        // console.log(oldPwd, newPwd);
         if (oldPwd === newPwd) {
             utils.handleJson({
                 response: res,

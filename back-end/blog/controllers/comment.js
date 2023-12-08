@@ -3,6 +3,7 @@ var i18n = require('i18n'); //i18n国际化
 var utils = require('../libs/utils'); //工具类
 var config = require('../config/default'); //配置文件
 var Comment = require('../models/index').Comment; //评论
+var Article = require('../models/index').Article; //评论
 var dataSummary = require('./dataSummary');
 var Sequelize = require('sequelize');
 var WebConfig = require('../models/index').WebConfig; //web配置表
@@ -10,13 +11,15 @@ const configs = require('../config/default');
 const email = require('../services/email');
 const Op = Sequelize.Op;
 var dateFormat = require("dateformat"); //时间格式化
+const { isArray } = require('underscore');
 module.exports = {
     /**
      * 创建评论
      */
     createComment: function (req, res, next) {
-        let _this = this;
+        _this = this
         var params = req.body || req.params;
+
         var comment = {
             nickName: utils.trim(params.nickName),
             ip: utils.trim(params.ip),
@@ -26,6 +29,8 @@ module.exports = {
             articleUuid: utils.trim(params.articleUuid),
             faceUrl: utils.getGravatarURL(email),
             link: utils.trim(params.link),
+            vestingPlace: utils.trim(params.vestingPlace),
+            status: 1,
         }
 
         if (!comment.nickName || !comment.email || !comment.comments) {
@@ -39,8 +44,7 @@ module.exports = {
 
         co(function* () {
             var commentResult = yield Comment.create(comment);
-
-            if (!commentResult) {
+            if (JSON.stringify(commentResult) == "{}") {
                 utils.handleJson({
                     response: res,
                     msg: i18n.__("doFail")
@@ -52,7 +56,8 @@ module.exports = {
 
             // 统计评论数据
             dataSummary.summaryComment(req, res, next);
-            _this.getEmailInformation(commen, articleUuid, req, res, next)
+
+            _this.getEmailInformation(commen, comment.articleUuid, req, res, next)
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
@@ -62,6 +67,7 @@ module.exports = {
             })
 
         }).catch(function (error) {
+            console.log('error')
             utils.handleError({
                 response: res,
                 error: error
@@ -125,18 +131,20 @@ module.exports = {
      */
     updateComment: function (req, res, next) {
         var params = req.body || req.params;
-        var comment = utils.trim(params.comment);
-        var checkFlag = utils.validateMandatory(comment);
-        if (!checkFlag) {
+        var comment = params.comment;
+        var commentUuid = utils.trim(comment.uuid);
+        var nickName = utils.trim(comment.nickName);
+        var email = utils.trim(comment.email);
+        var comments = utils.trim(comment.comments);
+        if (!nickName || !email || !comments, !commentUuid) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('pleasePassParamsComplete')
             });
-
             return;
         }
-        var commentUuid = utils.trim(comment.uuid);
-
+        console.log(comment)
+        // return
         co(function* () {
             var commentFindOne = yield Comment.findOne({
                 where: {
@@ -150,12 +158,12 @@ module.exports = {
                 });
                 return;
             }
-            var commentResult = yield Comment.update(comment, {
+            var commentResult = yield Comment.update({ nickName, email, comments }, {
                 where: {
                     uuid: commentUuid
                 }
             });
-
+            console.log('ss', commentResult)
             if (!commentResult) {
                 utils.handleJson({
                     response: res,
@@ -168,7 +176,7 @@ module.exports = {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),
-                result: ""
+                result: "u1"
             });
 
         }).catch(function (error) {
@@ -178,6 +186,71 @@ module.exports = {
             })
         })
 
+    },
+    /**
+     * 修改评论状态
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    updateCommentStatus: function (req, res, next) {
+        var params = req.body || req.params;
+        var status = params.status;
+        if (!status.toString()) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassParamsComplete')
+            });
+
+            return;
+        }
+        var commentUuid = utils.trim(params.commentUuid);
+        if (!commentUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            });
+
+            return;
+        }
+        co(function* () {
+            var commentFindOne = yield Comment.findOne({
+                where: {
+                    uuid: commentUuid
+                }
+            });
+            if (!commentFindOne) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('noInformationFound')
+                });
+                return;
+            }
+            var commentResult = yield Comment.update({ status: status }, {
+                where: {
+                    uuid: commentUuid
+                }
+            });
+
+            if (!commentResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('doFail')
+                });
+                return;
+            }
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: 'u1'
+            });
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
     },
     /**
      * 删除
@@ -252,7 +325,6 @@ module.exports = {
                 [Op.like]: '%' + comments + '%'
             }
         }
-
         if (email) {
             condition.email = email
         }
@@ -260,7 +332,7 @@ module.exports = {
         if (status) {
             condition.status = status
         }
-
+        // console.log(condition)
         // 分页
         var page = {
             currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
@@ -270,9 +342,9 @@ module.exports = {
         co(function* () {
             var commentResult = yield Comment.findAndCountAll({
                 where: condition,
-                attributes: {
-                    exclude: ['ip', 'agent', '']
-                },
+                include: [{
+                    model: Article
+                }],
                 limit: page.pageSize, //每页多少条
                 offset: page.pageSize * (page.currPage - 1), //偏移量
                 order: [ //排序
@@ -331,18 +403,20 @@ module.exports = {
                         </div>
                         <div style="line-height:40px;  font-size:14px;">
                             <label style="color:#999;">评论人：</label>
-                            <span style="color:#333;">${commen.nickName} 邮箱: <a href="mailto:${commen.email}" rel="noopener"
-                                    target="_blank">${commen.email}</a></span>
+                            <span style="color:#333;">${commen.nickName}</span>
+                            <br/>
+                            <label style="color:#999;">邮箱: <a href="mailto:${commen.email}" rel="noopener"
+                                    target="_blank">${commen.email}</a></label>
                         </div>
                         <div style="line-height:40px;  font-size:14px;">
                             <label style="color:#999;">评论地址：</label>
-                            <a href = "${webConfig.siteAddress+'/home/article/'+articleUuid}"
+                            <a href = "${webConfig.siteAddress + '/home/article/' + articleUuid}"
                                 style="color:#333;" rel="noopener"
-                                target="_blank">${webConfig.siteAddress+'/home/article/'+articleUuid}</a>
+                                target="_blank">${webConfig.siteAddress + '/home/article/' + articleUuid}</a>
                         </div>
                         <div style="line-height:40px;  font-size:14px;">
                             <label style="color:#999;">评论时间：</label>
-                            <span style="color:#333;">${dateFormat(commen.createDate,"yyyy-mm-dd HH:MM:ss")}</span>
+                            <span style="color:#333;">${dateFormat(commen.createDate, "yyyy-mm-dd HH:MM:ss")}</span>
                         </div>
                     </div>
                 </div>
@@ -372,5 +446,91 @@ module.exports = {
 
         // 发送邮件
         email.sendSystemEmail(opts);
+    },
+    /**获取用户文章相关联的评论 */
+    getUserCommentList: function (req, res, next) {
+        console.log('getUserCommentList')
+        var params = req.query || req.params;
+        var userUuid = utils.trim(params.userUuid);
+        var comments = utils.trim(params.comments);
+        var email = utils.trim(params.email);
+        var status = utils.trim(params.status);
+        var condition = {};
+        if (comments) {
+            condition.comments = {
+                [Op.like]: '%' + comments + '%'
+            }
+        }
+
+        if (email) {
+            condition.email = email
+        }
+
+        if (status) {
+            condition.status = status
+        }
+        if (!userUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            });
+            return
+        }
+        // 分页
+        var page = {
+            currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
+            pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
+        }
+        co(function* () {
+            var articleResult = yield Article.findAll({
+                where: {
+                    userUuid
+                },
+                attributes: ['uuid'],
+                include: [
+                    {
+                        model: Comment,
+                        where: condition
+                    }
+                ]
+            })
+            // console.log('articleResult', articleResult[0].comments)
+            var commentsList = froItem(articleResult)
+
+            var pageResult = yield utils.handlePage({
+                count: commentsList.length,
+                page: page
+            })
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: {
+                    list: commentsList.slice(0, 10),
+                    page: pageResult
+                }
+            })
+
+        }).catch(error => {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+            // console.log(error)
+        })
+
+    },
+
+}
+
+function froItem(list) {
+    var commentsList = []
+    for (const item of list) {
+        if ((isArray(item.comments)) && (item.comments.length > 0)) {
+            for (const iterator of item.comments) {
+                commentsList.push(iterator)
+            }
+        }
+
     }
+    return commentsList
 }

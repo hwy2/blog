@@ -28,7 +28,7 @@ module.exports = {
                 casts
             } = data.forecasts[0];
             let i = 0,
-                str_weather = "";
+                str_weather = `<h2 style="text-align: center;">${city}天气</h2>`;
             while (i < casts.length) {
                 let {
                     date,
@@ -43,18 +43,35 @@ module.exports = {
                     nightpower
                 } = casts[i];
                 i++;
-                str_weather += `${date} 周${weeks[week]} ${city}天气:
-                    <br>白天：
-                        <br>&emsp;&emsp;天气：${dayweather}
-                        <br>&emsp;&emsp;最高气温：${daytemp}°
-                        <br>&emsp;&emsp;风向：${daywind}风
-                        <br>&emsp;&emsp;风力：${daypower}级
-                    <br>夜间：
-                        <br>&emsp;&emsp;天气：${nightweather}
-                        <br>&emsp;&emsp;最高气温：${nighttemp}°
-                        <br>&emsp;&emsp;风向：${nightwind}风
-                        <br>&emsp;&emsp;风力：${nightpower}级<br><br>
-                `;
+                str_weather +=`<table style="border-collapse: collapse;width: 100%; border: 1px solid #999;margin-top:15px;">
+                    <thead>
+                        <tr>
+                            <th colspan="2" style=" border: 1px solid #999;padding: 5px;">${date} 周${weeks[week]} </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style=" border: 1px solid #999;padding: 5px;"> 白天</td>
+                            <td style=" border: 1px solid #999;padding: 5px;"> 夜间</td>
+                        </tr>
+                        <tr>
+                            <td style=" border: 1px solid #999;padding: 5px;">天气:${dayweather}</td>
+                            <td style=" border: 1px solid #999;padding: 5px;">天气：${nightweather}</td>
+                        </tr>
+                        <tr>
+                            <td style=" border: 1px solid #999;padding: 5px;">最高气温：${daytemp}°</td>
+                            <td style=" border: 1px solid #999;padding: 5px;">最高气温：${nighttemp}°</td>
+                        </tr>
+                        <tr>
+                            <td style=" border: 1px solid #999;padding: 5px;">风向：${daywind}风</td>
+                            <td style=" border: 1px solid #999;padding: 5px;">风向：${nightwind}风</td>
+                        </tr>
+                        <tr>
+                            <td style=" border: 1px solid #999;padding: 5px;">风力：${daypower}级</td>
+                            <td style=" border: 1px solid #999;padding: 5px;">风力：${nightpower}级</td>
+                        </tr>
+                    </tbody>
+                </table >`;
             }
 
             return str_weather;
@@ -68,7 +85,7 @@ module.exports = {
     sendWeatherMail: async function () {
         let _this = this;
         //每天 14h 运行天气预报任务         周几
-        schedule.scheduleJob('0 05 11 * * *', async function () {
+        schedule.scheduleJob('0 40 09 * * *', async function () {
             console.log('schedule', new Date());
             var object = await _this.getWeather(configs.weather.citycode);
             if (!object) {

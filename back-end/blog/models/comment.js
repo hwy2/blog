@@ -13,6 +13,7 @@ var Comment = Mysql.define('comment', {
     }, //uuid
     ip: Sequelize.STRING,
     agent: Sequelize.STRING,
+    vestingPlace: Sequelize.STRING,
     nickName: {
         type: Sequelize.STRING,
         allowNull: false

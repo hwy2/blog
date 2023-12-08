@@ -5,6 +5,13 @@ var i18n = require('i18n'); //国际化
 var utils = require('../libs/utils'); //工具类
 
 module.exports = function (app) {
+  app.use(function (req, res, next) {
+    if (req.method != 'GET' && JSON.stringify(req.body) != "{}") {
+      const data = utils.declassificationAES(req.body.data)
+      req.body = data
+    }
+    next()
+  })
   //router分流
   app.use('/common', require('./common'));
   app.use('/user', require('./users'));

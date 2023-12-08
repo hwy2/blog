@@ -6,21 +6,22 @@
           <p>网站概要</p>
         </div>
         <div class="details">
-          <p>
-            目前有 <span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
+           <p>
+            目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
             <span>{{ dataSummary?.commentsTotal }}</span> 条关于你的评论在
             <span>{{ dataSummary?.categoriesTotal }}</span> 个分类中.
           </p>
           <p>点击下面的链接快速开始:</p>
           <p>
             <router-link
-              to="/backstage/writingArticles"
-              @click="methods.changeIndex('/backstage/writingArticles')"
+              to="/backstage/write/writingArticles"
+              @click="changeIndex('/backstage/write/writingArticles')"
               >撰写新文章</router-link
             >
             <router-link
-              to="/backstage/basicSettings"
-              @click="methods.changeIndex('/backstage/basicSettings')"
+              to="/backstage/setting/basicSettings"
+              v-if="user.role == 1"
+              @click="changeIndex('/backstage/setting/basicSettings')"
               >系统设置</router-link
             >
           </p>
@@ -51,7 +52,7 @@
               <div class="date">{{ item.createDate }}</div>
               <div class="head">
                 <a :href="item.link">{{ item.nickName }}</a
-                >:{{ item.comments }}
+                >:<span v-html="item.comments"></span>
               </div>
             </div>
           </div>
@@ -67,7 +68,7 @@
               :key="index"
             >
               <div class="date">{{ item.createDate }}</div>
-              <div class="head" @click="methods.pushHome(item.title)">
+              <div class="head" @click="pushHome(item.title)">
                 <a href="javascript:void(0)">{{ item.title }}</a>
               </div>
             </div>
@@ -78,110 +79,123 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup name="outline">
 import {
-  defineComponent,
   reactive,
-  toRefs,
+  ref,
   onMounted,
   getCurrentInstance,
   computed,
-  onBeforeMount,
+  onBeforeMount
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
-import dateFormat from "/@/assets/js/dateFormat.js";
-export default defineComponent({
-  name: "outline",
-  setup: () => {
-    const store = useStore();
-    const router = useRouter();
-    const { proxy }: any = getCurrentInstance();
-    const state = reactive({
-      commentList: [],
-      categoryList: computed(() => store.state.backstage.categoryList),
-      aricleList: computed(() => store.state.foreground.articleLists),
-      condition: computed({
-        get: () => {
-          return store.state.foreground.condition;
-        },
-        set: (val) => {
-          store.commit("foreground/setCondition", val);
-        },
-      }),
-      dataSummary: computed({
-        get: () => {
-          return store.state.backstage.dataSummary;
-        },
-        set: (val) => {
-          store.commit("backstage/setDataSummary", val);
-        },
-      }),
-      activeIndex: computed({
-        get: () => {
-          return store.state.backstage.activeIndex;
-        },
-        set: (val) => {
-          store.commit("backstage/setActiveIndex", val);
-        },
-      }),
-      clientHeight: computed(() => {
-        let height: number = document.documentElement.clientHeight;
-        height = height - 68;
-        return "min-height:" + height + "px";
-      }),
-    });
-    const methods = {
-      /**
-       * 获取评论列表
-       */
-      getCommentList() {
-        proxy.$axios
-          .get("/comment/list", {})
-          .then((res: any) => {
-            console.log(res);
-            for (const item of res.result.list) {
-              item.createDate = dateFormat(item.createDate, "MM-dd");
-            }
-            state.commentList = res.result.list;
-          })
-          .catch((err: any) => {
-            console.log(err);
-          });
-      },
-      /**
-       * 返回首页，并搜索
-       */
-      pushHome(category: string) {
-        state.condition.currPage = 1;
-        state.condition.categoryTitle = category;
-        proxy.getAricleList(state.condition);
-        router.push({ name: "index", params: { category } });
-      },
-      /**
-       *
-       */
-      changeIndex(index: string) {
-        state.activeIndex = index;
-      },
-    };
-    onBeforeMount(() => {
-      document.title = "概要";
-    });
-    onMounted(() => {
-      state.condition.pageSize = 7;
-      state.condition.currPage = 1;
-      state.condition.state = 1;
-      state.condition.categoryTitle = "";
-      proxy.getAricleList(state.condition, "MM-dd");
-      methods.getCommentList();
-    });
-    return {
-      ...toRefs(state),
-      methods,
-    };
+import dateFormat from "@/assets/js/dateFormat.js";
+const store = useStore();
+const router = useRouter();
+const { proxy }: any = getCurrentInstance();
+const commentList = ref<Array<any>>([]);
+const categoryList = computed(() => store.state.backstage.categoryList);
+const aricleList = ref<Array<any>>([]);
+const condition = computed({
+  get: () => {
+    return store.state.foreground.condition;
   },
+  set: (val) => {
+    store.commit("foreground/setCondition", val);
+  }
+});
+const dataSummary = computed({
+  get: () => {
+    return store.state.backstage.dataSummary;
+  },
+  set: (val) => {
+    store.commit("backstage/setDataSummary", val);
+  }
+});
+const activeIndex = computed({
+  get: () => {
+    return store.state.backstage.activeIndex;
+  },
+  set: (val) => {
+    store.commit("backstage/setActiveIndex", val);
+  }
+});
+const clientHeight = computed(() => {
+  let height: number = document.documentElement.clientHeight;
+  height = height - 68;
+  return "min-height:" + height + "px";
+});
+const user = ref<any>({});
+// 获取用户文章
+const getUserArticleList = (uuid: string) => {
+  console.log(user.value);
+  proxy.$axios
+    .get("/article/userArticleList", { userUuid: uuid, state: 1 })
+    .then((res: any) => {
+      console.log(res);
+      for (const item of res.result.list) {
+        item.createDate = dateFormat(item.createDate, "MM-dd");
+      }
+      aricleList.value = res.result.list;
+      store.commit("backstage/setArticlesTotal", res.result.page.totalRow);
+      // commentList.value = res.result.list;
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+const statisticalData: any = computed(
+  () => store.state.backstage.statisticalData
+);
+
+/**
+ * 获取评论列表
+ */
+const getCommentList = (uuid: string) => {
+  proxy.$axios
+    .get("/comment/userCommentList", { userUuid: uuid })
+    .then((res: any) => {
+      console.log("评论列表", res);
+      for (const item of res.result.list) {
+        item.createDate = dateFormat(item.createDate, "MM-dd");
+      }
+      commentList.value = res.result.list;
+      store.commit("backstage/setCommentsTotal", res.result.page.totalRow);
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+/**
+ * 返回首页，并搜索
+ */
+const pushHome = (category: string) => {
+  condition.value.currPage = 1;
+  condition.value.categoryTitle = category;
+  proxy.getAricleList(condition);
+  router.push({ name: "index", params: { category } });
+};
+/**
+ *
+ */
+const changeIndex = (index: string) => {
+  activeIndex.value = index;
+};
+onBeforeMount(() => {
+  document.title = "概要";
+  const temp = JSON.parse(proxy.$Cookies.get("user"));
+  getCommentList(temp.uuid);
+  getUserArticleList(temp.uuid);
+  user.value = temp;
+});
+onMounted(() => {
+  condition.value.pageSize = 7;
+  condition.value.currPage = 1;
+  condition.value.state = 1;
+  condition.value.categoryTitle = "";
+  proxy.getAricleList(condition, "MM-dd");
 });
 </script>
 
@@ -191,7 +205,7 @@ export default defineComponent({
 
   min-height: 93vh;
   .container {
-    width: 70%;
+    width: 95%;
     margin: 0 auto;
     .synopsis {
       .title {
@@ -291,6 +305,10 @@ export default defineComponent({
               color: #444;
               span {
                 color: #499bc3;
+                span {
+                  color: rgb(233, 30, 99);
+                  cursor: pointer;
+                }
               }
               a {
                 position: relative;

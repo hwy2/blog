@@ -1,6 +1,7 @@
 import {
     createStore
 } from 'vuex'
+import createPersistedState from 'vuex-persistedstate';
 
 export default createStore({
     actions: {},
@@ -14,7 +15,13 @@ export default createStore({
                     categoriesTotal: 0
                 },
                 activeIndex: "/backstage/outline",
-                categoryList: []
+                categoryList: [],
+                user: {},
+                statisticalData: {
+                    articlesTotal: 0,
+                    commentsTotal: 0,
+                    classificationsTotal: 0,
+                }
             },
             getters: {
                 getDataSummary(state) {
@@ -25,6 +32,12 @@ export default createStore({
                 },
                 getCategoryList(state) {
                     return state.categoryList
+                },
+                getUser(state) {
+                    return state.user
+                },
+                getStatisticalData(state) {
+                    return state.statisticalData
                 }
             },
             mutations: {
@@ -36,6 +49,19 @@ export default createStore({
                 },
                 setCategoryList(state, status) {
                     state.categoryList = status
+                },
+                setUser(state, user) {
+                    state.user = user
+                },
+                setArticlesTotal(state, articlesTotal) {
+                    console.log(state)
+                    state.statisticalData.articlesTotal = articlesTotal
+                },
+                setCommentsTotal(state, commentsTotal) {
+                    state.statisticalData.commentsTotal = commentsTotal
+                },
+                setClassificationsTotal(state, classificationsTotal) {
+                    state.statisticalData.classificationsTotal = classificationsTotal
                 }
             }
         },
@@ -47,15 +73,17 @@ export default createStore({
                 blogTitle: '',
                 article: {},
                 articleLists: [],
+                articleStickyList: [],
                 totals: 0,
                 pageTtotals: 0,
                 dataSummary: [],
                 condition: {
-                    pageSize: 7,
+                    pageSize: 10,
                     currPage: 1,
                     categoryTitle: "",
                     articleVague: '',
-                    state: 1
+                    state: 1,
+                    userUuid: ''
                 },
                 search: {
                     categoryFlag: false,
@@ -97,6 +125,8 @@ export default createStore({
                 },
                 getPageList(state) {
                     return state.pageList
+                }, getArticleStickyList(state) {
+                    return state.articleStickyList
                 }
             },
             mutations: {
@@ -132,8 +162,14 @@ export default createStore({
                 },
                 setPageList(state, status) {
                     state.pageList = status
-                }
+                },
+                setArticleStickyList(state, status) {
+                    state.articleStickyList = status
+                },
             },
         }
-    }
+    },
+    plugins: [
+        createPersistedState()
+    ]
 })

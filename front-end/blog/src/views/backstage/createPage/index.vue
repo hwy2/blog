@@ -1,8 +1,8 @@
 <template>
-  <div id="writingArticles">
+  <div id="createPage">
     <div class="container">
       <div class="page-title">
-        <h2>{{ article?.title ? article?.title : "撰写新文章" }}</h2>
+        <h2>{{ article?.title ? article?.title : "创建新页面" }}</h2>
       </div>
       <div class="page-main">
         <div class="content-pane">
@@ -21,9 +21,9 @@
               <div class="md-editor">
                 <md-editor
                   v-model="content"
-                  @onHtmlChanged="methods.saveHtml"
-                  @onSave="methods.saveValue"
-                  @onUploadImg="methods.uploadImg"
+                  @onHtmlChanged="saveHtml"
+                  @onSave="saveValue"
+                  @onUploadImg="uploadImg"
                   :preview="false"
                 />
               </div>
@@ -50,13 +50,13 @@
             <el-form-item class="clearfix">
               <el-button
                 type="primary"
-                @click="methods.submitArticleForm('articleForm', true)"
+                @click="submitArticleForm('articleForm', true)"
               >
                 保存草稿
               </el-button>
               <el-button
                 type="primary"
-                @click="methods.submitArticleForm('articleForm', false)"
+                @click="submitArticleForm('articleForm', false)"
               >
                 发布页面
               </el-button>
@@ -82,384 +82,368 @@
     </div>
   </div>
 </template>
-<script lang="ts">
+<script lang="ts" setup name="createPage">
 import {
-  defineComponent,
   reactive,
-  toRefs,
+  ref,
   onMounted,
   getCurrentInstance,
   computed,
   onBeforeMount,
   watch,
+  onBeforeUnmount
 } from "vue";
-import dateFormat from "/@/assets/js/dateFormat.js";
+import dateFormat from "@/assets/js/dateFormat.js";
 import { useStore } from "vuex";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { ElNotification, ElLoading } from "element-plus";
-export default defineComponent({
-  name: "createPage",
-  components: {
-    MdEditor,
-  },
-  setup: () => {
-    const store = useStore();
-    const router = useRouter();
-    const { proxy }: any = getCurrentInstance();
-    const state = reactive({
-      // vue2.x的data参数
-      content: "", // 富文本编辑框
-      saveStatus: true,
-      article: {
-        title: "",
-        content: "",
-        photo: "http://localhost:3000/common/wallpaper",
-        state: 1,
-        abstract: "",
-        pageview: 0,
-        ishot: false,
-        userUuid: computed(() => {
-          if (proxy.$Cookies.get("user")) {
-            const user = JSON.parse(proxy.$Cookies.get("user"));
-            return user.uuid;
-          }
-          return "";
-        }),
-        pageOrder: 0,
-        template: 0,
-        categoryUuids: computed(
-          () => store.state.backstage.categoryList[0].uuid
-        ),
-      },
-      rulesArticle: {
-        title: [
-          { required: true, message: "请输入标题", trigger: "blur" },
-          {
-            max: 255,
-            message: "最长为 255 个字符",
-            trigger: "blur",
-          },
-        ],
-        content: [
-          { required: true, message: "请输入文章内容", trigger: "blur" },
-        ],
-        photo: [{ required: true, message: "请输入链接", trigger: "blur" }],
-        abstract: [
-          { required: true, message: "请输入摘要", trigger: "blur" },
-          {
-            max: 255,
-            message: "最长为 255 个字符",
-            trigger: "blur",
-          },
-        ],
-      },
-      categoryList: computed(() => store.state.backstage.categoryList),
-    });
-    /**
-     * 文章状态 （0已删除、1已发布、2草稿、3页面）
-     */
-    enum status {
-      delete, // 删除
-      release, // 发布
-      draft, // 草稿
-      reviewed, // 审核
-      page, // 页面
+
+const store = useStore();
+const router = useRouter();
+const { proxy }: any = getCurrentInstance();
+// vue2.x的data参数
+const content = ref<string>(""); // 富文本编辑框
+const saveStatus = ref<boolean>(true);
+const article = reactive({
+  title: "",
+  content: "",
+  photo: "https://api.baka.fun/acgpic",
+  state: 1,
+  abstract: "",
+  pageview: 0,
+  ishot: false,
+  userUuid: computed(() => {
+    if (proxy.$Cookies.get("user")) {
+      const user = JSON.parse(proxy.$Cookies.get("user"));
+      return user.uuid;
     }
-    setTimeout(() => {
-      watch(
-        () => state.article,
-        (newValue: any, oldValue: any) => {
-          console.log(newValue);
-          console.log(oldValue);
-          state.saveStatus = false;
-        },
-        {
-          deep: true, // 深度监听的参数
+    return "";
+  }),
+  pageOrder: 0,
+  template: 0,
+  categoryUuids: computed(() => store.state.backstage.categoryList[0].uuid)
+});
+const rulesArticle = reactive({
+  title: [
+    { required: true, message: "请输入标题", trigger: "blur" },
+    {
+      max: 255,
+      message: "最长为 255 个字符",
+      trigger: "blur"
+    }
+  ],
+  content: [{ required: true, message: "请输入文章内容", trigger: "blur" }],
+  photo: [{ required: true, message: "请输入链接", trigger: "blur" }],
+  abstract: [
+    { required: true, message: "请输入摘要", trigger: "blur" },
+    {
+      max: 255,
+      message: "最长为 255 个字符",
+      trigger: "blur"
+    }
+  ]
+});
+const categoryList = ref<Array<any>>([]);
+
+/**
+ * 文章状态 （0已删除、1已发布、2草稿、3页面）
+ */
+enum status {
+  delete, // 删除
+  release, // 发布
+  draft, // 草稿
+  reviewed, // 审核
+  page // 页面
+}
+setTimeout(() => {
+  watch(
+    () => article,
+    (newValue: any, oldValue: any) => {
+      console.log(newValue);
+      console.log(oldValue);
+      saveStatus.value = false;
+    },
+    {
+      deep: true // 深度监听的参数
+    }
+  );
+}, 500);
+watch(
+  () => saveStatus,
+  (newValue: any, oldValue: any) => {
+    if (newValue) {
+      // 清除窗口事件
+      window.onbeforeunload = null;
+    } else {
+      // 添加刷新提示
+      window.onbeforeunload = (e) => {
+        e = e || window.event;
+        if (e) {
+          e.returnValue = "关闭提示";
         }
-      );
-    }, 500);
-    watch(
-      () => state.saveStatus,
-      (newValue: any, oldValue: any) => {
-        if (newValue) {
-          // 清除窗口事件
-          window.onbeforeunload = null;
+        return "关闭提示";
+      };
+    }
+  }
+);
+
+/**
+ * 保存当前装换的html字段
+ */
+const saveHtml = (html: string) => {
+  console.log(html);
+  article.content = content.value;
+};
+/**
+ * 保存当前数据
+ */
+const saveValue = (v: string) => {
+  console.log(v);
+  saveStatus.value = true;
+  submitArticleForm("articleForm", true);
+};
+/**
+ * 上传图片文件
+ */
+const uploadImg = async (
+  files: FileList,
+  callback: (urls: string[]) => void
+) => {
+  const res = await Promise.all(
+    Array.from(files).map((file) => {
+      console.log(file);
+      return new Promise((rev, rej) => {
+        const data = new FormData();
+        data.append("files", file);
+        proxy.$axios
+          .post("/common/enclosure", data)
+          .then((resp: any) => rev(resp))
+          .catch((error: any) => rej(error));
+      });
+    })
+  );
+  console.log(res);
+  callback(res.map((item: any) => item.result.fileList[0].absoluteUrl));
+};
+/**
+ * 提交表单
+ */
+const submitArticleForm = (formName: string, isdraft: boolean) => {
+  saveStatus.value = true;
+  isdraft ? (article.state = status.draft) : (article.state = status.page);
+  if (article.abstract === "") {
+    article.abstract = content.value.substr(0, 100);
+  }
+  if (article.template !== 0) {
+    rulesArticle.abstract[0].required = false;
+    rulesArticle.content[0].required = false;
+  }
+  proxy.$refs[formName].validate((valid: any) => {
+    if (valid) {
+      if (router.currentRoute.value.params.uuid) {
+        updateArticle(article, isdraft);
+      } else {
+        createArticle(article, isdraft);
+      }
+    } else {
+      ElNotification({
+        title: "错误",
+        message: "必填项不能为空",
+        type: "error"
+      });
+      return false;
+    }
+  });
+};
+/**
+ * 创建页面
+ */
+const createArticle = (article: any, isdraft: boolean) => {
+  proxy.$axios
+    .post("/article/create", article)
+    .then((res: any) => {
+      console.log(res);
+      if (res.code === "200") {
+        saveStatus.value = true;
+        if (isdraft) {
+          ElNotification({
+            title: "成功",
+            message: "保存成功",
+            type: "success"
+          });
         } else {
-          // 添加刷新提示
-          window.onbeforeunload = (e) => {
-            e = e || window.event;
-            if (e) {
-              e.returnValue = "关闭提示";
-            }
-            return "关闭提示";
-          };
-        }
-      }
-    );
-
-    const methods = {
-      /**
-       * 保存当前装换的html字段
-       */
-      saveHtml(html: string) {
-        console.log(html);
-        state.article.content = state.content;
-      },
-      /**
-       * 保存当前数据
-       */
-      saveValue(v: string) {
-        console.log(v);
-        state.saveStatus = true;
-        methods.submitArticleForm("articleForm", true);
-      },
-      /**
-       * 上传图片文件
-       */
-      async uploadImg(files: FileList, callback: (urls: string[]) => void) {
-        const res = await Promise.all(
-          Array.from(files).map((file) => {
-            console.log(file);
-            return new Promise((rev, rej) => {
-              const data = new FormData();
-              data.append("files", file);
-              proxy.$axios
-                .post("/common/enclosure", data)
-                .then((resp: any) => rev(resp))
-                .catch((error: any) => rej(error));
-            });
-          })
-        );
-        console.log(res);
-        callback(res.map((item: any) => item.result.fileList[0].absoluteUrl));
-      },
-      /**
-       * 提交表单
-       */
-      submitArticleForm(formName: string, isdraft: boolean) {
-        state.saveStatus = true;
-        isdraft
-          ? (state.article.state = status.draft)
-          : (state.article.state = status.page);
-        if (state.article.abstract === "") {
-          state.article.abstract = state.content.substr(0, 100);
-        }
-        if (state.article.template !== 0) {
-          state.rulesArticle.abstract[0].required = false;
-          state.rulesArticle.content[0].required = false;
-        }
-        proxy.$refs[formName].validate((valid: any) => {
-          if (valid) {
-            if (router.currentRoute.value.params.uuid) {
-              methods.updateArticle(state.article, isdraft);
-            } else {
-              methods.createArticle(state.article, isdraft);
-            }
-          } else {
-            ElNotification({
-              title: "错误",
-              message: "必填项不能为空",
-              type: "error",
-            });
-            return false;
-          }
-        });
-      },
-      /**
-       * 创建页面
-       */
-      createArticle(article: any, isdraft: boolean) {
-        proxy.$axios
-          .post("/article/create", state.article)
-          .then((res: any) => {
-            console.log(res);
-            if (res.code === "200") {
-              state.saveStatus = true;
-              if (isdraft) {
-                ElNotification({
-                  title: "成功",
-                  message: "保存成功",
-                  type: "success",
-                });
-              } else {
-                ElNotification({
-                  title: "成功",
-                  message: "页面创建成功",
-                  type: "success",
-                });
-                // 跳转到文章列表页面
-                setTimeout(() => {
-                  router.push({ name: "pageList" });
-                  store.commit(
-                    "backstage/setActiveIndex",
-                    "/backstage/pageList"
-                  );
-                }, 1000);
-              }
-            } else {
-              state.saveStatus = false;
-              ElNotification({
-                title: "错误",
-                message: res.msg,
-                type: "error",
-              });
-            }
-          })
-          .catch((err: any) => {
-            console.log(err);
+          ElNotification({
+            title: "成功",
+            message: "页面创建成功",
+            type: "success"
           });
-      },
-      /**
-       * 创建页面
-       */
-      updateArticle(article: any, isdraft: boolean) {
-        proxy.$axios
-          .put("/article/update", { article: state.article })
-          .then((res: any) => {
-            console.log(res);
-            if (res.code === "200") {
-              state.saveStatus = true;
-              if (isdraft) {
-                ElNotification({
-                  title: "成功",
-                  message: "保存成功",
-                  type: "success",
-                });
-              } else {
-                ElNotification({
-                  title: "成功",
-                  message: "页面修改成功",
-                  type: "success",
-                });
-                // 跳转到文章列表页面
-                setTimeout(() => {
-                  router.push({ name: "pageList" });
-                  store.commit(
-                    "backstage/setActiveIndex",
-                    "/backstage/pageList"
-                  );
-                }, 1000);
-              }
-            } else {
-              state.saveStatus = false;
-              ElNotification({
-                title: "错误",
-                message: res.msg,
-                type: "error",
-              });
-            }
-          })
-          .catch((err: any) => {
-            console.log(err);
-          });
-      },
-      /**
-       * 获取文章内容
-       */
-      getArticleInfo(uuid: any) {
-        const loading = ElLoading.service({ fullscreen: true });
-        proxy.$axios
-          .get("/article/info", { articleUuid: uuid })
-          .then((res: any) => {
-            console.log(res.result.article.content);
-            document.title = "编辑" + res.result.article.title;
-            res.result.article.createDate = dateFormat(
-              res.result.article.createDate,
-              "yyyy年MM月dd日"
-            );
-            res.result.article.updateDate = dateFormat(
-              res.result.article.updateDate,
-              "yyyy-MM-dd hh:mm:ss"
-            );
-            state.article = {
-              title: res.result.article.title,
-              content: res.result.article.content,
-              photo: res.result.article.photo,
-              state: res.result.article.state,
-              abstract: res.result.article.abstract,
-              pageview: res.result.article.pageview,
-              ishot: res.result.article.ishot,
-              userUuid: res.result.article.user.uuid,
-              pageOrder: res.result.article.pageOrder,
-              template: res.result.article.template,
-              categoryUuids: res.result.article.categories[0].uuid,
-            };
-            (state.article as any).uuid = res.result.article.uuid;
-            state.content = res.result.article.content;
-            loading.close();
-          })
-          .catch((error: any) => {
-            console.log(error);
-            loading.close();
-          });
-      },
-    };
-    onBeforeMount(() => {
-      // 挂载之前
-      document.title = "创建页面";
-    });
-    onMounted(() => {
-      // 挂载之后
-      if (!proxy.$Cookies.get("accessToken")) {
-        router.push({ name: "login" });
-      }
-
-      // 如果路由中携带有文章的uuid，默认认为是修改文章
-      if (router.currentRoute.value.query.uuid) {
-        const paramsUuid = router.currentRoute.value.query.uuid;
-        methods.getArticleInfo(paramsUuid);
-      }
-    });
-    // 单页面导航守卫
-
-    onBeforeRouteLeave((to, from, next) => {
-      if (!state.saveStatus) {
-        const answer = window.confirm("你真的想离开吗? 您有未保存的更改!");
-        // 清除窗口绑定，及提交activeIndex导航
-        if (answer) {
-          store.commit("backstage/setActiveIndex", to.fullPath);
-          window.onbeforeunload = null;
-          next();
-        } else {
-          // 取消导航并停留在同一页面上
-          store.commit(
-            "backstage/setActiveIndex",
-            "/backstage/writingArticles"
-          );
-          next(false);
+          // 跳转到文章列表页面
+          setTimeout(() => {
+            router.push({ name: "pageList" });
+            store.commit("backstage/setActiveIndex", "/backstage/pageList");
+          }, 1000);
         }
       } else {
-        window.onbeforeunload = null;
-        next(true);
+        saveStatus.value = false;
+        ElNotification({
+          title: "错误",
+          message: res.msg,
+          type: "error"
+        });
       }
+    })
+    .catch((err: any) => {
+      console.log(err);
     });
+};
+/**
+ * 创建页面
+ */
+const updateArticle = (article: any, isdraft: boolean) => {
+  proxy.$axios
+    .put("/article/update", { article: article })
+    .then((res: any) => {
+      console.log(res);
+      if (res.code === "200") {
+        saveStatus.value = true;
+        if (isdraft) {
+          ElNotification({
+            title: "成功",
+            message: "保存成功",
+            type: "success"
+          });
+        } else {
+          ElNotification({
+            title: "成功",
+            message: "页面修改成功",
+            type: "success"
+          });
+          // 跳转到文章列表页面
+          setTimeout(() => {
+            router.push({ name: "pageList" });
+            store.commit("backstage/setActiveIndex", "/backstage/pageList");
+          }, 1000);
+        }
+      } else {
+        saveStatus.value = false;
+        ElNotification({
+          title: "错误",
+          message: res.msg,
+          type: "error"
+        });
+      }
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+/**
+ * 获取文章内容
+ */
+const getArticleInfo = (uuid: any) => {
+  const loading = ElLoading.service({ fullscreen: true });
+  proxy.$axios
+    .get("/article/info", { articleUuid: uuid })
+    .then((res: any) => {
+      console.log(res.result.article.content);
+      document.title = "编辑" + res.result.article.title;
+      res.result.article.createDate = dateFormat(
+        res.result.article.createDate,
+        "yyyy年MM月dd日"
+      );
+      res.result.article.updateDate = dateFormat(
+        res.result.article.updateDate,
+        "yyyy-MM-dd hh:mm:ss"
+      );
 
-    return {
-      ...toRefs(state),
-      methods,
-    };
-  },
-  destroyed() {
-    // 清除窗口绑定事件
+      (article.title = res.result.article.title),
+        (article.content = res.result.article.content),
+        (article.photo = res.result.article.photo),
+        (article.state = res.result.article.state),
+        (article.abstract = res.result.article.abstract),
+        (article.pageview = res.result.article.pageview),
+        (article.ishot = res.result.article.ishot),
+        (article.userUuid = res.result.article.user.uuid),
+        (article.pageOrder = res.result.article.pageOrder),
+        (article.template = res.result.article.template),
+        (article.categoryUuids = res.result.article.categories[0].uuid(
+          article as any
+        ).uuid =
+          res.result.article.uuid);
+      content.value = res.result.article.content;
+      loading.close();
+    })
+    .catch((error: any) => {
+      console.log(error);
+      loading.close();
+    });
+};
+onBeforeMount(() => {
+  // 挂载之前
+  categoryList.value = store.state.backstage.categoryList;
+  document.title = "创建页面";
+});
+onMounted(() => {
+  // 挂载之后
+  if (!proxy.$Cookies.get("accessToken")) {
+    router.push({ name: "login" });
+  }
+
+  // 如果路由中携带有文章的uuid，默认认为是修改文章
+  if (router.currentRoute.value.query.uuid) {
+    const paramsUuid = router.currentRoute.value.query.uuid;
+    getArticleInfo(paramsUuid);
+  }
+});
+// 单页面导航守卫
+
+onBeforeRouteLeave((to, from, next) => {
+  if (!saveStatus.value) {
+    const answer = window.confirm("你真的想离开吗? 您有未保存的更改!");
+    // 清除窗口绑定，及提交activeIndex导航
+    if (answer) {
+      store.commit("backstage/setActiveIndex", to.fullPath);
+      window.onbeforeunload = null;
+      next();
+    } else {
+      // 取消导航并停留在同一页面上
+      store.commit("backstage/setActiveIndex", "/backstage/setting/basicSettings");
+      next(false);
+    }
+  } else {
     window.onbeforeunload = null;
-  },
+    next(true);
+  }
+});
+onBeforeUnmount(() => {
+  // 清除窗口绑定事件
+  window.onbeforeunload = null;
 });
 </script>
 
 <style lang="scss">
-#writingArticles {
-  min-height: 93.3vh;
+#createPage {
+  height: calc(100vh - 60px);
+  overflow: auto;
   width: 100%;
   .container {
-    width: 70%;
+    width: 95%;
     margin: 0 auto;
     color: #444;
     .page-title {
       padding: 1.5% 0;
+      width: 76%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       h2 {
         font-size: 1.2em;
+        width: 99%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
     .page-main {

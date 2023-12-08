@@ -27,6 +27,10 @@ User.hasOne(UserInfo); //1:1
 User.hasMany(Article); //1:N
 Article.belongsTo(User); //1:1
 
+//用户-分类
+User.hasMany(Category); //1:N
+Category.belongsTo(User); //1:1
+
 // 文章-评论
 Article.hasMany(Comment); //1:N
 Comment.belongsTo(Article); //1:1
@@ -44,6 +48,17 @@ Article.belongsToMany(Category, {
 //config配置文件确定是否首次配置，
 //首次创建表之后将isFirstTimeInstall字段修改为false
 //确保该代码只执行一次，不会破坏数据
+//基于sequelize自动创建表,会清空数据，保险起见第一次运行之后注释掉
+// drop()与sync()对于数据库是破坏性的，所以保险起见第一次运行之后注释掉
+// Mysql.sync({
+//     force: true, //是否清空数据库表
+// }).then(async function () {
+//     console.log('创建数据表 ok！');
+//     Initialization.init(User, UserInfo, Category, WebConfig, DataSummary, Article, ArticleCategory, Comment, Links);
+// }).catch(function (error) {
+//     console.log("error", error)
+// });
+
 if (config.isFirstTimeInstall) {
     console.log("isFirstTimeInstall", config.isFirstTimeInstall);
     // 删除所有表及数据
@@ -61,16 +76,6 @@ if (config.isFirstTimeInstall) {
             }
             console.log("修改状态成功");
         })
-    });
-    //基于sequelize自动创建表,会清空数据，保险起见第一次运行之后注释掉
-    // drop()与sync()对于数据库是破坏性的，所以保险起见第一次运行之后注释掉
-    Mysql.sync({
-        force: true, //是否清空数据库表
-    }).then(async function () {
-        console.log('创建数据表 ok！');
-        Initialization.init(User, UserInfo, Category, WebConfig, DataSummary, Article, ArticleCategory, Comment, Links);
-    }).catch(function (error) {
-        console.log("error", error)
     });
 }
 

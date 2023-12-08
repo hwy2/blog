@@ -3,11 +3,13 @@ var i18n = require('i18n'); //i18n国际化
 var utils = require('../libs/utils'); //工具类
 var config = require('../config/default'); //配置文件
 var Category = require('../models/index').Category; //文章类别
-var Article = require('../models/index').Article; //文章
-var User = require('../models/index').User;
-var UserInfo = require('../models/index').UserInfo;
-var Comment = require('../models/index').Comment;
+// var Article = require('../models/index').Article; //文章
+// var User = require('../models/index').User;
+// var UserInfo = require('../models/index').UserInfo;
+// var Comment = require('../models/index').Comment;
+// var ArticleCategory = require('../models/index').ArticleCategory;
 var dataSummary = require('./dataSummary');
+// var Sequelize = require('sequelize');
 module.exports = {
     /**
      * 获取文章类别
@@ -280,5 +282,62 @@ module.exports = {
                 error: error
             })
         })
-    }
+    },
+    /**
+     * 用户全部分类
+     * list
+     */
+    userCategoryList: function (req, res, next) {
+        var params = req.query || req.params;
+        var userUuid = utils.trim(params.userUuid) 
+
+        if (!userUuid){
+            utils.handleJson({
+                response:res,
+                msg:i18n.__('pleasePassUuid')
+            })
+            return
+        }
+
+        // 分页
+        var page = {
+            currPage: utils.trim(params.currPage) || config.page.currPage, //获取当前页
+            pageSize: utils.trim(params.pageSize) || config.page.pageSize //每页数量
+        }
+        co(function* () {
+            var categoryResult = yield Category.findAndCountAll({
+                where:{
+                    userUuid
+                },
+                limit: page.pageSize,
+                offset: page.pageSize * (page.currPage - 1),
+                order: [
+                    ['createDate', 'DESC']
+                ]
+            });
+
+            var categoryList = categoryResult.rows || [];
+            // 处理分页
+            var pageResult = yield utils.handlePage({
+                count: categoryResult.count,
+                page: page
+            });
+
+            utils.handleJson({
+                response: res,
+                result: {
+                    list: categoryList,
+                    page: pageResult
+                }
+            })
+
+
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    },
 }

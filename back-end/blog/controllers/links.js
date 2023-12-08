@@ -172,6 +172,7 @@ module.exports = {
     updateLinks: function (req, res, next) {
         var params = req.body || req.params;
         var linkModel = params.links;
+        console.log(linkModel)
         if (!linkModel.state) linkModel.state = 0;
         if (!linkModel.uuid || !linkModel.name || !linkModel.URL) {
             utils.handleJson({

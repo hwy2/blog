@@ -87,11 +87,11 @@ import {
   onBeforeMount
 } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
 
 const store = useStore();
-const router = useRouter();
+// const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 let webConfig = reactive({
   siteName: "",

@@ -226,6 +226,7 @@ const uploadImg = async (
       return new Promise((rev, rej) => {
         const data = new FormData();
         data.append("files", file);
+        data.append("userUuid", article.userUuid);
         proxy.$axios
           .post("/common/enclosure", data)
           .then((resp: any) => rev(resp))
@@ -353,39 +354,41 @@ const getArticleInfo = (uuid: any) => {
     .get("/article/info", { articleUuid: uuid })
     .then((res: any) => {
       console.log(res);
-      document.title = "编辑" + res.result.article.title;
-      res.result.article.createDate = dateFormat(
-        res.result.article.createDate,
-        "yyyy年MM月dd日"
-      );
-      res.result.article.updateDate = dateFormat(
-        res.result.article.updateDate,
-        "yyyy-MM-dd hh:mm:ss"
-      );
-      article.title = res.result.article.title;
-      article.content = res.result.article.content;
-      article.photo = res.result.article.photo;
-      article.state = res.result.article.state;
-      article.abstract = res.result.article.abstract;
-      article.pageview = res.result.article.pageview;
-      article.ishot = res.result.article.ishot;
-      article.userUuid = res.result.article.user.uuid;
-      article.categoryUuids = "";
+      if (res.code == "200") {
+        document.title = "编辑" + res.result.article.title;
+        res.result.article.createDate = dateFormat(
+          res.result.article.createDate,
+          "yyyy年MM月dd日"
+        );
+        res.result.article.updateDate = dateFormat(
+          res.result.article.updateDate,
+          "yyyy-MM-dd hh:mm:ss"
+        );
+        article.title = res.result.article.title;
+        article.content = res.result.article.content;
+        article.photo = res.result.article.photo;
+        article.state = res.result.article.state;
+        article.abstract = res.result.article.abstract;
+        article.pageview = res.result.article.pageview;
+        article.ishot = res.result.article.ishot;
+        article.userUuid = res.result.article.user.uuid;
+        article.categoryUuids = "";
 
-      (article as any).uuid = res.result.article.uuid;
-      const list: string[] = [];
-      const list2: string[] = [];
-      for (const item of res.result.article.categories) {
-        console.log(item);
-        list.push(item.uuid);
-        list2.push(item.title);
+        (article as any).uuid = res.result.article.uuid;
+        const list: string[] = [];
+        const list2: string[] = [];
+        for (const item of res.result.article.categories) {
+          console.log(item);
+          list.push(item.uuid);
+          list2.push(item.title);
+        }
+        article.categoryUuids = list.join(",");
+        checkboxGroup.value = list2;
+
+        //  res.result.article;
+        content.value = res.result.article.content;
+        loading.close();
       }
-      article.categoryUuids = list.join(",");
-      checkboxGroup.value = list2;
-
-      //  res.result.article;
-      content.value = res.result.article.content;
-      loading.close();
     })
     .catch((error: any) => {
       console.log(error);

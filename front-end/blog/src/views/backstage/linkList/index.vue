@@ -277,8 +277,10 @@ const getLinksList = () => {
     .get("/links/list", condition)
     .then((res: any) => {
       console.log(res);
-      tableData.value = res.result.list;
-      totals.value = res.result.page.totalRow;
+      if (res.code == "200") {
+        tableData.value = res.result.list;
+        totals.value = res.result.page.totalRow;
+      }
     })
     .catch((err: any) => {
       console.log(err);

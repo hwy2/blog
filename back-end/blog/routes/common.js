@@ -23,4 +23,23 @@ router.get('/wallpaper', function (req, res, next) {
     commonDao.returnRandomPictures(req, res, next);
 })
 
+/**
+ * 获取全部附件信息
+ */
+router.get("/userList", async function (req, res, next) {
+    var userUuid = (req.query || req.query || req.params).userUuid
+    var token = req.headers.accesstoken;
+
+    try {
+        const result = await verifyAdminToken(token, userUuid)
+        if (result == 'ok') {
+            commonDao.getFileList(req, res, next)
+        } else {
+            commonDao.getUserFileList(req, res, next)
+        }
+    } catch (error) {
+        commonDao.getUserFileList(req, res, next)
+    }
+})
+
 module.exports = router;

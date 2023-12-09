@@ -36,9 +36,9 @@
                   <div class="rightName">
                     <h3>{{ scope.row.nickName }}</h3>
                     <p>
-                      <a :href="`mailto:${scope.row.email}`" target="_blank"
-                        >hwy@3dcw.cn</a
-                      >
+                      <a :href="`mailto:${scope.row.email}`" target="_blank">{{
+                        scope.row.email
+                      }}</a>
                     </p>
                     <p>{{ scope.row.ip }}<br />{{ scope.row.vestingPlace }}</p>
                   </div>
@@ -148,11 +148,7 @@
         </div>
       </div>
     </div>
-    <el-dialog
-      v-model="editDialog"
-      :title="dialogTitle"
-      width="50%"
-    >
+    <el-dialog v-model="editDialog" :title="dialogTitle" width="50%">
       <el-form
         label-position="top"
         label-width="80px"
@@ -326,8 +322,10 @@ const getCommentData = (condition: any) => {
     .get("/comment/userCommentList", condition)
     .then((resp: any) => {
       console.log(resp, "kk");
-      commentListData.value = resp.result.list;
-      commentTotal.value = resp.result.page.totalRow;
+      if (resp.code == "200") {
+        commentListData.value = resp.result.list;
+        commentTotal.value = resp.result.page.totalRow;
+      }
     })
     .catch((error: any) => {
       console.log(error);

@@ -135,6 +135,10 @@ module.exports = {
         }
         return result;
     },
+    /**
+     * 获取文件名称
+     * @returns 
+     */
     getFileName: function () {
         let components = [];
         var fpath = path.join(__dirname, '../public/attchments/wallpaper/')
@@ -146,5 +150,57 @@ module.exports = {
             }
         })
         return components;
+    },
+    /**
+     * 删除对应地址的文件
+     * @param {*} url 
+     */
+    delFile: function (url, relativeUrl) {
+        fs.unlink(url, (err) => {
+            if (err) {
+                console.error(err)
+                return false
+            }
+            var reg = new RegExp(relativeUrl,"g")
+            var folderPath = url.replace(reg,'')
+            if (isDirectoryEmptySync(folderPath)) {
+                deleteFolder(folderPath)
+            }
+            return true
+        })
+
+
+    },
+    /**
+     * 判断文件夹是否为空
+     * @param {*} path 
+     * @returns 
+     */
+    isDirectoryEmptySync: function (path) {
+        const files = fs.readdirSync(path);
+        return files.length === 0;
+    },
+    /** 删除文件夹 */
+    deleteFolder: function (folderPath) {
+        try {
+            if (fs.existsSync(folderPath)) {
+                fs.readdirSync(folderPath).forEach((file) => {
+                    const currentPath = folderPath + '/' + file;
+                    if (fs.statSync(currentPath).isDirectory()) {
+                        // 递归删除子文件夹
+                        deleteFolder(currentPath);
+                    } else {
+                        // 删除文件
+                        fs.unlinkSync(currentPath);
+                    }
+                });
+                fs.rmdirSync(folderPath);
+                console.log('文件夹删除成功！');
+            } else {
+                console.log('文件夹不存在！');
+            }
+        } catch (err) {
+            console.error('删除文件夹出错：', err);
+        }
     }
 };

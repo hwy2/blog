@@ -14,6 +14,7 @@
     "pleasePassUuid": "please pass uuid",
     "updateUserInfoFail": "update user info fail",
     "updateUserInfoSuccess": "update user info success",
+    "fileDoesNotExist": "file does not exist",
     "pleasePassParamsComplete": "please pass params complete",
     "newPwdEqOldPwd": "newPwd Eq oldPwd",
     "oldPwdError": "oldPwd error",
@@ -27,11 +28,12 @@
     "userUuidNotNull": "userUuid not null",
     "userInfoAlreadyExists": "user info already exists",
     "userInfoNotExist": "user info not exist",
-    "categoryNotExist":"category does not exist",
+    "categoryNotExist": "category does not exist",
     "categoryAlreadyExists": "category already exists",
-    "updateArticleFail":"update article fail",
-    "creationFailed":"creation failed",
+    "updateArticleFail": "update article fail",
+    "creationFailed": "creation failed",
     "siteName&&siteAddress": "siteName&&siteAddress not null",
     "noInformationFound": "no information found",
-    "notDeleteLastAccount": "It is forbidden to delete the last account"
+    "notDeleteLastAccount": "It is forbidden to delete the last account",
+    "categoryOccupancy": "category occupancy"
 }

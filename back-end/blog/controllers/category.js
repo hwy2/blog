@@ -7,7 +7,7 @@ var Category = require('../models/index').Category; //文章类别
 var User = require('../models/index').User;
 // var UserInfo = require('../models/index').UserInfo;
 // var Comment = require('../models/index').Comment;
-// var ArticleCategory = require('../models/index').ArticleCategory;
+var ArticleCategory = require('../models/index').ArticleCategory;
 var dataSummary = require('./dataSummary');
 var Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -140,6 +140,7 @@ module.exports = {
         }
 
         co(function* () {
+            // 搜索是否存在
             var categoryResult = yield Category.findOne({
                 where: {
                     uuid: categoryUuid
@@ -154,6 +155,23 @@ module.exports = {
 
                 return;
             }
+
+            // 搜索是否被引用
+            var articleCategoryResult = yield ArticleCategory.findAll({
+                where :{
+                    categoryUuid: categoryUuid
+                }
+            })
+            
+            if (articleCategoryResult.length >0) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('categoryOccupancy')
+                });
+
+                return;
+            }
+
 
             categoryResult = yield Category.destroy({
                 where: {

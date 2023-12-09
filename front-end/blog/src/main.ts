@@ -22,7 +22,7 @@ app.config.globalProperties.$Cookies = Cookies;
 //     (app.config as any).devtools = true
 // }
 // 实例挂载
-app.use(VueLazyload, { loading: '@/assets/images/photo_default.jpg', error: './assets/img/gif_404.gif' })
+app.use(VueLazyload, { loading: '/src/assets/images/photo_default.jpg', error: '/src/assets/img/gif_404.gif' })
     .mixin({
         methods: { ...publicMethods }
     })

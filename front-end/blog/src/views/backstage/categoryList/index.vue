@@ -30,14 +30,14 @@
             <el-table-column
               label="标题"
               prop="title"
-              width="260"
+              width="200"
               align="center"
             >
             </el-table-column>
             <el-table-column
               label="创建者"
               prop="name"
-              width="260"
+              width="200"
               align="center"
             >
               <template #default="scope">
@@ -47,12 +47,22 @@
             <el-table-column
               label="创建时间"
               prop="createDate"
-              width="260"
               align="center"
             >
               <template #default="scope">
                 <span>{{
-                  dateFormat(scope.row.createDate, "yyyy-MM-dd")
+                  dateFormat(scope.row.createDate, "yyyy-MM-dd hh:mm:ss")
+                }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="修改时间"
+              prop="createDate"
+              align="center"
+            >
+              <template #default="scope">
+                <span>{{
+                  dateFormat(scope.row.updateDate, "yyyy-MM-dd hh:mm:ss")
                 }}</span>
               </template>
             </el-table-column>
@@ -176,14 +186,14 @@ import {
   onBeforeMount,
   watch
 } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+// import { useStore } from "vuex";
+// import { useRouter } from "vue-router";
 import { ElNotification, ElMessage, FormInstance } from "element-plus";
 import { InfoFilled } from "@element-plus/icons-vue";
 import dateFormat from "@/assets/js/dateFormat.js";
 
-const store = useStore();
-const router = useRouter();
+// const store = useStore();
+// const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 
 const categoryListData = ref<Array<any>>([]); //数据

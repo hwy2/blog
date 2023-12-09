@@ -353,13 +353,10 @@ const hidePage = computed(() => {
   return true;
 });
 
-watch(
-  search,
-  (newValue, oldValue) => {
-    condition.name = newValue;
-    getUserList();
-  }
-);
+watch(search, (newValue, oldValue) => {
+  condition.name = newValue;
+  getUserList();
+});
 
 /**
  * 选择全部
@@ -376,11 +373,13 @@ const getUserList = () => {
     .get("/user/list", condition)
     .then((res: any) => {
       console.log(res);
-      for (const item of res.result.list) {
-        item.createDate = dateFormat(item.createDate, "yyyy-MM-dd");
+      if (res.code == "200") {
+        for (const item of res.result.list) {
+          item.createDate = dateFormat(item.createDate, "yyyy-MM-dd");
+        }
+        tableData.value = res.result.list;
+        userTtotals.value = res.result.page.totalRow;
       }
-      tableData.value = res.result.list;
-      userTtotals.value = res.result.page.totalRow;
     })
     .catch((err: any) => {
       console.log(err);

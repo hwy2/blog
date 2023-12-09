@@ -21,6 +21,7 @@
 	"doSuccess": "成功",
 	"uploadFileFail": "上传文件失败",
 	"uploadFileSuccess": "上传文件成功",
+	"fileDoesNotExist":"文件不存在",
 	"userNameOrPwdNull": "用户名或密码为空",
 	"adminUserNotExist": "admin用户不存在",
 	"adminUserHadReg": "admin用户已被注册",
@@ -34,5 +35,6 @@
 	"creationFailed":"创建失败",
 	"siteName&&siteAddress":"网站名称或网站地址不能为空",
 	"noInformationFound":"查无信息",
-	"notDeleteLastAccount":"禁止删除最后一个账户"
+	"notDeleteLastAccount":"禁止删除最后一个账户",
+	"categoryOccupancy":"类别已占用"
 }

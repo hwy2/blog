@@ -6,7 +6,7 @@
           <p>网站概要</p>
         </div>
         <div class="details">
-           <p>
+          <p>
             目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
             <span>{{ dataSummary?.commentsTotal }}</span> 条关于你的评论在
             <span>{{ dataSummary?.categoriesTotal }}</span> 个分类中.
@@ -158,11 +158,13 @@ const getCommentList = (uuid: string) => {
     .get("/comment/userCommentList", { userUuid: uuid })
     .then((res: any) => {
       console.log("评论列表", res);
-      for (const item of res.result.list) {
-        item.createDate = dateFormat(item.createDate, "MM-dd");
+      if (res.code == "200") {
+        for (const item of res.result.list) {
+          item.createDate = dateFormat(item.createDate, "MM-dd");
+        }
+        commentList.value = res.result.list;
+        store.commit("backstage/setCommentsTotal", res.result.page.totalRow);
       }
-      commentList.value = res.result.list;
-      store.commit("backstage/setCommentsTotal", res.result.page.totalRow);
     })
     .catch((err: any) => {
       console.log(err);

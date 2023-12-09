@@ -13,67 +13,68 @@ export const getAricleList = (data: any = {}, format: string = 'yyyy年MM月dd�
     const loading = ElLoading.service({ fullscreen: true });
     axios.get("/article/list", data)
         .then((res: any) => {
-            console.log('获取文章列表',res);
-            for (const item of res?.result?.list) {
-                item.createDate = dateFormat(item.createDate, format);
-                item.updateDate = dateFormat(item.updateDate, format);
-                const category = [];
-                for (const iterator of item.categories) {
-                    category.push(iterator.title);
-                }
-                item.category = category.join(',')
-            }
-            if (data.state === 4) {
-                // 有序号的页面
-                const orderly = res.result.list.filter((item: any) => {
-                    switch (item.template) {
-                        case 0:
-                            item.to = "/home/normalPage/" + item.uuid
-                            break;
-                        case 1:
-                            item.to = "/home/archiveArticles"
-                            break;
-                        case 2:
-                            item.to = "/home/friendlyLink"
-                            break;
-                        default:
-                            break;
+            console.log('获取文章列表', res);
+            if (res.code == "200") {
+                for (const item of res?.result?.list) {
+                    item.createDate = dateFormat(item.createDate, format);
+                    item.updateDate = dateFormat(item.updateDate, format);
+                    const category = [];
+                    for (const iterator of item.categories) {
+                        category.push(iterator.title);
                     }
-                    return item.pageOrder > 0;
-                });
-                // 冒泡排序
-                for (let i = 0; i < orderly.length - 1; i++) {
-                    for (let j = 0; j < orderly.length - i - 1; j++) {
-                        if (orderly[j].pageOrder > orderly[j + 1].pageOrder) {
-                            const swap = orderly[j];
-                            orderly[j] = orderly[j + 1];
-                            orderly[j + 1] = swap;
+                    item.category = category.join(',')
+                }
+                if (data.state === 4) {
+                    // 有序号的页面
+                    const orderly = res.result.list.filter((item: any) => {
+                        switch (item.template) {
+                            case 0:
+                                item.to = "/home/normalPage/" + item.uuid
+                                break;
+                            case 1:
+                                item.to = "/home/archiveArticles"
+                                break;
+                            case 2:
+                                item.to = "/home/friendlyLink"
+                                break;
+                            default:
+                                break;
+                        }
+                        return item.pageOrder > 0;
+                    });
+                    // 冒泡排序
+                    for (let i = 0; i < orderly.length - 1; i++) {
+                        for (let j = 0; j < orderly.length - i - 1; j++) {
+                            if (orderly[j].pageOrder > orderly[j + 1].pageOrder) {
+                                const swap = orderly[j];
+                                orderly[j] = orderly[j + 1];
+                                orderly[j + 1] = swap;
+                            }
                         }
                     }
-                }
 
-                // 无序号的页面
-                const disorder = res.result.list.filter((item: any) => {
-                    return item.pageOrder === 0;
-                });
+                    // 无序号的页面
+                    const disorder = res.result.list.filter((item: any) => {
+                        return item.pageOrder === 0;
+                    });
 
-                if (orderly.length > 0) {
-                    for (const item of orderly) {
-                        disorder.splice(item.pageOrder - 1, 0, item);
+                    if (orderly.length > 0) {
+                        for (const item of orderly) {
+                            disorder.splice(item.pageOrder - 1, 0, item);
+                        }
                     }
-                }
-                store.commit("foreground/setPageList", disorder);
-                store.commit("foreground/setPageTtotals", res.result.page.totalRow);
-                loading.close();
-                return;
-            } else {
-                
-                store.commit("foreground/setArticleList", res.result.list);
-                store.commit('foreground/setArticleStickyList', res.result.articleSticky)
-                store.commit("foreground/setTotal", res.result.page.totalRow);
-                loading.close();
-            }
+                    store.commit("foreground/setPageList", disorder);
+                    store.commit("foreground/setPageTtotals", res.result.page.totalRow);
+                    loading.close();
+                    return;
+                } else {
 
+                    store.commit("foreground/setArticleList", res.result.list);
+                    store.commit('foreground/setArticleStickyList', res.result.articleSticky)
+                    store.commit("foreground/setTotal", res.result.page.totalRow);
+                    loading.close();
+                }
+            }
         })
         .catch((error: any) => {
             store.commit("foreground/setPageList", []);
@@ -157,8 +158,12 @@ export const getTestimonialsAricleList = (data: any = {}, format: string = 'yyyy
         axios.get("/article/testimonialsArticle", data)
             .then((res: any) => {
                 console.log(res);
-                resolve(res.result.list)
-                loading.close();
+                if (res.code == "200") {
+                    resolve(res.result.list)
+                    loading.close();
+                } else {
+                    reject(res)
+                }
             })
             .catch((error: any) => {
                 reject(error)
@@ -178,8 +183,12 @@ export const getHotArticle = (data: any = {}, format: string = 'yyyy年MM月dd�
         axios.get("/article/hotArticle", data)
             .then((res: any) => {
                 console.log(res);
-                resolve(res.result.list)
-                loading.close();
+                if (res.code == "200") {
+                    resolve(res.result.list)
+                    loading.close();
+                } else {
+                    reject(res)
+                }
             })
             .catch((error: any) => {
                 reject(error)

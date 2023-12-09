@@ -107,13 +107,17 @@
                 </el-select>
               </template>
               <template #default="scope">
-               <el-button
-                  :disabled="user.role == 1 && (scope.row.state != 1 && scope.row.state != 2)"
+                <el-button
+                  :disabled="
+                    user.role == 1 &&
+                    scope.row.state != 1 &&
+                    scope.row.state != 2
+                  "
                   size="small"
                   type="warning"
                   style="width: 22%"
-                  v-if="scope.row.state == 1||scope.row.state == 2"
-                  @click="handleSetArticleState(scope.row.uuid,'3')"
+                  v-if="scope.row.state == 1 || scope.row.state == 2"
+                  @click="handleSetArticleState(scope.row.uuid, '3')"
                 >
                   待审核
                 </el-button>
@@ -123,7 +127,7 @@
                   type="warning"
                   style="width: 22%"
                   v-if="scope.row.state == 3"
-                  @click="handleSetArticleState(scope.row.uuid,'1')"
+                  @click="handleSetArticleState(scope.row.uuid, '1')"
                 >
                   审核
                 </el-button>
@@ -133,7 +137,7 @@
                   type="warning"
                   style="width: 22%"
                   v-if="scope.row.state == 0"
-                  @click="handleSetArticleState(scope.row.uuid,'2')"
+                  @click="handleSetArticleState(scope.row.uuid, '2')"
                 >
                   恢复
                 </el-button>
@@ -143,17 +147,21 @@
                   type="success"
                   style="width: 22%"
                   v-if="scope.row.state == 2"
-                  @click="handleSetArticleState(scope.row.uuid,'1')"
+                  @click="handleSetArticleState(scope.row.uuid, '1')"
                 >
                   发布
                 </el-button>
                 <el-button
-                  :disabled="user.role == 1 && (scope.row.state != 1&&scope.row.state != 3)"
+                  :disabled="
+                    user.role == 1 &&
+                    scope.row.state != 1 &&
+                    scope.row.state != 3
+                  "
                   size="small"
                   type="warning"
                   style="width: 22%"
-                  v-if="scope.row.state == 1||scope.row.state == 3"
-                  @click="handleSetArticleState(scope.row.uuid,'2')"
+                  v-if="scope.row.state == 1 || scope.row.state == 3"
+                  @click="handleSetArticleState(scope.row.uuid, '2')"
                 >
                   存草稿
                 </el-button>
@@ -358,10 +366,10 @@ const handleDelete = (index: number, row: any) => {
 /**
  * 弹窗
  */
-const handleForeverDelete = (index: number, row: any) => {
-  centerDialogVisible.value = true;
-  article.value = row;
-};
+// const handleForeverDelete = (index: number, row: any) => {
+//   centerDialogVisible.value = true;
+//   article.value = row;
+// };
 /**
  * 批量删除
  */
@@ -474,7 +482,7 @@ const handleSticky = (uuid: string) => {
  *修改文章状态
  * @param condition
  */
-const handleSetArticleState = (uuid: string,state:string) => {
+const handleSetArticleState = (uuid: string, state: string) => {
   proxy.$axios
     .post("/article/setArticleState", { articleUuid: uuid, state: state })
     .then((resp: any) => {
@@ -505,13 +513,15 @@ const getUserArticleList = (condition: any) => {
     .get("/article/userArticleList", condition)
     .then((res: any) => {
       console.log(res);
-      for (const item of res.result.list) {
-        item.createDate = dateFormat(item.createDate, "MM-dd");
-        item.updateDate = dateFormat(item.updateDate, "yyyy-MM-dd");
+      if (res.code == "200") {
+        for (const item of res.result.list) {
+          item.createDate = dateFormat(item.createDate, "MM-dd");
+          item.updateDate = dateFormat(item.updateDate, "yyyy-MM-dd");
+        }
+        tableData.value = res.result.list;
+        articleTotal.value = res.result.page.totalRow;
+        // commentList.value = res.result.list;
       }
-      tableData.value = res.result.list;
-      articleTotal.value = res.result.page.totalRow;
-      // commentList.value = res.result.list;
     })
     .catch((err: any) => {
       console.log(err);

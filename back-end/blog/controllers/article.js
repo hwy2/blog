@@ -143,7 +143,7 @@ module.exports = {
                 }],
                 where: {
                     sticky: true,
-                    state:'1'
+                    state: '1'
                 },
                 limit: 10,
                 offset: 0,
@@ -614,7 +614,7 @@ module.exports = {
             })
         })
     },
-    // 获取用户文章
+    /** 获取用户文章*/
     getUserArticleList: function (req, res, next) {
         var params = req.query || req.params;
         // console.log('params', params)
@@ -717,18 +717,17 @@ module.exports = {
             })
         })
     },
-    // 修改置顶
+    /**
+    * 修改文章置顶
+    * @param {*} req 
+    * @param {*} res 
+    * @param {*} next 
+    * @returns 
+    */
     setSticky: (req, res, next) => {
         var params = req.body || req.params;
-        var sticky = params.sticky;
+        var sticky = params.sticky || false;
         var articleUuid = params.articleUuid;
-        if (!sticky) {
-            utils.handleJson({
-                response: res,
-                msg: i18n.__('pleasePassParamsComplete')
-            });
-            return;
-        }
         if (!articleUuid) {
             utils.handleJson({
                 response: res,
@@ -757,6 +756,13 @@ module.exports = {
         })
 
     },
+    /**
+     * 修改文章状态
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     * @returns 
+     */
     setArticleState: (req, res, next) => {
         var params = req.body || req.params;
         var state = params.state;
@@ -777,9 +783,9 @@ module.exports = {
         }
         co(function* () {
             var resultOne = yield Article.findOne({
-                where:{
+                where: {
                     uuid: articleUuid
-                } 
+                }
             })
 
             if (!resultOne) {
@@ -810,4 +816,44 @@ module.exports = {
         })
 
     },
+    /**
+     * 设置热文推荐
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    setIshotArticle: (req, res, next) => {
+        var params = req.body || req.params;
+        var ishot = params.ishot || false
+        var articleUuid = params.articleUuid;
+        if (!articleUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            });
+            return;
+        }
+
+        co(function* () {
+
+            var result = yield Article.update({ ishot: ishot }, {
+                where: {
+                    uuid: articleUuid
+                }
+            })
+
+            console.log('result', result)
+            utils.handleJson({
+                response: res,
+                msg: 'doSuccess',
+                result: 'u1'
+            })
+        }).catch(err => {
+            // console.log(err)
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    }
 }

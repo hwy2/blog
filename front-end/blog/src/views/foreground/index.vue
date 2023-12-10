@@ -45,7 +45,7 @@
                       :style="{ display: isOpenCoverImage ? 'block' : 'none' }"
                     >
                       <img
-                        :src="item.photo + '?t=' + new Date().getTime()"
+                        :src="item.photo + '?t=' + new Date().getTime() + index"
                         alt="photo"
                       />
                     </div>
@@ -133,7 +133,7 @@
                       :style="{ display: isOpenCoverImage ? 'block' : 'none' }"
                     >
                       <img
-                        :src="item.photo + '?t=' + new Date().getTime()"
+                        :src="item.photo + '?t=' + new Date().getTime() + index"
                         alt="photo"
                       />
                     </div>
@@ -236,10 +236,18 @@
                 :key="item.uuid"
                 @click.stop="jumpArticle(item.uuid, index)"
               >
-                <p>{{ index + 1 }}.</p>
-                <p>
-                  {{ item.title }}
-                </p>
+                <div
+                  class="skew-elm1"
+                  :style="`background: url('${
+                    item.photo + '?t=' + new Date().getTime() + index
+                  }') center center no-repeat ;`"
+                ></div>
+                <div class="text">
+                  <h3>{{ index + 1 }}. {{ item.title }}</h3>
+                  <p>
+                    {{ item.abstract }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -261,16 +269,25 @@
             <div class="banner">
               <p>推荐阅读</p>
             </div>
-            <div class="list">
+             <div class="list">
               <div
                 class="list-item"
                 v-for="(item, index) in hotArticleList"
                 :key="item.uuid"
+                @click.stop="jumpArticle(item.uuid, index)"
               >
-                <p>{{ index + 1 }}.</p>
-                <p @click="jumpArticle(item.uuid)">
-                  {{ item.title }}
-                </p>
+                <div
+                  class="skew-elm1"
+                  :style="`background: url('${
+                    item.photo + '?t=' + new Date().getTime() + index
+                  }') center center no-repeat ;`"
+                ></div>
+                <div class="text">
+                  <h3>{{ index + 1 }}. {{ item.title }}</h3>
+                  <p>
+                    {{ item.abstract }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -833,7 +850,7 @@ onMounted(async () => {
             // }
           }
         }
-        .items-hint{
+        .items-hint {
           min-height: unset;
         }
         .pic {
@@ -920,6 +937,7 @@ onMounted(async () => {
       background-color: rgba(255, 255, 255, 1);
       overflow: hidden;
       .banner {
+        height: 60px;
         p {
           font-size: 20px;
           font-weight: bold;
@@ -939,39 +957,80 @@ onMounted(async () => {
         }
       }
       .list {
-        padding: 0px 15px 10px;
+        padding: 0px 10px 10px;
         box-sizing: border-box;
+        height: calc(430px - 60px);
+        overflow-y: auto;
         .list-item {
           margin-bottom: 10px;
           display: flex;
           align-items: flex-start;
+          border: 1px solid var(--el-color-primary);
+          border-radius: 10px;
+
+          .skew-elm1 {
+            width: 100px;
+            height: 80px;
+            // background: #000;
+            border-radius: 10px 0px 0px 10px;
+            background: url("https://api.baka.fun/acgpic?t=17021992266430")
+              center center no-repeat;
+            background-size: cover !important;
+            position: relative;
+            &::before {
+              content: "";
+              position: absolute;
+              width: 0;
+              height: 0;
+              border-top: 40px solid transparent;
+              border-bottom: 40px solid white;
+              border-left: 25px solid transparent;
+              border-right: 25px solid white;
+              right: 0;
+            }
+          }
+
           &::before {
             content: 1;
             font-size: 18px;
             color: #000;
           }
-          p:nth-child(1) {
-            min-width: 15px;
-            color: #666;
-          }
-
-          p {
-            font-size: 16px;
-            line-height: 1.5;
-            color: #353535;
-            font-weight: 100;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            word-break: break-all;
-            text-overflow: ellipsis;
+          .text {
+            background-color: #fff;
+            width: 78%;
             overflow: hidden;
+            box-sizing: border-box;
+             border-radius: 10px;
+            h3 {
+              min-width: 15px;
+              color: var(--el-color-primary-dark-2);
+              padding: 10px 0 0;
+              box-sizing: border-box;
+              &:hover {
+                color: #000;
+                color: #ff4081;
+                cursor: pointer;
+              }
+            }
 
-            &:hover {
-              color: #000;
-              color: #ff4081;
-              cursor: pointer;
-              transform: scale(1.01);
+            p {
+              box-sizing: border-box;
+              padding: 5px 10px 0px 0;
+              font-size: 16px;
+              line-height: 1.3;
+              color: var(--el-color-info-light-3);
+              font-weight: 100;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              word-break: break-all;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              // &:hover {
+              //   color: #000;
+              //   color: #ff4081;
+              //   cursor: pointer;
+              // }
             }
           }
         }

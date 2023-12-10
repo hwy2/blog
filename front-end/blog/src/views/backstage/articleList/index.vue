@@ -36,7 +36,9 @@
             </el-table-column>
             <el-table-column label="标题" style="color: rgb(70, 123, 150)">
               <template #default="scope">
-                <b v-if="scope.row.sticky" style="color: #f56c6c">[置顶]</b>
+                <b v-if="scope.row.sticky" style="color: #f56c6c">[置顶]</b
+                >&nbsp;
+                <b v-if="scope.row.ishot" style="color: #f56c6c">[推荐]</b>
                 <p
                   class="articleTitle"
                   @click="handleEdit(scope.$index, scope.row)"
@@ -70,7 +72,7 @@
             <el-table-column
               label="作者"
               prop="user.userInfo.nickName"
-              width="150"
+              width="120"
             >
             </el-table-column>
             <el-table-column label="分类" prop="category" width="180">
@@ -84,7 +86,7 @@
             </el-table-column>
             <el-table-column label="日期" prop="updateDate" width="150">
             </el-table-column>
-            <el-table-column align="right" width="260">
+            <el-table-column align="right" width="380">
               <template #header style="display: flex">
                 <el-input
                   title="根据标题搜索"
@@ -171,10 +173,39 @@
                   type="primary"
                   style="width: 22%"
                   @click="handleSticky(scope.row.uuid)"
-                  v-if="scope.row.state == 1"
-                  :disabled="scope.row.sticky"
+                  v-if="scope.row.state == 1 && !scope.row.sticky"
                 >
                   置顶
+                </el-button>
+                <el-button
+                  title="设为置顶"
+                  size="small"
+                  type="primary"
+                  style="width: 22%"
+                  @click="handleSticky(scope.row.uuid, false)"
+                  v-if="scope.row.state == 1 && scope.row.sticky"
+                >
+                  取消置顶
+                </el-button>
+                <el-button
+                  title="设为推荐"
+                  size="small"
+                  type="primary"
+                  style="width: 22%"
+                  @click="handleSetArticleTestimonials(scope.row.uuid)"
+                  v-if="scope.row.state == 1 && !scope.row.ishot"
+                >
+                  推荐
+                </el-button>
+                <el-button
+                  title="设为推荐"
+                  size="small"
+                  type="primary"
+                  style="width: 22%"
+                  @click="handleSetArticleTestimonials(scope.row.uuid, false)"
+                  v-if="scope.row.state == 1 && scope.row.ishot"
+                >
+                  取消推荐
                 </el-button>
                 <el-popconfirm
                   width="220"
@@ -454,9 +485,9 @@ const deleteArticle = (uuid: string) => {
  *置顶文章
  * @param condition
  */
-const handleSticky = (uuid: string) => {
+const handleSticky = (uuid: string, sticky: boolean = true) => {
   proxy.$axios
-    .post("/article/setSticky", { articleUuid: uuid, sticky: true })
+    .post("/article/setSticky", { articleUuid: uuid, sticky })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -506,8 +537,38 @@ const handleSetArticleState = (uuid: string, state: string) => {
       console.log(error);
     });
 };
-
-// 获取用户文章
+/**
+ *修改推荐文章
+ * @param condition
+ */
+const handleSetArticleTestimonials = (uuid: string, ishot: boolean = true) => {
+  proxy.$axios
+    .post("/article/setIshotArticle", { articleUuid: uuid, ishot })
+    .then((resp: any) => {
+      if (resp.code === "200") {
+        ElNotification({
+          title: "成功",
+          message: "设置成功",
+          type: "success"
+        });
+        getUserArticleList(condition);
+      } else {
+        ElNotification({
+          title: "失败",
+          message: resp.msg,
+          type: "error"
+        });
+      }
+    })
+    .catch((error: any) => {
+      centerDialogVisible.value = false;
+      console.log(error);
+    });
+};
+/**
+ * 获取用户文章
+ * @param condition
+ */
 const getUserArticleList = (condition: any) => {
   proxy.$axios
     .get("/article/userArticleList", condition)
@@ -637,7 +698,7 @@ onMounted(() => {
             display: flex;
             align-items: center;
             .articleTitle {
-              width: 92%;
+              width: 86%;
               margin-left: 5px;
             }
           }

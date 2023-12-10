@@ -8,7 +8,7 @@ module.exports = function (app) {
   app.use(function (req, res, next) {
     if (req.method != 'GET' && JSON.stringify(req.body) != "{}") {
       const data = utils.declassificationAES(req.body.data)
-      console.log(data)
+      // console.log(data)
       req.body = data
     }
     next()

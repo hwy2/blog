@@ -1,4 +1,4 @@
-<template >
+<template>
   <div id="pageList">
     <div class="container">
       <div class="page-title">
@@ -6,7 +6,7 @@
           管理独立页面
           <router-link
             to="/backstage/createPage"
-            @click="methods.changeIndex('/backstage/createPage')"
+            @click="changeIndex('/backstage/createPage')"
             >新增</router-link
           >
         </h2>
@@ -16,7 +16,7 @@
           <el-table
             :data="tableData"
             style="width: 100%"
-            @selection-change="methods.handleSelectionChange"
+            @selection-change="handleSelectionChange"
           >
             >
             <el-table-column type="selection" width="55"> </el-table-column>
@@ -24,7 +24,7 @@
             </el-table-column>
             <el-table-column label="标题" prop="title">
               <template #default="scope">
-                <p @click="methods.handleEdit(scope.$index, scope.row)">
+                <p @click="handleEdit(scope.$index, scope.row)">
                   <span style="user-select: none; color: rgb(70, 123, 150)">{{
                     scope.row.title
                   }}</span
@@ -50,16 +50,16 @@
                 <el-input
                   title="根据标题搜索"
                   v-model="search"
-                  size="mini"
+                  size="small"
                   placeholder="输入关键字搜索"
                 />
               </template>
               <template #default="scope">
                 <el-button
-                  size="mini"
+                  size="small"
                   type="danger"
                   style="margin-left: auto"
-                  @click="methods.handleDelete(scope.$index, scope.row)"
+                  @click="handleDelete(scope.$index, scope.row)"
                   >删除</el-button
                 >
               </template>
@@ -68,18 +68,18 @@
           <div class="operation" style="margin-top: 20px">
             <el-button
               v-if="hideDeletebtn"
-              size="mini"
+              size="small"
               type="danger"
-              @click="methods.handleBatchDelete()"
+              @click="handleBatchDelete()"
               >删除全部</el-button
             >
             <el-pagination
               :hide-on-single-page="hidePage"
               layout="prev, pager, next"
               :total="pageTtotals"
-              @next-click="methods.handleChangePage"
-              @prev-click="methods.handleChangePage"
-              @current-change="methods.handleChangePage"
+              @next-click="handleChangePage"
+              @prev-click="handleChangePage"
+              @current-change="handleChangePage"
             >
             </el-pagination>
           </div>
@@ -98,155 +98,144 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="centerDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="methods.deleteArticle(article.uuid)"
+        <el-button type="primary" @click="deleteArticle(article.uuid)"
           >确 定</el-button
         >
       </span>
     </template>
   </el-dialog>
 </template>
-<script lang="ts">
+<script lang="ts" setup name="pageList">
 import {
-  defineComponent,
   reactive,
-  toRefs,
+  ref,
   onMounted,
   getCurrentInstance,
   computed,
   onBeforeMount,
-  watch,
+  watch
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
-export default defineComponent({
-  name: "pageList",
-  setup: () => {
-    const store = useStore();
-    const router = useRouter();
-    const { proxy }: any = getCurrentInstance();
-    const state = reactive({
-      search: "",
-      centerDialogVisible: false, // 提示框
-      article: {},
-      pageTtotals: computed(() => store.state.foreground.pageTtotals),
-      tableData: computed(() => store.state.foreground.pageList),
-      multipleSelection: [],
-      condition: {
-        pageSize: 10,
-        currPage: 1,
-        categoryTitle: "",
-        articleVague: "",
-        state: 4,
-      },
-      hideDeletebtn: computed(() => {
-        if (store.state.foreground.pageTtotals > 1) return true;
-        return false;
-      }),
-      hidePage: computed(() => {
-        if (store.state.foreground.pageTtotals > 10) return false;
-        return true;
-      }),
-    });
-    watch(
-      () => state.search,
-      (newValue: any, oldValue: any) => {
-        state.tableData.filter(
-          (data: any) =>
-            !newValue ||
-            data.title.toLowerCase().includes(newValue.toLowerCase())
-        );
+import { ElNotification, ElMessage } from "element-plus";
+
+const store = useStore();
+const router = useRouter();
+const { proxy }: any = getCurrentInstance();
+
+const search = ref<string>("");
+const centerDialogVisible = ref<boolean>(false); // 提示框
+const article = ref<any>({});
+const pageTtotals = computed(() => store.state.foreground.pageTtotals);
+const tableData = computed(() => store.state.foreground.pageList);
+const multipleSelection = ref<Array<any>>([]);
+const condition = reactive({
+  pageSize: 10,
+  currPage: 1,
+  categoryTitle: "",
+  articleVague: "",
+  state: 4
+});
+const hideDeletebtn = computed(() => {
+  if (store.state.foreground.pageTtotals > 1) return true;
+  return false;
+});
+const hidePage = computed(() => {
+  if (store.state.foreground.pageTtotals > 10) return false;
+  return true;
+});
+
+watch(search, (newValue: any, oldValue: any) => {
+  condition.articleVague = newValue
+  proxy.getAricleList(condition)
+});
+
+/**
+ * 修改导航
+ */
+const changeIndex = (index: string) => {
+  store.commit("backstage/setActiveIndex", index);
+};
+/**
+ * 修改文章
+ */
+const handleEdit = (index: number, row: any) => {
+  console.log(index, row);
+  changeIndex("/backstage/write/createPage");
+  router.push({
+    name: "createPage",
+    query: { uuid: row.uuid }
+  });
+};
+/**
+ * 删除
+ */
+const handleDelete = (index: number, row: any) => {
+  console.log(row);
+  centerDialogVisible.value = true;
+  article.value = row;
+};
+/**
+ * 批量删除
+ */
+const handleBatchDelete = () => {
+  if (multipleSelection.value.length == 0) {
+    ElMessage.error("请选择要删除的数据！");
+    return;
+  }
+  Array.from(multipleSelection.value).map((item: any) => {
+    deleteArticle(item.uuid);
+  });
+  proxy.getAricleList();
+};
+/**
+ * 选择全部
+ */
+const handleSelectionChange = (val: any) => {
+  console.log(val);
+  multipleSelection.value = val;
+};
+/** 删除请求 */
+const deleteArticle = (uuid: string) => {
+  proxy.$axios
+    .get("/article/del", { articleUuid: uuid })
+    .then((resp: any) => {
+      centerDialogVisible.value = false;
+      if (resp.code === "200") {
+        ElNotification({
+          title: "成功",
+          message: "删除成功",
+          type: "success"
+        });
+        article.value = {};
+        proxy.getAricleList(condition);
+      } else {
+        ElNotification({
+          title: "失败",
+          message: resp.msg,
+          type: "error"
+        });
       }
-    );
-    const methods = {
-      /**
-       * 修改导航
-       */
-      changeIndex(index: string) {
-        store.commit("backstage/setActiveIndex", index);
-      },
-      /**
-       * 修改文章
-       */
-      handleEdit(index: number, row: any) {
-        console.log(index, row);
-        methods.changeIndex("/backstage/createPage");
-        router.push({
-          name: "createPage",
-          query: { uuid: row.uuid },
-        });
-      },
-      /**
-       * 删除
-       */
-      handleDelete(index: number, row: any) {
-        console.log(row);
-        state.centerDialogVisible = true;
-        state.article = row;
-      },
-      /**
-       * 批量删除
-       */
-      handleBatchDelete() {
-        Array.from(state.multipleSelection).map((item: any) => {
-          methods.deleteArticle(item.uuid);
-        });
-        proxy.getAricleList();
-      },
-      /**
-       * 选择全部
-       */
-      handleSelectionChange(val: any) {
-        console.log(val);
-        state.multipleSelection = val;
-      },
-      /** 删除请求 */
-      deleteArticle(uuid: string) {
-        proxy.$axios
-          .get("/article/del", { articleUuid: uuid })
-          .then((resp: any) => {
-            state.centerDialogVisible = false;
-            if (resp.code === "200") {
-              ElNotification({
-                title: "成功",
-                message: "删除成功",
-                type: "success",
-              });
-              state.article = {};
-              proxy.getAricleList(state.condition);
-            } else {
-              ElNotification({
-                title: "失败",
-                message: resp.msg,
-                type: "error",
-              });
-            }
-          })
-          .catch((error: any) => {
-            state.centerDialogVisible = false;
-            console.log(error);
-          });
-      },
-      /**
-       * 分页跳转
-       */
-      handleChangePage(val: any) {
-        state.condition.currPage = val;
-        proxy.getAricleList(state.condition);
-        scrollTo(0, 0); // 回到页面顶部
-      },
-    };
-    onBeforeMount(() => {
-      document.title = "页面列表";
+    })
+    .catch((error: any) => {
+      centerDialogVisible.value = false;
+      console.log(error);
     });
-    onMounted(() => {
-      proxy.getAricleList(state.condition);
-    });
-    return {
-      ...toRefs(state),
-      methods,
-    };
-  },
+};
+/**
+ * 分页跳转
+ */
+const handleChangePage = (val: any) => {
+  condition.currPage = val;
+  proxy.getAricleList(condition);
+  scrollTo(0, 0); // 回到页面顶部
+};
+
+onBeforeMount(() => {
+  document.title = "页面列表";
+});
+onMounted(() => {
+  proxy.getAricleList(condition);
 });
 </script>
 

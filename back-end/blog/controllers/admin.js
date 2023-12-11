@@ -211,31 +211,29 @@ module.exports = {
             pageSize: utils.trim(params.pageSize) || config.page.pageSize //每页数量
         }
 
-        //查询
-        AdminUser.findAndCountAll({
-            where: condition,
-            attributes: {
-                exclude: ['password']
-            },
-            limit: page.pageSize,
-            offset: page.pageSize * (page.currPage - 1),
-            order: [
-                ['updateDate', 'DESC']
-            ]
-        }).then((result) => {
-            var userList = result.rows || [];
-            //分页处理
-            utils.handlePage({
-                count: result.count,
+        co(function* () {
+            var userResult = AdminUser.findAndCountAll({
+                where: condition,
+                attributes: {
+                    exclude: ['password']
+                },
+                limit: page.pageSize,
+                offset: page.pageSize * (page.currPage - 1),
+                order: [
+                    ['updateDate', 'DESC']
+                ]
+            })
+            var userList = userResult.rows || [];
+            var pageResult = yield utils.handlePage({
+                count: userResult.count,
                 page: page
-            }).then(result => {
-                utils.handleJson({
-                    response: res,
-                    result: {
-                        list: userList,
-                        page: result
-                    }
-                })
+            });
+            utils.handleJson({
+                response: res,
+                result: {
+                    list: userList,
+                    page: pageResult
+                }
             })
 
         }).catch(function (error) {
@@ -244,5 +242,6 @@ module.exports = {
                 error: error
             })
         })
+        //查询
     },
 }

@@ -30,7 +30,7 @@ router.post("/create", function (req, res, next) {
  * 删除分类
  * get
  */
-router.get("/del", function (req, res, next) {
+router.get("/del", checkAdminToken,function (req, res, next) {
     CategoryDao.categoryDelete(req, res, next);
 });
 

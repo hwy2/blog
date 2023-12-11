@@ -34,7 +34,7 @@ router.put("/update", checkToken,function (req, res, next) {
     articleDao.updateArticle(req, res, next);
 })
 /** 删除文章 */
-router.get("/del", function (req, res, next) {
+router.get("/del", checkAdminToken,function (req, res, next) {
     articleDao.deleteArticle(req, res, next);
 })
 /** 添加文章浏览量 */

@@ -36,7 +36,7 @@ router.put("/update", function (req, res, next) {
 /**
  * 删除评论
  */
-router.get("/del", function (req, res, next) {
+router.get("/del",checkAdminToken, function (req, res, next) {
     commentDao.deleteComment(req, res, next);
 });
 

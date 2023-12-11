@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var checkToken = require('../middlewares/check').checkToken;
 var userInfoDao = require('../controllers/userInfo'); //
+const { checkAdminToken } = require('../middlewares/check');
 /**
  * Create
  * 创建用户信息
@@ -30,7 +31,7 @@ router.put('/upinfo', checkToken, function (req, res, next) {
  * delete
  * 删除用户
  */
-router.get("/del", checkToken, function (req, res, next) {
+router.get("/del", checkAdminToken, function (req, res, next) {
     userInfoDao.deleteUserInfo(req, res, next);
 })
 

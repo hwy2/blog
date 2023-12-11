@@ -213,6 +213,11 @@ module.exports = {
                 })
                 return
             }
+            // console.log(resultOne.dataValues.absoluteUrl)
+            const urlString = utils.splitString(resultOne.dataValues.absoluteUrl)
+            console.log(urlString)
+            fileService.delFile(urlString, resultOne.dataValues.relativeUrl)
+            // return
             var result = yield Attachment.destroy({
                 where: {
                     uuid: fileUuid
@@ -226,6 +231,7 @@ module.exports = {
                 });
                 return;
             }
+
             utils.handleJson({
                 response: res,
                 msg: i18n.__('doSuccess'),

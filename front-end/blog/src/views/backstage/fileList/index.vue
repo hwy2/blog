@@ -16,7 +16,7 @@
             <el-table-column label="文件名" prop="name" width="200">
               <template #default="scope">
                 <!-- <img slot="reference" v-lazy="scope.row.absoluteUrl" /> -->
-                <img :src="scope.row.absoluteUrl" alt="">
+                <img :src="scope.row.absoluteUrl" alt="" />
               </template>
             </el-table-column>
             <el-table-column
@@ -164,6 +164,7 @@ const handleBatchDelete = () => {
     return;
   }
   Array.from(multipleSelection.value).map((item: any) => {
+    console.log(item);
     handleDelete(item);
   });
   // proxy.getAricleList();
@@ -172,10 +173,8 @@ const handleBatchDelete = () => {
  * 删除（）
  */
 const handleDelete = (row: any) => {
-  console.log(row);
-
   proxy.$axios
-    .get("/comment/del", { commentUuid: row.uuid })
+    .get("/common/del", { fileUuid: row.uuid })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({

@@ -134,7 +134,11 @@ module.exports = {
         }
         return checkFlag;
     },
-    // 处理字符串数组
+    /**
+     * 处理字符串数组
+     * @param {*} opt 
+     * @returns 
+     */
     handleArray: function (opt) {
         if (opt && opt.length) {
             if (opt.indexOf(",") != -1) {
@@ -144,14 +148,19 @@ module.exports = {
         }
         return "";
     },
-    // 获取Gravatar图元
+    /**
+     * 获取Gravatar图元
+     * @param {*} email 
+     * @returns 
+     */
     getGravatarURL: function (email) {
 
         const address = String(email).trim().toLowerCase();
         const hash = md5(address);
         return `https://gravatar.loli.net/avatar/${hash}`;
     },
-    // 加密
+    /**
+     * 加密 */ 
     encryptedAES: function (data) {
         const content = JSON.stringify(data);
         const encryptedContent = CryptoJS.AES.encrypt(content, key, {
@@ -160,7 +169,8 @@ module.exports = {
         });
         return encryptedContent.ciphertext.toString();
     },
-    // 解密
+    /**
+     * 解密 */
     declassificationAES: function (encryptedData) {
         const decryptedContent = CryptoJS.AES.decrypt(
             CryptoJS.format.Hex.parse(encryptedData),
@@ -196,6 +206,11 @@ module.exports = {
         ip = ip.substr(ip.lastIndexOf(':') + 1, ip.length);
         return ip
     },
+    /**
+     * 获取req中的IP地址
+     * @param {*} req 
+     * @returns 
+     */
     getClientIp: function (req) {
         return req.headers['x-forwarded-for'] ||
             req.ip ||
@@ -204,4 +219,14 @@ module.exports = {
             req.connection.socket.remoteAddress ||
             '';
     },
+    /**
+     * 截取字符串，
+     * @param {*} string 原字符串
+     * @param {*} goalStr 目标字符串
+     * @returns 
+     */
+    splitString: function (string, goalStr ='/attchments'){
+        let temp = string.substring(string.lastIndexOf(goalStr))
+        return temp
+    }
 };

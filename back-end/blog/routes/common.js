@@ -5,6 +5,7 @@ var express = require('express');
 var router = express.Router();
 var commonDao = require('../controllers/common');
 var fileService = require('../services/file'); //文件服务
+const { checkAdminToken } = require('../middlewares/check');
 /**
  * 上传附件
  * 支持单/多文件上传
@@ -41,5 +42,13 @@ router.get("/userList", async function (req, res, next) {
         commonDao.getUserFileList(req, res, next)
     }
 })
+
+/**
+ * 删除附件
+ */
+router.get('/del',checkAdminToken ,function(req,res,next){
+    commonDao.deleteFile(req, res, next)
+})
+
 
 module.exports = router;

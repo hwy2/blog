@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var checkToken = require('../middlewares/check').checkToken;
 var linksDao = require('../controllers/links'); //友链处理
+const { checkAdminToken } = require('../middlewares/check');
 /**
  * Create
  * 创建友链信息
@@ -47,7 +48,7 @@ router.put('/upinfo', checkToken, function (req, res, next) {
  * delete
  * 删除友链
  */
-router.get("/del", checkToken, function (req, res, next) {
+router.get("/del", checkAdminToken, function (req, res, next) {
     linksDao.deleteLinks(req, res, next);
 })
 

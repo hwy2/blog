@@ -156,15 +156,18 @@ module.exports = {
      * @param {*} url 
      */
     delFile: function (url, relativeUrl) {
-        fs.unlink(url, (err) => {
+        let newUrl = path.join(__dirname, '..', '/public', url)
+        // console.log('newUrl',newUrl)
+        var reg = new RegExp(relativeUrl, "g")
+        var folderPath = newUrl.replace(reg, '')
+        // console.log('folderPath',folderPath)
+        fs.unlink(newUrl, (err) => {
             if (err) {
                 console.error(err)
                 return false
             }
-            var reg = new RegExp(relativeUrl,"g")
-            var folderPath = url.replace(reg,'')
-            if (isDirectoryEmptySync(folderPath)) {
-                deleteFolder(folderPath)
+            if (this.isDirectoryEmptySync(folderPath)) {
+                this.deleteFolder(folderPath)
             }
             return true
         })

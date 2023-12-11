@@ -23,7 +23,13 @@
 </template>
 
 <script setup lang="ts" name="Sidebar">
-import { ref, computed, onMounted, getCurrentInstance } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  getCurrentInstance,
+  onBeforeMount
+} from "vue";
 import { backstageRouteRe } from "../../router";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -49,24 +55,29 @@ const handleSelect = (key: string, keyPath: string) => {
   activeIndex.value = key;
 };
 
-const handleESelectroleUrl = () => {
- urlList.value = backstageRouteRe.map((item) => {
-    item.children = item.children?.map((items: any) => {
-      let role:Array<number> =items.meta.role
-      if (role.includes(parseInt(user.value.role))){
-        return items
-      }
-      
-    });
-    return item;
+const handleESelectroleUrl = (userRole: number) => {
+  console.log('backstageRouteRe',backstageRouteRe)
+  const routerList = JSON.parse(JSON.stringify(backstageRouteRe))
+
+  urlList.value = routerList.filter((routeItem: any) => {
+    let routeRole: Array<number> = routeItem.meta.role;
+    if (routeRole.includes(userRole)) {
+      routeItem.children = routeItem.children?.filter((childrenItem: any) => {
+        let chilMetaRole: Array<number> = childrenItem.meta.role;
+        if (chilMetaRole.includes(userRole)) {
+          return childrenItem;
+        }
+      });
+
+      return routeItem;
+    }
   });
-  console.log(urlList.value)
 };
 
 onMounted(() => {
   if (proxy.$Cookies.get("user")) {
     user.value = JSON.parse(proxy.$Cookies.get("user"));
-    handleESelectroleUrl();
+    handleESelectroleUrl(parseInt(user.value.role));
   } else {
     router.push({ name: "login" });
   }

@@ -160,7 +160,7 @@ module.exports = {
         return `https://gravatar.loli.net/avatar/${hash}`;
     },
     /**
-     * 加密 */ 
+     * 加密 */
     encryptedAES: function (data) {
         const content = JSON.stringify(data);
         const encryptedContent = CryptoJS.AES.encrypt(content, key, {
@@ -225,8 +225,11 @@ module.exports = {
      * @param {*} goalStr 目标字符串
      * @returns 
      */
-    splitString: function (string, goalStr ='/attchments'){
+    splitString: function (string, goalStr = '/attchments') {
         let temp = string.substring(string.lastIndexOf(goalStr))
         return temp
+    },
+    md5Pwd: function (str) {
+        return md5(config.pwd.key + str)
     }
 };

@@ -44,7 +44,7 @@
 <script lang="ts" setup name="login">
 import {
   reactive,
-  ref,
+  onBeforeUnmount,
   getCurrentInstance,
   computed,
   onBeforeMount
@@ -160,8 +160,22 @@ const login = () => {
 const fackHome = () => {
   router.push({ name: "home" });
 };
+/**
+ * 全局回车
+ */
+const handleKeyDown = (event: any) => {
+  if (event.key == "Enter") {
+    login();
+  }
+};
 onBeforeMount(() => {
   sessionStorage.removeItem("store");
+  window.addEventListener("keydown", handleKeyDown);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", () => {
+    console.log("卸载监听");
+  });
 });
 </script>
 

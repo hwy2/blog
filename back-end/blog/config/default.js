@@ -14,7 +14,7 @@ var configs = {
     },
     pwd: { //密码
         salt: 10, //密码强度
-
+        key:"d41d8cd98f00b204e9800998ecf8427e"
     },
     token: { //token https://github.com/auth0/node-jsonwebtoken
         secretOrPrivateKey: 'iboomer', // 秘钥

@@ -1,6 +1,7 @@
 var md5 = require('blueimp-md5'); //md5加密
 var config = require('../config/default');
 var fs = require('fs'); //fs文件流
+const utils = require('../libs/utils');
 module.exports = {
     init: async function (User, UserInfo, Category, WebConfig, DataSummary, Article, ArticleCategory, Comment, Links) {
         // 初始化添加数据
@@ -15,7 +16,7 @@ module.exports = {
         })
         var user = await User.create({
             email: "admin@admin.com",
-            password: md5("123456"),
+            password: utils.md5Pwd('123456'),
             role: "1",
             name: 'admin'
         });

@@ -313,16 +313,11 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  // setup() {
-  // },
-  created() {
-    document.title = "404";
-  },
-});
+<script lang="ts" setup>
+import { onBeforeMount } from "vue";
+onBeforeMount(()=>{
+  document.title = "404";
+})
 </script>
 
 <style lang="scss">

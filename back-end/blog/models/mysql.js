@@ -7,7 +7,7 @@ var Mysql = new Sequelize(config.mysql.database, config.mysql.user, config.mysql
     port: config.mysql.port,//端口
     operatorsAliases: 0, //去除Sequelize警告
     timezone: '+08:00', //东八时区
-    logging: (sql) => console.log(sql),
+    // logging: (sql) => console.log(sql),
     logging:false,
     pool: {//连接池
         max: 5,

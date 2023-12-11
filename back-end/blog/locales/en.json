@@ -17,6 +17,7 @@
     "fileDoesNotExist": "file does not exist",
     "pleasePassParamsComplete": "please pass params complete",
     "newPwdEqOldPwd": "newPwd Eq oldPwd",
+    "inconsistentPasswords": "inconsistent passwords",
     "oldPwdError": "oldPwd error",
     "updateSuccess": "update success",
     "doSuccess": "do success",

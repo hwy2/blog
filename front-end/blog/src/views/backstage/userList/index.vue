@@ -16,8 +16,20 @@
           >
             >
             <el-table-column type="selection" width="55"> </el-table-column>
-            <!-- <el-table-column label="评论" prop="comments.length" width="55">
-            </el-table-column> -->
+            <el-table-column
+              label="头像"
+              prop="face"
+              width="100"
+              align="center"
+            >
+              <template #default="scope">
+                <img
+                  :src="scope.row.userInfo.face"
+                  alt="face"
+                  style="width: 80px; height: 80px"
+                />
+              </template>
+            </el-table-column>
             <el-table-column label="用户名" prop="name">
               <template #default="scope">
                 <p @click="handleEdit(scope.$index, scope.row)">
@@ -39,7 +51,33 @@
               </template></el-table-column
             >
             <el-table-column label="电子邮件" prop="email"> </el-table-column>
-            <el-table-column label="用户组" prop="role"> </el-table-column>
+            <el-table-column label="验证邮箱" prop="state">
+              <template #default="scope">
+                <span>{{ scope.row.state == 0 ? "未验证" : "验证成功" }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="用户组" prop="role">
+              <template #default="scope">
+                <span>{{ scope.row.role == 1 ? "管理员" : "普通用户" }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="生日" prop="birth">
+              <template #default="scope">
+                <span>
+                  {{ dateFormat(scope.row.userInfo.birth, "yyyy-MM-dd") }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="性别" prop="sex">
+              <template #default="scope">
+                <span>
+                  {{ scope.row.userInfo.sex == 0 ? "女" : "男" }}
+                </span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="简介" prop="userInfo.synopsis">
+            </el-table-column>
             <el-table-column label="日期" prop="createDate" width="150">
             </el-table-column>
             <el-table-column align="right" width="260">
@@ -54,11 +92,18 @@
               <template #default="scope">
                 <el-button
                   size="small"
-                  type="danger"
-                  style="margin-left: auto"
-                  @click="handleDelete(scope.$index, scope.row)"
-                  >删除</el-button
+                  type="primary"
+                  @click="handleUpPwd(scope.row)"
                 >
+                  重置密码
+                </el-button>
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(scope.$index, scope.row)"
+                >
+                  删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -196,6 +241,39 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <el-dialog title="重置密码" v-model="resetPasswordDialog">
+      <el-form
+        class="upPwdUserFome"
+        :model="formUser"
+        :rules="rulesUser"
+        ref="UserForm"
+        label-position="top"
+      >
+        <el-form-item label="密码" prop="password">
+          <el-input
+            show-password
+            v-model="formUser.password"
+            placeholder="建议使用特殊字符与字母、数字的混编样式,以增加系统安全性."
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input
+            show-password
+            v-model="formUser.confirmPassword"
+            placeholder="请确认你的密码, 与左侧输入的密码保持一致."
+          ></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            style="width: 20%; margin: 0 auto; display: block"
+            type="primary"
+            @click="updateUserPwd('UserForm')"
+          >
+            重置密码
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 <script lang="ts" setup name="userList">
@@ -223,7 +301,7 @@ const validatePass1 = (rule: any, value: string, callback: any) => {
   } else if (!isvalidPass(value)) {
     callback(
       new Error(
-        "最少6位，包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符"
+        "最少6位，包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符：!@#$%^&*?"
       )
     );
   } else {
@@ -260,6 +338,7 @@ const centerDialogVisible = ref<boolean>(false); //创建弹窗
 let user = ref<any>({}); //当前用户
 const newUserVisible = ref<boolean>(false); //新用户验证
 const addOrModify = ref<boolean>(true); //添加或者修改
+const resetPasswordDialog = ref<boolean>(false); //重置密码
 let formUser = reactive({
   name: "",
   email: "",
@@ -435,35 +514,26 @@ const deleteUser = (userUuid: string) => {
  * 修改用户信息
  */
 const handleEdit = (index: number, row: any) => {
-  formUser = {
-    name: row.name,
-    email: row.email,
-    password: "",
-    confirmPassword: "",
-    state: row.state,
-    role: row.role,
-    nickName: row.userInfo?.nickName,
-    birth: row.userInfo?.birth,
-    sex: row.userInfo?.sex,
-    face: row.userInfo?.face,
-    city: row.userInfo?.city,
-    address: row.userInfo?.address,
-    uuid: row.uuid,
-    userInfoUuid: row.userInfo?.uuid
-  };
+  formUser.name = row.name;
+  formUser.email = row.email;
+  formUser.password = "";
+  formUser.confirmPassword = "";
+  formUser.state = row.state;
+  formUser.role = row.role;
+  formUser.nickName = row.userInfo?.nickName;
+  formUser.birth = row.userInfo?.birth;
+  formUser.sex = row.userInfo?.sex;
+  formUser.face = row.userInfo?.face;
+  formUser.city = row.userInfo?.city;
+  formUser.address = row.userInfo?.address;
+  formUser.uuid = row.uuid;
+  formUser.userInfoUuid = row.userInfo?.uuid;
+
   newUserVisible.value = true;
   addOrModify.value = false;
   if (proxy.$refs.UserForm !== undefined) {
     proxy.$refs.UserForm.resetFields();
   }
-  rulesUser.password = [
-    { required: false, message: "请输入密码", trigger: "blur" },
-    { validator: validatePass1, trigger: "blur" }
-  ];
-  rulesUser.confirmPassword = [
-    { required: false, message: "请再次输入密码", trigger: "blur" },
-    { validator: validatePass2, trigger: "blur" }
-  ];
   rulesUser.nickName = [
     { required: false, message: "请输入昵称", trigger: "blur" },
     {
@@ -525,7 +595,7 @@ const newlyUser = () => {
 const submitUserForm = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      if (addOrModify) {
+      if (addOrModify.value) {
         createUser(formUser);
       } else {
         const user = {
@@ -594,13 +664,14 @@ const updateUser = (user: any, userInfo: any) => {
     .put("/user/upInfo", { user, userInfo })
     .then((res: any) => {
       console.log(res);
-      newUserVisible.value = false;
       if (res.code === "200") {
         ElNotification({
           title: "成功",
           message: "修改用户成功",
           type: "success"
         });
+        newUserVisible.value = false;
+        getUserList();
       } else {
         ElNotification({
           title: "错误",
@@ -613,6 +684,58 @@ const updateUser = (user: any, userInfo: any) => {
       console.log(error);
     });
 };
+/**
+ * 修改用户密码
+ */
+const updateUserPwd = (formName: string) => {
+  proxy.$refs[formName].validate((valid: any) => {
+    if (valid) {
+      proxy.$axios
+        .put("/user/resetPwd", {
+          password: formUser.password,
+          confirmPassword: formUser.confirmPassword,
+          userUuid: formUser.uuid
+        })
+        .then((res: any) => {
+          console.log(res);
+          if (res.code === "200") {
+            ElNotification({
+              title: "成功",
+              message: "重置用户密码成功",
+              type: "success"
+            });
+            resetPasswordDialog.value = false;
+            getUserList();
+          } else {
+            ElNotification({
+              title: "错误",
+              message: res.msg,
+              type: "error"
+            });
+          }
+        })
+        .catch((error: any) => {
+          console.log(error);
+        });
+    }
+  });
+};
+//重置密码
+const handleUpPwd = (user: any) => {
+  formUser.uuid = user.uuid;
+  formUser.password= '';
+  formUser.confirmPassword ='';
+  resetPasswordDialog.value = true;
+  rulesUser.password = [
+    { required: false, message: "请输入密码", trigger: "blur" },
+    { validator: validatePass1, trigger: "blur" }
+  ];
+  rulesUser.confirmPassword = [
+    { required: false, message: "请再次输入密码", trigger: "blur" },
+    { validator: validatePass2, trigger: "blur" }
+  ];
+};
+
 onBeforeMount(() => {
   document.title = "用户列表";
 });

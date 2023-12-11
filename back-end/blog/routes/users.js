@@ -96,6 +96,12 @@ router.put('/upInfo', checkToken, function (req, res, next) {
 router.put("/pwd", checkToken, function (req, res, next) {
     userDao.updateUserPwd(req, res, next);
 })
+/**
+ * 重置密码
+ */
+router.put("/resetPwd", checkToken, function (req, res, next) {
+    userDao.updateUserResetPwd(req, res, next);
+})
 
 /**
  * 删除账号

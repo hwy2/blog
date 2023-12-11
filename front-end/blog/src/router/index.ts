@@ -11,6 +11,7 @@ export const backstageRouteRe: RouteRecordRaw[] = [
         name: 'consoles',
         component: Layout,
         meta: {
+            role: [1, 2],
             title: '控制台'
         },
         children: [
@@ -39,6 +40,7 @@ export const backstageRouteRe: RouteRecordRaw[] = [
         name: 'write',
         component: Layout,
         meta: {
+            role: [1, 2],
             title: '撰写'
         },
         children: [
@@ -67,6 +69,7 @@ export const backstageRouteRe: RouteRecordRaw[] = [
         name: 'manage',
         component: Layout,
         meta: {
+            role: [1, 2],
             title: '管理'
         },
         children: [
@@ -140,6 +143,7 @@ export const backstageRouteRe: RouteRecordRaw[] = [
         name: 'setting',
         component: Layout,
         meta: {
+            role: [1],
             title: '设置'
         },
         children: [

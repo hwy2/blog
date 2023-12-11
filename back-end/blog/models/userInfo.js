@@ -19,14 +19,14 @@ var UserInfo = Mysql.define("userInfo", {
         allowNull: false
     }, //昵称
     birth: Sequelize.DATE, //出生日期
-    sex: { //性别 1男 2女 0未知
+    sex: { //性别 1男 0女 
         type: Sequelize.STRING(2),
         defaultValue: "1"
     },
     face: Sequelize.STRING, //头像
     city: Sequelize.STRING, //所在城市
     address: Sequelize.STRING, //住址
-    synopsis: { //性别 1男 2女 0未知
+    synopsis: { //简介
         type: Sequelize.STRING(256),
         defaultValue: "这个人很懒，没有留下任何信息！"
     },

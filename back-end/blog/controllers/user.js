@@ -72,7 +72,7 @@ module.exports = {
             name: params.name,
             email: params.email,
             role: params.role || "2",
-            password: md5(params.password),
+            password: utils.md5Pwd(params.password),
             state: params.state || '0',
         }
         const userInfo = {
@@ -195,8 +195,7 @@ module.exports = {
             }
 
             var user = userResult.dataValues;
-
-            if (md5(password) != user.password) {
+            if (utils.md5Pwd(password) != user.password) {
                 //密码不正确
                 utils.handleJson({
                     response: res,
@@ -379,9 +378,9 @@ module.exports = {
 
             var userList = result.rows || [];
 
-            for (const item of userList) {
-                item.role = item.role === '1' ? '管理员' : '普通用户'
-            }
+            // for (const item of userList) {
+            //     item.role = item.role === '1' ? '管理员' : '普通用户'
+            // }
 
             // 处理分页
             var pageResult = yield utils.handlePage({
@@ -466,11 +465,11 @@ module.exports = {
      */
     updateUserInfo: function (req, res, next) {
         var params = req.body || req.params;
-        var user = utils.trim(params.user);
-        var userInfo = utils.trim(params.userInfo);
-        var userUuid = utils.trim(user.uuid);
-        var userInfoUuid = utils.trim(userInfo.uuid);
-
+        var user = params.user
+        var userInfo = params.userInfo
+        var userUuid = user.uuid;
+        var userInfoUuid = userInfo.uuid
+        console.log(params)
         if (!userUuid) {
             utils.handleJson({
                 response: res,
@@ -480,12 +479,18 @@ module.exports = {
         }
         co(function* () {
             var userInfoResults = '';
-            var userResult = yield User.update(user, {
+            console.log(1)
+            var userResult = yield User.update({
+                name: user.name,
+                email: user.email,
+                state: user.state,
+                role: user.role
+            }, {
                 where: {
                     uuid: userUuid
                 }
             });
-
+            console.log(1)
             if (!userResult) {
                 utils.handleJson({
                     response: res,
@@ -496,7 +501,15 @@ module.exports = {
             }
 
             if (userInfoUuid && userInfo.nickName) {
-                yield UserInfo.update(userInfo, {
+                console.log('session')
+                yield UserInfo.update({
+                    nickName: userInfo.nickName,
+                    birth: userInfo.birth,
+                    sex: userInfo.sex,
+                    face: userInfo.face,
+                    city: userInfo.city,
+                    address: userInfo.address
+                }, {
                     where: {
                         uuid: userInfoUuid
                     }
@@ -504,8 +517,8 @@ module.exports = {
             } else if (!userInfoUuid && userInfo.nickName) {
                 userInfo.userUuid = userUuid;
                 userInfoResults = yield UserInfo.create(userInfo);
-            } else {}
-            
+            } else { }
+
             utils.handleJson({
                 response: res,
                 msg: i18n.__('updateUserInfoSuccess'),
@@ -566,7 +579,7 @@ module.exports = {
                 return;
             }
             var user = userResult.dataValues;
-            if (user.password && md5(oldPwd) != user.password) {
+            if (user.password && utils.md5Pwd(oldPwd) != user.password) {
                 utils.handleJson({
                     response: res,
                     msg: i18n.__('oldPwdError')
@@ -575,7 +588,7 @@ module.exports = {
                 return;
             }
             yield User.update({
-                password: md5(newPwd)
+                password: utils.md5Pwd(newPwd)
             }, {
                 where: {
                     uuid: userUuid
@@ -596,7 +609,80 @@ module.exports = {
             })
         })
     },
+    /**
+     * 重置密码
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    updateUserResetPwd: function (req, res, next) {
+        var params = req.body || req.params;
+        var userUuid = params.userUuid;
+        var password = utils.trim(params.password);
+        var confirmPassword = utils.trim(params.confirmPassword);
+        if (!userUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUuid')
+            })
 
+            return
+        }
+        if (password != confirmPassword) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('inconsistentPasswords')
+            });
+
+            return;
+        }
+        co(function* () {
+            var userResult = yield User.findOne({
+                where: {
+                    uuid: userUuid
+                }
+            });
+
+            if (!userResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('userNotExist')
+                });
+
+                return;
+            }
+            var user = userResult.dataValues;
+            if (user.password && utils.md5Pwd(password) == user.password) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('newPwdEqOldPwd')
+                });
+
+                return;
+            }
+            // console.log('更新前',utils.md5Pwd(password))
+            yield User.update({
+                password: utils.md5Pwd(password)
+            }, {
+                where: {
+                    uuid: userUuid
+                }
+            });
+
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('updateSuccess'),
+                result: "+1"
+            })
+
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    },
     /**
      * 删除
      */

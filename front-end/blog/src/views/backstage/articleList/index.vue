@@ -173,7 +173,9 @@
                   type="primary"
                   style="width: 22%"
                   @click="handleSticky(scope.row.uuid)"
-                  v-if="scope.row.state == 1 && !scope.row.sticky"
+                  v-if="
+                    scope.row.state == 1 && !scope.row.sticky && user.role == 1
+                  "
                 >
                   置顶
                 </el-button>
@@ -183,7 +185,9 @@
                   type="primary"
                   style="width: 22%"
                   @click="handleSticky(scope.row.uuid, false)"
-                  v-if="scope.row.state == 1 && scope.row.sticky"
+                  v-if="
+                    scope.row.state == 1 && scope.row.sticky && user.role == 1
+                  "
                 >
                   取消置顶
                 </el-button>
@@ -193,17 +197,21 @@
                   type="primary"
                   style="width: 22%"
                   @click="handleSetArticleTestimonials(scope.row.uuid)"
-                  v-if="scope.row.state == 1 && !scope.row.ishot"
+                  v-if="
+                    scope.row.state == 1 && !scope.row.ishot && user.role == 1
+                  "
                 >
                   推荐
                 </el-button>
                 <el-button
-                  title="设为推荐"
+                  title="设为取消推荐"
                   size="small"
                   type="primary"
                   style="width: 22%"
                   @click="handleSetArticleTestimonials(scope.row.uuid, false)"
-                  v-if="scope.row.state == 1 && scope.row.ishot"
+                  v-if="
+                    scope.row.state == 1 && scope.row.ishot && user.role == 1
+                  "
                 >
                   取消推荐
                 </el-button>

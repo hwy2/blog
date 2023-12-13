@@ -217,6 +217,7 @@ const uploadImg = async (
       return new Promise((rev, rej) => {
         const data = new FormData();
         data.append("files", file);
+        data.append("userUuid", article.userUuid);
         proxy.$axios
           .post("/common/enclosure", data)
           .then((resp: any) => rev(resp))

@@ -4,10 +4,12 @@ var i18n = require('i18n'); //i18n国际化
 var config = require('../config/default'); //配置文件
 var utils = require('../libs/utils'); //工具类
 var User = require('../models/index').User; //用户
+var WebConfig = require('../models/index').WebConfig
 var tokenService = require('../services/token'); //token服务
 const UserInfo = require('../models/index').UserInfo;
 var Sequelize = require('sequelize');
 const Op = Sequelize.Op;
+const emailServices = require('../services/email');//邮件服务
 
 module.exports = {
 
@@ -82,7 +84,8 @@ module.exports = {
             face: utils.trim(params.face),
             city: utils.trim(params.city),
             address: utils.trim(params.address),
-            userUuid: ''
+            userUuid: '',
+            synopsis: utils.trim(params.synopsis),
         }
         const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
         if (!userDao.email || !userDao.password || !reg.test(userDao.email) || !userInfo.nickName || !userInfo.face) {
@@ -414,7 +417,7 @@ module.exports = {
      */
     getUserInfo: function (req, res, next) {
         var params = req.query || req.params;
-        // console.log("params", params);
+        console.log("params", params);
         var userUuid = utils.trim(params.userUuid);
 
         if (!userUuid) {
@@ -437,7 +440,7 @@ module.exports = {
             });
 
             if (userResult) {
-                userResult.role = userResult.role === '1' ? '管理员' : '普通用户'
+                // userResult.role = userResult.role === '1' ? '管理员' : '普通用户'
                 utils.handleJson({
                     response: res,
                     msg: i18n.__('doSuccess'),
@@ -479,7 +482,6 @@ module.exports = {
         }
         co(function* () {
             var userInfoResults = '';
-            console.log(1)
             var userResult = yield User.update({
                 name: user.name,
                 email: user.email,
@@ -490,7 +492,6 @@ module.exports = {
                     uuid: userUuid
                 }
             });
-            console.log(1)
             if (!userResult) {
                 utils.handleJson({
                     response: res,
@@ -499,7 +500,7 @@ module.exports = {
 
                 return;
             }
-
+            console.log('111', userInfo)
             if (userInfoUuid && userInfo.nickName) {
                 console.log('session')
                 yield UserInfo.update({
@@ -508,7 +509,8 @@ module.exports = {
                     sex: userInfo.sex,
                     face: userInfo.face,
                     city: userInfo.city,
-                    address: userInfo.address
+                    address: userInfo.address,
+                    synopsis: userInfo.synopsis
                 }, {
                     where: {
                         uuid: userInfoUuid
@@ -748,5 +750,171 @@ module.exports = {
         })
 
 
-    }
+    },
+    /**
+    * 发送验证邮件
+    */
+    getEmailInformation: function (req, res, next) {
+        var params = req.body || req.params;
+        var email = params.email
+        var captcha = utils.generateRandomNumber();
+        var userUuid = params.userUuid
+        if (!userUuid) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassUserUuid')
+            })
+            return
+        }
+        if (!email || !captcha) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassParamsComplete')
+            })
+            return
+        }
+        co(function* () {
+
+            var webConfigResult = yield WebConfig.findOne({});
+            yield User.update({
+                captcha: captcha
+            }, {
+                where: {
+                    uuid: userUuid
+                }
+            })
+
+            var webConfig = webConfigResult.dataValues;
+
+            var object = `<div id="contentDiv" onmouseover="getTop().stopPropagation(event);"
+        onclick="getTop().preSwapLink(event, 'html', 'ZC2010-kTkPZlCCgcLTTSBBibaHRb8');"
+        style="position:relative;font-size:14px;height:auto;padding:15px 15px 10px 15px;z-index:1;zoom:1;line-height:1.7;"
+        class="body">
+        <div id="qm_con_body">
+            <div id="mailContentContainer" class="qmbox qm_con_body_content qqmail_webmail_only" style="">
+                <div
+                    style="margin:100px auto;background-color:#fff;  width:866px; border:1px solid #F1F0F0;box-shadow: 0 0 5px #F1F0F0;">
+                    <div
+                        style="width:838px;height: 78px; padding-top: 10px;padding-left:28px; background-color:#F7F7F7;">
+                        <a style="cursor:pointer; font-size:30px; color:#333;text-decoration: none; font-weight: bold;"
+                            href="${webConfig.siteAddress}" rel="noopener" target="_blank">${webConfig.siteName}</a><span
+                            style="color:#999; font-size:14px;padding-left:20px;">${webConfig.siteDescription}</span>
+                    </div>
+                    <div style="padding:30px;">
+                        <div style="height:50px; line-height:50px; font-size:16px; color:#9e9e9e;">验证码：<span style="color:cornflowerblue;">${captcha}</span>，该验证码10分钟内有效。为了保障您的账户安全，请勿向他人泄漏验证码信息。</div>
+                    </div>
+                </div>
+
+                <style type="text/css">
+                    .qmbox style,
+                    .qmbox script,
+                    .qmbox head,
+                    .qmbox link,
+                    .qmbox meta {
+                        display: none !important;
+                    }
+                </style>
+            </div>
+        </div><!-- -->
+        <style>
+            #mailContentContainer .txt {
+                height: auto;
+            }
+        </style>
+    </div>`;
+
+            var opts = {
+                to: email,
+                subject: `来自[${webConfig.siteName}]的邮箱验证`,
+                html: object
+            }
+
+            // 发送邮件
+            emailServices.sendSystemEmail(opts);
+
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('doSuccess'),
+                result: '+1'
+            })
+
+        }).catch(error => {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+
+
+    },
+    /**
+     * 验证邮箱
+     * @param {1} req 
+     * @param {*} res 
+     * @param {*} next 
+     * @returns 
+     */
+    upDateEmail: function (req, res, next) {
+        var params = req.body || req.params;
+        // 验证新旧密码
+        var userUuid = params.userUuid;
+        var email = utils.trim(params.email);
+        var captcha = utils.trim(params.captcha);
+        // console.log(oldPwd, newPwd);
+        if (!email || !captcha) {
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('pleasePassParamsComplete')
+            });
+
+            return;
+        }
+
+        co(function* () {
+            var userResult = yield User.findOne({
+                where: {
+                    uuid: userUuid
+                }
+            });
+
+            if (!userResult) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('userNotExist')
+                });
+
+                return;
+            }
+            var user = userResult.dataValues;
+            if (user.captcha && captcha != user.captcha) {
+                utils.handleJson({
+                    response: res,
+                    msg: i18n.__('validationFailure')
+                });
+
+                return;
+            }
+            yield User.update({
+                email: email,
+                state: 1
+            }, {
+                where: {
+                    uuid: userUuid
+                }
+            });
+
+            utils.handleJson({
+                response: res,
+                msg: i18n.__('updateSuccess'),
+                result: "+1"
+            })
+
+
+        }).catch(function (error) {
+            utils.handleError({
+                response: res,
+                error: error
+            })
+        })
+    },
 }

@@ -36,6 +36,9 @@ var User = Mysql.define('user', {
     role: { //1管理员，2普通用户
         type: Sequelize.STRING(2),
         defaultValue: '2'
+    },
+    captcha:{
+        type: Sequelize.STRING(8),
     }
 }, {
     freezeTableName: true, //开启自定义表名

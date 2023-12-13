@@ -110,6 +110,19 @@ router.get("/del", checkAdminToken, function (req, res, next) {
     userDao.deleteUser(req, res, next);
 })
 
+/**
+ * 发送邮箱验证码
+ */
+router.post('/emailPost', checkToken, function (req, res, next){
+    userDao.getEmailInformation(req, res, next)
+})
+/**
+ * 验证邮箱验证码
+ */
+router.post('/captchaEmail', checkToken, function (req, res, next) {
+    userDao.upDateEmail(req, res, next)
+})
+
 
 /* GET users listing. */
 // router.get('/', function(req, res, next) {

@@ -960,6 +960,7 @@ onMounted(async () => {
         padding: 0px 10px 10px;
         box-sizing: border-box;
         height: calc(430px - 60px);
+        // height: max-content;
         overflow-y: auto;
         .list-item {
           margin-bottom: 10px;

@@ -18,9 +18,10 @@
           <p>
             {{ user?.userInfo?.nickName }}
           </p>
-          <p>
-           角色： {{ user?.role==1?"管理员":"用户" }}
-          </p>
+          <p>角色： <b>{{ user?.role == 1 ? "管理员" : "用户" }}</b></p>
+          <p>邮箱： <b>{{ user?.email }}</b></p>
+          <p>邮箱是否验证：<b style="color: cornflowerblue;">{{ user?.state== 1 ? "已验证" : "未验证" }}</b> </p>
+
           <p>
             目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
             <span>{{ dataSummary?.commentsTotal }}</span> 条关于你的评论在
@@ -46,30 +47,54 @@
                 用户昵称可以与用户名不同, 用于前台显示. 如果你将此项留空,
                 将默认使用用户名.
               </p>
-              <el-form-item label="生日" prop="birth">
-                <el-date-picker
-                  v-model="formUserInfo.birth"
-                  type="date"
-                  placeholder="选择日期"
-                >
-                </el-date-picker>
-              </el-form-item>
-              <el-form-item label="性别">
-                <el-radio v-model="formUserInfo.sex" label="1" border
-                  >男</el-radio
-                >
-                <el-radio v-model="formUserInfo.sex" label="0" border
-                  >女</el-radio
-                >
-              </el-form-item>
+              <div class="flex">
+                <el-form-item label="生日" prop="birth">
+                  <el-date-picker
+                    v-model="formUserInfo.birth"
+                    type="date"
+                    placeholder="选择日期"
+                  >
+                  </el-date-picker>
+                </el-form-item>
+                <el-form-item label="性别">
+                  <el-radio v-model="formUserInfo.sex" label="1" border
+                    >男</el-radio
+                  >
+                  <el-radio v-model="formUserInfo.sex" label="0" border
+                    >女</el-radio
+                  >
+                </el-form-item>
+              </div>
               <el-form-item label="头像" prop="face">
-                <el-input v-model="formUserInfo.face"></el-input>
+                <!-- <el-input v-model="formUserInfo.face"></el-input> -->
+                <el-upload
+                  action="#"
+                  list-type="picture-card"
+                  :auto-upload="false"
+                  :http-request="uploadFile"
+                  :before-upload="beforeUpload"
+                  :on-change="uploadChange"
+                  :limit="1"
+                  :on-remove="uploadRemove"
+                  v-model:file-list="fileList"
+                  :on-preview="handlePictureCardPreview"
+                  :on-exceed="uploadExceed"
+                >
+                  <el-icon><Plus /></el-icon>
+                </el-upload>
               </el-form-item>
               <el-form-item label="城市" prop="city">
                 <el-input v-model="formUserInfo.city"></el-input>
               </el-form-item>
               <el-form-item label="具体地址" prop="address">
                 <el-input v-model="formUserInfo.address"></el-input>
+              </el-form-item>
+              <el-form-item label="个人简介" prop="synopsis">
+                <el-input
+                  type="textarea"
+                  :rows="2"
+                  v-model="formUserInfo.synopsis"
+                ></el-input>
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="submitForm('ruleForm')"
@@ -109,9 +134,65 @@
               </el-form-item>
             </el-form>
           </div>
+          <div class="update-password email-calibration" v-if="user.state == 0">
+            <div class="title">
+              <p>邮箱验证</p>
+            </div>
+            <el-form
+              label-position="top"
+              label-width="80px"
+              :model="formUser"
+              ref="emailForm"
+            >
+              <el-form-item
+                label="邮箱号"
+                prop="email"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入邮箱',
+                    trigger: 'blur'
+                  },
+                  {
+                    type: 'email',
+                    message: '请输入正确的电子邮件地址',
+                    trigger: ['blur', 'change']
+                  }
+                ]"
+              >
+                <el-input v-model="formUser.email"></el-input>
+              </el-form-item>
+              <p>用户创建是输入的邮箱号</p>
+              <el-form-item
+                label="验证码"
+                prop="captcha"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入验证码',
+                    trigger: 'blur'
+                  }
+                ]"
+              >
+                <el-input v-model="formUser.captcha"></el-input>
+                <el-button type="primary" @click="postCaptcha"
+                  >发送验证码</el-button
+                >
+              </el-form-item>
+              <p>请输入邮箱收到的验证码</p>
+              <el-form-item>
+                <el-button type="primary" @click="verifyEmail('emailForm')">
+                  验证邮箱
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </div>
         </div>
       </div>
     </div>
+    <el-dialog v-model="imgdialogVisible">
+      <img w-full :src="dialogImageUrl" alt="Preview Image" />
+    </el-dialog>
   </div>
 </template>
 
@@ -126,7 +207,8 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
+import { ElNotification, ElMessage } from "element-plus";
+import { Plus } from "@element-plus/icons-vue";
 const store = useStore();
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
@@ -138,7 +220,8 @@ const formUserInfo = reactive({
   sex: 0,
   face: "",
   city: "",
-  address: ""
+  address: "",
+  synopsis: ""
 });
 const rules = reactive({
   nickName: [
@@ -188,7 +271,9 @@ const rules = reactive({
 });
 const formUser = reactive({
   oldPwd: "",
-  newPwd: ""
+  newPwd: "",
+  email: "",
+  captcha: ""
 });
 const rulesPwd = reactive({
   oldPwd: [
@@ -223,36 +308,31 @@ const clientHeight = computed(() => {
   height = height - 68;
   return "min-height:" + height + "px";
 });
+const file = ref<File>(); //上传的文件
+const isUpload = ref<boolean>(false); //是否有上传
+const fileList = ref<Array<any>>([]); //图片列表
+const imgdialogVisible = ref<boolean>(false); //图片弹窗
+const dialogImageUrl = ref<string>("");
+
 /**
  * 修改个人信息
  */
 const submitForm = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      proxy.$axios
-        .put("/userInfo/upinfo", {
-          userInfo: formUserInfo
-        })
-        .then((res: any) => {
-          console.log(res);
-          if (res.code === "200") {
-            ElNotification({
-              title: "成功",
-              message: "用户信息更新成功",
-              type: "success"
-            });
-            getUserInfo();
-          } else {
-            ElNotification({
-              title: "错误",
-              message: res.msg,
-              type: "error"
-            });
-          }
-        })
-        .catch((err: any) => {
-          console.log(err);
-        });
+      if (isUpload.value) {
+        uploadFile(file.value)
+          .then((res: any) => {
+            formUserInfo.face = res.result.fileList[0].absoluteUrl;
+            isUpload.value = false;
+            updateUserInfo();
+          })
+          .catch((err) => {
+            ElMessage.error("上传文件文件失败", err);
+          });
+      } else {
+        updateUserInfo();
+      }
     } else {
       ElNotification({
         title: "错误",
@@ -268,12 +348,25 @@ const submitForm = (formName: string) => {
  */
 const getUserInfo = () => {
   proxy.$axios
-    .get("/user/info", { userUuid: (user.value as any).uuid })
+    .get("/user/info", { userUuid: user.value.uuid })
     .then((res: any) => {
       if (res.code === "200") {
         proxy.$Cookies.set("user", JSON.stringify(res.result.user));
         user.value = res.result.user;
-        location.reload();
+        formUserInfo.uuid = res.result.user.userInfo.uuid;
+        formUserInfo.nickName = res.result.user.userInfo.nickName;
+        formUserInfo.birth = res.result.user.userInfo.birth;
+        formUserInfo.sex = res.result.user.userInfo.sex;
+        formUserInfo.face = res.result.user.userInfo.face;
+        formUserInfo.city = res.result.user.userInfo.city;
+        formUserInfo.address = res.result.user.userInfo.address;
+        formUserInfo.synopsis = res.result.user.userInfo.synopsis;
+        formUser.email = res.result.user.email;
+        fileList.value = [];
+        fileList.value.push({
+          name: "face",
+          url: formUserInfo.face
+        });
       }
       console.log(res);
     })
@@ -323,22 +416,161 @@ const submitPwdForm = (formName: string) => {
     }
   });
 };
+
+/**
+ * 上传前校验
+ */
+const beforeUpload = (file: any) => {
+  console.log("file.type", file.type);
+  // 类型判断
+  const isAPK = ["image/png", "image/jpg", "image/jpeg"].includes(file.type);
+  // 大小判断
+  const is1M = file.size / 1024 / 1024 < 1;
+  if (!isAPK) {
+    // 类型不匹配
+    ElMessage.error("上传文件只能是 png，jpg  格式!");
+  }
+  if (!is1M) {
+    // 大小不匹配
+    ElMessage.error("上传文件大小不能超过 1MB !");
+  }
+  // 返回 false 阻断 true 正常上传
+  return isAPK && is1M;
+};
+/**
+ * 自定义上传
+ */
+const uploadFile = (param: any) => {
+  console.log("hhh", param);
+  return new Promise((rev, rej) => {
+    const data = new FormData();
+    data.append("files", param);
+    data.append("userUuid", user.value.uuid);
+    proxy.$axios
+      .post("/common/enclosure", data)
+      .then((resp: any) => rev(resp))
+      .catch((error: any) => rej(error));
+  });
+};
+/**
+ * 上传前的change事件
+ * @param uploadFile
+ */
+const uploadChange = (uploadFile: any) => {
+  console.log(uploadFile);
+  file.value = uploadFile.raw;
+  beforeUpload(uploadFile.raw);
+  isUpload.value = true;
+};
+/**
+ * 上传前的remove事件
+ * @param uploadFile
+ */
+const uploadRemove = (uploadFile: any) => {
+  console.log("处罚法");
+  isUpload.value = false;
+};
+/**
+ * 修改用户信息
+ */
+const updateUserInfo = () => {
+  proxy.$axios
+    .put("/userInfo/upinfo", {
+      userInfo: formUserInfo
+    })
+    .then((res: any) => {
+      console.log(res);
+      if (res.code === "200") {
+        ElNotification({
+          title: "成功",
+          message: "用户信息更新成功",
+          type: "success"
+        });
+        getUserInfo();
+      } else {
+        ElNotification({
+          title: "错误",
+          message: res.msg,
+          type: "error"
+        });
+      }
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+/**
+ * 上传超限制
+ */
+const uploadExceed = (uploadFile: any) => {
+  ElMessage.error("只能上传一个图片，如需修改请删除之前的图片");
+};
+/**
+ * 查看图片
+ * @param uploadFile
+ */
+const handlePictureCardPreview = (uploadFile: any) => {
+  console.log("1232313");
+  dialogImageUrl.value = uploadFile.url!;
+  imgdialogVisible.value = true;
+};
+/**
+ * 发送验证码
+ */
+const postCaptcha = () => {
+  proxy.$axios
+    .post("/user/emailPost", {
+      userUuid: user.value.uuid,
+      email: formUser.email
+    })
+    .then((res: any) => {
+      if (res.code === "200") {
+        ElNotification.success("发送验证码成功");
+      } else {
+        ElNotification.error(res.msg);
+      }
+      console.log(res);
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+
+const verifyEmail = (formName: string) => {
+  proxy.$refs[formName].validate((valid: any) => {
+    if (valid) {
+      proxy.$axios
+        .post("/user/captchaEmail", {
+          userUuid: user.value.uuid,
+          email: formUser.email,
+          captcha: formUser.captcha
+        })
+        .then((res: any) => {
+          if (res.code === "200") {
+            ElNotification.success("邮箱验证成功");
+            getUserInfo();
+          } else {
+            ElNotification.error(res.msg);
+          }
+          console.log(res);
+        })
+        .catch((err: any) => {
+          console.log(err);
+        });
+    }
+  });
+};
+
 onBeforeMount(() => {
   document.title = "个人设置";
 });
 onMounted(() => {
   if (proxy.$Cookies.get("user")) {
     user.value = JSON.parse(proxy.$Cookies.get("user"));
+    getUserInfo();
   } else {
     router.push({ name: "login" });
   }
-  formUserInfo.uuid = (user.value as any).userInfo.uuid;
-  formUserInfo.nickName = (user.value as any).userInfo.nickName;
-  formUserInfo.birth = (user.value as any).userInfo.birth;
-  formUserInfo.sex = (user.value as any).userInfo.sex;
-  formUserInfo.face = (user.value as any).userInfo.face;
-  formUserInfo.city = (user.value as any).userInfo.city;
-  formUserInfo.address = (user.value as any).userInfo.address;
 });
 </script>
 
@@ -361,7 +593,8 @@ onMounted(() => {
 
     .page-main {
       display: flex;
-      .content-pane,.content-right {
+      .content-pane,
+      .content-right {
         width: 50%;
         padding-right: 30px;
         box-sizing: border-box;
@@ -373,6 +606,13 @@ onMounted(() => {
           }
         }
         .el-form {
+          .flex {
+            display: flex;
+            .el-form-item {
+              width: 50%;
+              box-sizing: border-box;
+            }
+          }
           .el-form-item {
             .el-form-item__label {
               line-height: 1.5;
@@ -399,6 +639,7 @@ onMounted(() => {
         p {
           font-size: 87.5%;
           line-height: 1.5;
+          padding: 1% 0;
 
           .el-image {
             width: 222px;
@@ -424,6 +665,18 @@ onMounted(() => {
       .content-right {
         width: 25%;
         padding-right: 0px;
+        .email-calibration {
+          .el-form {
+            .el-form-item:nth-of-type(2) {
+              .el-input {
+                width: 50%;
+              }
+              .el-button {
+                margin-left: 20px;
+              }
+            }
+          }
+        }
       }
     }
   }

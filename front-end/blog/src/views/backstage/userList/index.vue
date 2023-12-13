@@ -23,11 +23,21 @@
               align="center"
             >
               <template #default="scope">
-                <img
-                  :src="scope.row.userInfo.face"
-                  alt="face"
-                  style="width: 80px; height: 80px"
-                />
+                <div
+                  class="face"
+                  @click="
+                    handlePictureCardPreview({
+                      url: scope.row.userInfo.face
+                    })
+                  "
+                >
+                  <img
+                    :src="scope.row.userInfo.face"
+                    alt="face"
+                    style="width: 80px; height: 80px"
+                  />
+                  <el-icon><ZoomIn /></el-icon>
+                </div>
               </template>
             </el-table-column>
             <el-table-column label="用户名" prop="name">
@@ -167,20 +177,25 @@
             placeholder="电子邮箱地址将作为此用户的主要联系方式."
           ></el-input>
         </el-form-item>
-        <!-- <el-form-item label="密码" prop="password">
+
+        <el-form-item label="密码" prop="password" v-if="addOrModify">
           <el-input
             show-password
             v-model="formUser.password"
             placeholder="建议使用特殊字符与字母、数字的混编样式,以增加系统安全性."
           ></el-input>
         </el-form-item>
-        <el-form-item label="确认密码" prop="confirmPassword">
+        <el-form-item
+          label="确认密码"
+          prop="confirmPassword"
+          v-if="addOrModify"
+        >
           <el-input
             show-password
             v-model="formUser.confirmPassword"
             placeholder="请确认你的密码, 与上面输入的密码保持一致."
           ></el-input>
-        </el-form-item> -->
+        </el-form-item>
         <el-form-item label="用户组" prop="role">
           <el-select v-model="formUser.role" placeholder="请选择">
             <el-option label="管理员" value="1"> </el-option>
@@ -205,12 +220,6 @@
           <el-radio v-model="formUser.sex" label="1" border>男</el-radio>
           <el-radio v-model="formUser.sex" label="0" border>女</el-radio>
         </el-form-item>
-        <el-form-item label="头像" prop="face">
-          <el-input
-            v-model="formUser.face"
-            placeholder="用于前台作者头像"
-          ></el-input>
-        </el-form-item>
         <el-form-item label="城市" prop="city">
           <el-input
             v-model="formUser.city"
@@ -223,17 +232,47 @@
             placeholder="你的地址（选填）"
           ></el-input>
         </el-form-item>
+        <el-form-item label="头像" prop="face">
+          <!-- <el-input
+            v-model="formUser.face"
+            placeholder="用于前台作者头像"
+          ></el-input>
+          <br />
+          <br /> -->
+          <el-upload
+            action="#"
+            list-type="picture-card"
+            :auto-upload="false"
+            :http-request="uploadFile"
+            :before-upload="beforeUpload"
+            :on-change="uploadChange"
+            :limit="1"
+            :on-remove="uploadRemove"
+            v-model:file-list="fileList"
+            :on-preview="handlePictureCardPreview"
+            :on-exceed="uploadExceed"
+          >
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="简介" prop="synopsis">
+          <el-input
+            type="textarea"
+            :rows="5"
+            v-model="formUser.synopsis"
+            placeholder="个人简介（选填）"
+          ></el-input>
+        </el-form-item>
+        <!-- <div class="clearfix"></div> -->
         <el-form-item>
           <el-button
             v-if="addOrModify"
-            style="margin-left: auto"
             type="primary"
             @click="submitUserForm('UserForm')"
             >新增用户</el-button
           >
           <el-button
             v-if="!addOrModify"
-            style="margin-left: auto"
             type="primary"
             @click="submitUserForm('UserForm')"
             >修改用户</el-button
@@ -274,6 +313,9 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <el-dialog v-model="imgdialogVisible">
+      <img w-full :src="dialogImageUrl" alt="Preview Image" />
+    </el-dialog>
   </div>
 </template>
 <script lang="ts" setup name="userList">
@@ -286,14 +328,15 @@ import {
   onBeforeMount,
   watch
 } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
+// import { useStore } from "vuex";
+// import { useRouter } from "vue-router";
+import { ElNotification, ElMessage } from "element-plus";
+import { Plus, ZoomIn } from "@element-plus/icons-vue";
 import dateFormat from "@/assets/js/dateFormat.js";
 import { isvalidPass, isvalidUsername } from "@/assets/js/validate.js";
 
-const store = useStore();
-const router = useRouter();
+// const store = useStore();
+// const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 const validatePass1 = (rule: any, value: string, callback: any) => {
   if (value === "") {
@@ -339,7 +382,7 @@ let user = ref<any>({}); //当前用户
 const newUserVisible = ref<boolean>(false); //新用户验证
 const addOrModify = ref<boolean>(true); //添加或者修改
 const resetPasswordDialog = ref<boolean>(false); //重置密码
-let formUser = reactive({
+const formUser = reactive({
   name: "",
   email: "",
   password: "",
@@ -353,7 +396,8 @@ let formUser = reactive({
   city: "",
   address: "",
   uuid: "",
-  userInfoUuid: ""
+  userInfoUuid: "",
+  synopsis: ""
 });
 const rulesUser = reactive({
   name: [
@@ -431,6 +475,13 @@ const hidePage = computed(() => {
   if (userTtotals.value > 10) return false;
   return true;
 });
+
+const loginUser = ref<any>(); //当前登录用户
+const file = ref<File>(); //上传的文件
+const isUpload = ref<boolean>(false); //是否有上传
+const fileList = ref<Array<any>>([]); //图片列表
+const imgdialogVisible = ref<boolean>(false); //图片弹窗
+const dialogImageUrl = ref<string>("");
 
 watch(search, (newValue, oldValue) => {
   condition.name = newValue;
@@ -514,6 +565,8 @@ const deleteUser = (userUuid: string) => {
  * 修改用户信息
  */
 const handleEdit = (index: number, row: any) => {
+  console.log(row);
+
   formUser.name = row.name;
   formUser.email = row.email;
   formUser.password = "";
@@ -528,12 +581,13 @@ const handleEdit = (index: number, row: any) => {
   formUser.address = row.userInfo?.address;
   formUser.uuid = row.uuid;
   formUser.userInfoUuid = row.userInfo?.uuid;
-
-  newUserVisible.value = true;
+  formUser.synopsis = row.userInfo?.synopsis;
+  fileList.value = [];
+  fileList.value.push({
+    name: "face",
+    url: formUser.face
+  });
   addOrModify.value = false;
-  if (proxy.$refs.UserForm !== undefined) {
-    proxy.$refs.UserForm.resetFields();
-  }
   rulesUser.nickName = [
     { required: false, message: "请输入昵称", trigger: "blur" },
     {
@@ -552,16 +606,30 @@ const handleEdit = (index: number, row: any) => {
       trigger: "blur"
     }
   ];
+  newUserVisible.value = true;
 };
 /**
  * 新增用户按钮处理
  */
 const newlyUser = () => {
-  if (proxy.$refs.UserForm !== undefined) {
-    proxy.$refs.UserForm.resetFields();
-  }
-  newUserVisible.value = true;
+  console.log(formUser);
+  formUser.name = "";
+  formUser.email = "";
+  formUser.password = "";
+  formUser.confirmPassword = "";
+  formUser.state = "";
+  formUser.role = "2";
+  formUser.nickName = "";
+  formUser.birth = "";
+  formUser.sex = "1";
+  formUser.face = "";
+  formUser.city = "";
+  formUser.address = "";
+  formUser.uuid = "";
+  formUser.userInfoUuid = "";
+  formUser.synopsis = "";
   addOrModify.value = true;
+  fileList.value = [];
   rulesUser.password = [
     { required: true, message: "请输入密码", trigger: "blur" },
     { validator: validatePass1, trigger: "blur" }
@@ -588,35 +656,27 @@ const newlyUser = () => {
       trigger: "blur"
     }
   ];
+  newUserVisible.value = true;
 };
 /**
  * 提交表单
  */
 const submitUserForm = (formName: string) => {
+  if (!formUser.face) formUser.face = "123";
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      if (addOrModify.value) {
-        createUser(formUser);
+      if (isUpload.value) {
+        uploadFile(file.value)
+          .then((res: any) => {
+            formUser.face = res.result.fileList[0].absoluteUrl;
+            isUpload.value = false;
+            isCreateOrUpdate();
+          })
+          .catch((err) => {
+            ElMessage.error("上传文件文件失败", err);
+          });
       } else {
-        const user = {
-          uuid: formUser.uuid,
-          name: formUser.name,
-          email: formUser.email,
-          password: formUser.password,
-          confirmPassword: formUser.confirmPassword,
-          state: formUser.state,
-          role: formUser.role
-        };
-        const userInfo = {
-          uuid: formUser.userInfoUuid,
-          nickName: formUser.nickName,
-          birth: formUser.birth,
-          sex: formUser.sex,
-          face: formUser.face,
-          city: formUser.city,
-          address: formUser.address
-        };
-        updateUser(user, userInfo);
+        isCreateOrUpdate();
       }
     } else {
       console.log("error");
@@ -644,6 +704,7 @@ const createUser = (form: any) => {
           message: "新增用户成功",
           type: "success"
         });
+        getUserList();
       } else {
         ElNotification({
           title: "错误",
@@ -660,6 +721,7 @@ const createUser = (form: any) => {
  * 修改用户信息
  */
 const updateUser = (user: any, userInfo: any) => {
+  console.log("userInfo", userInfo);
   proxy.$axios
     .put("/user/upInfo", { user, userInfo })
     .then((res: any) => {
@@ -723,8 +785,8 @@ const updateUserPwd = (formName: string) => {
 //重置密码
 const handleUpPwd = (user: any) => {
   formUser.uuid = user.uuid;
-  formUser.password= '';
-  formUser.confirmPassword ='';
+  formUser.password = "";
+  formUser.confirmPassword = "";
   resetPasswordDialog.value = true;
   rulesUser.password = [
     { required: false, message: "请输入密码", trigger: "blur" },
@@ -735,11 +797,122 @@ const handleUpPwd = (user: any) => {
     { validator: validatePass2, trigger: "blur" }
   ];
 };
+/**
+ * 上传前校验
+ */
+const beforeUpload = (file: any) => {
+  console.log("file.type", file.type);
+  // 类型判断
+  const isAPK = ["image/png", "image/jpg", "image/jpeg"].includes(file.type);
+  // 大小判断
+  const is1M = file.size / 1024 / 1024 < 1;
+  if (!isAPK) {
+    // 类型不匹配
+    ElMessage.error("上传文件只能是 png，jpg  格式!");
+  }
+  if (!is1M) {
+    // 大小不匹配
+    ElMessage.error("上传文件大小不能超过 1MB !");
+  }
+  // 返回 false 阻断 true 正常上传
+  return isAPK && is1M;
+};
+/**
+ * 自定义上传
+ */
+const uploadFile = (param: any) => {
+  console.log("hhh", param);
+  return new Promise((rev, rej) => {
+    const data = new FormData();
+    data.append("files", param);
+    data.append("userUuid", loginUser.value.uuid);
+    proxy.$axios
+      .post("/common/enclosure", data)
+      .then((resp: any) => rev(resp))
+      .catch((error: any) => rej(error));
+  });
+  // const data = new FormData();
+  // data.append("files", param.file);
+  // data.append("userUuid", loginUser.value.uuid);
+  // proxy.$axios
+  //   .post("/common/enclosure", data)
+  //   .then((resp: any) => {
+  //     if(resp.code == "200"){
+
+  //     }else{
+  //       ElMessage.error("上传文件文件失败");
+  //     }
+
+  //   })
+  //   .catch((error: any) => {
+  //     console.log(error);
+  //   });
+};
+/**
+ * 上传前的change事件
+ * @param uploadFile
+ */
+const uploadChange = (uploadFile: any) => {
+  console.log(uploadFile);
+  file.value = uploadFile.raw;
+  beforeUpload(uploadFile.raw);
+  isUpload.value = true;
+};
+/**
+ * 上传前的remove事件
+ * @param uploadFile
+ */
+const uploadRemove = (uploadFile: any) => {
+  console.log("处罚法");
+  isUpload.value = false;
+};
+/** 判断是修改还是创建 调用对应方法 */
+const isCreateOrUpdate = () => {
+  if (addOrModify.value) {
+    createUser(formUser);
+  } else {
+    const user = {
+      uuid: formUser.uuid,
+      name: formUser.name,
+      email: formUser.email,
+      password: formUser.password,
+      confirmPassword: formUser.confirmPassword,
+      state: formUser.state,
+      role: formUser.role
+    };
+    const userInfo = {
+      uuid: formUser.userInfoUuid,
+      nickName: formUser.nickName,
+      birth: formUser.birth,
+      sex: formUser.sex,
+      face: formUser.face,
+      city: formUser.city,
+      address: formUser.address,
+      synopsis: formUser.synopsis
+    };
+    updateUser(user, userInfo);
+  }
+};
+/**
+ * 上传超限制
+ */
+const uploadExceed = (uploadFile: any) => {
+  ElMessage.error("只能上传一个图片，如需修改请删除之前的图片");
+};
+/**
+ * 查看图片
+ * @param uploadFile 
+ */
+const handlePictureCardPreview = (uploadFile: any) => {
+  dialogImageUrl.value = uploadFile.url!;
+  imgdialogVisible.value = true;
+};
 
 onBeforeMount(() => {
   document.title = "用户列表";
 });
 onMounted(() => {
+  loginUser.value = JSON.parse(proxy.$Cookies.get("user"));
   getUserList();
 });
 </script>
@@ -776,7 +949,45 @@ onMounted(() => {
       .list {
         padding: 24px;
         background-color: #fff;
+        .face {
+          position: relative;
+          width: 80px;
+          height: 80px;
+          .el-icon {
+            font-size: 20px;
+            color: #fff;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+          }
+          &::before {
+            content: "";
+            width: 80px;
+            height: 80px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 999;
+          }
+          &:hover {
+            &::before {
+              background-color: rgba($color: #000000, $alpha: 0.2);
+            }
+            .el-icon {
+              opacity: 1;
+            }
+          }
+          img {
+            position: relative;
+            display: block;
 
+            &:hover {
+              background: #000;
+            }
+          }
+        }
         .operation {
           display: flex;
           .el-pagination {
@@ -789,9 +1000,13 @@ onMounted(() => {
 }
 
 .newUserFome {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   .el-form-item {
     width: 45%;
-    display: inline-block;
+    // display: inline-block;
+    margin-bottom: 3%;
 
     .el-form-item__label {
       line-height: 2;
@@ -802,6 +1017,15 @@ onMounted(() => {
   }
   .el-form-item:nth-child(odd) {
     margin-right: 5%;
+  }
+  .el-form-item:last-child {
+    width: 100%;
+    .el-button {
+      display: block;
+      margin: 0 auto;
+      width: 30%;
+      height: 40px;
+    }
   }
 }
 </style>

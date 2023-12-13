@@ -231,5 +231,13 @@ module.exports = {
     },
     md5Pwd: function (str) {
         return md5(config.pwd.key + str)
+    },
+    generateRandomNumber: function () {
+        let randomNum = Math.floor(Math.random() * 100000000);
+        let randomNumStr = randomNum.toString();
+        while (randomNumStr.length < 8) {
+            randomNumStr = "0" + randomNumStr;
+        }
+        return randomNumStr;
     }
 };

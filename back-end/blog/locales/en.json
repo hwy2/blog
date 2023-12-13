@@ -36,5 +36,7 @@
     "siteName&&siteAddress": "siteName&&siteAddress not null",
     "noInformationFound": "no information found",
     "notDeleteLastAccount": "It is forbidden to delete the last account",
-    "categoryOccupancy": "category occupancy"
+    "categoryOccupancy": "category occupancy",
+    "validationFailure": "validation Failure",
+    "pleasePassUserUuid":"please Pass User Uuid"
 }

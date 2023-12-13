@@ -127,8 +127,9 @@ module.exports = {
      */
     updateUserInfo: function (req, res, next) {
         var params = req.body || req.params;
-        var userInfo = utils.trim(params.userInfo);
-        var userInfoUuid = utils.trim(userInfo.uuid);
+        var userInfo = params.userInfo;
+        var userInfoUuid = userInfo.uuid;
+        console.log(userInfo.uuid)
         if (!userInfoUuid) {
             utils.handleJson({
                 response: res,

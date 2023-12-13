@@ -827,26 +827,10 @@ const uploadFile = (param: any) => {
     data.append("files", param);
     data.append("userUuid", loginUser.value.uuid);
     proxy.$axios
-      .post("/common/enclosure", data)
+      .post("/common/face", data)
       .then((resp: any) => rev(resp))
       .catch((error: any) => rej(error));
   });
-  // const data = new FormData();
-  // data.append("files", param.file);
-  // data.append("userUuid", loginUser.value.uuid);
-  // proxy.$axios
-  //   .post("/common/enclosure", data)
-  //   .then((resp: any) => {
-  //     if(resp.code == "200"){
-
-  //     }else{
-  //       ElMessage.error("上传文件文件失败");
-  //     }
-
-  //   })
-  //   .catch((error: any) => {
-  //     console.log(error);
-  //   });
 };
 /**
  * 上传前的change事件

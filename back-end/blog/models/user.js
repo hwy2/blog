@@ -39,6 +39,8 @@ var User = Mysql.define('user', {
     },
     captcha:{
         type: Sequelize.STRING(8),
+        allowNull:true,
+        defaultValue:''
     }
 }, {
     freezeTableName: true, //开启自定义表名

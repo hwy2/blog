@@ -162,7 +162,7 @@
               >
                 <el-input v-model="formUser.email"></el-input>
               </el-form-item>
-              <p>用户创建是输入的邮箱号</p>
+              <p>用户创建是输入的邮箱号,如不验证将无法收到邮件</p>
               <el-form-item
                 label="验证码"
                 prop="captcha"
@@ -447,7 +447,7 @@ const uploadFile = (param: any) => {
     data.append("files", param);
     data.append("userUuid", user.value.uuid);
     proxy.$axios
-      .post("/common/enclosure", data)
+      .post("/common/face", data)
       .then((resp: any) => rev(resp))
       .catch((error: any) => rej(error));
   });

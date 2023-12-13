@@ -17,7 +17,7 @@ axios.interceptors.request.use(
             config.headers.accessToken = accessToken;
         }
         // 加密提交
-        if (config.url !="/common/enclosure" &&(config.method === 'post' || config.method === 'put') && config.data)
+        if (config.url != "/common/enclosure" && config.url != "/common/face" &&(config.method === 'post' || config.method === 'put') && config.data)
             config.data = {
                 data: encryptedAES(config.data)
             }

@@ -12,11 +12,12 @@ const email = require('../services/email');
 const Op = Sequelize.Op;
 var dateFormat = require("dateformat"); //时间格式化
 const { isArray } = require('underscore');
+const { User } = require('../models/index');
 module.exports = {
     /**
      * 创建评论
      */
-    createComment: function (req, res, next,status=1) {
+    createComment: function (req, res, next, status = 1) {
         _this = this
         var params = req.body || req.params;
 
@@ -79,7 +80,7 @@ module.exports = {
      * 回复评论
      */
     recoverComment: function (req, res, next) {
-       this.createComment(req, res, next,0)
+        this.createComment(req, res, next, 0)
     },
     /**
      * 审核评论
@@ -388,6 +389,16 @@ module.exports = {
 
         var webConfigResult = await WebConfig.findOne({});
         var webConfig = webConfigResult.dataValues;
+        var articleResult = await Article.findOne({
+            where: {
+                uuid: articleUuid,
+
+            },
+            include: [
+                { model: User }
+            ]
+        })
+        console.log('articleResult', articleResult.dataValues)
         var object = ` <div id="contentDiv" onmouseover="getTop().stopPropagation(event);"
         onclick="getTop().preSwapLink(event, 'html', 'ZC2010-kTkPZlCCgcLTTSBBibaHRb8');"
         style="position:relative;font-size:14px;height:auto;padding:15px 15px 10px 15px;z-index:1;zoom:1;line-height:1.7;"
@@ -444,8 +455,12 @@ module.exports = {
             }
         </style>
     </div>`;
+        var emailNum = config.email.admin
+        if (articleResult.dataValues.user.state == "1") {
+            emailNum = articleResult.dataValues.user.email
+        }
         var opts = {
-            to: configs.email.admin,
+            to: emailNum,
             subject: `来自[${webConfig.siteName}]的新消息`,
             html: object
         }

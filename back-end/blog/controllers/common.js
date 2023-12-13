@@ -18,7 +18,8 @@ module.exports = {
         var params = req.body || req.params
         // console.log(req.body)
         var files = req.files;
-        console.log(files)
+        var fileName = params.fileName
+        console.log(fileName,"fileName")
         var userUuid = utils.trim(params.userUuid)
         if (!files || !files.length) {
             //err
@@ -37,11 +38,13 @@ module.exports = {
         }
 
         co(function* () {
+            var filePath = "default"
+            if (fileName) filePath = fileName
             var fileResult = yield Promise.all(files.map(function (file) {
                 return Attachment.create({
                     name: file.originalname,
                     relativeUrl: file.filename,
-                    absoluteUrl: fileService.getFilePath("default", file.filename),
+                    absoluteUrl: fileService.getFilePath(filePath, file.filename),
                     type: fileService.handlerFileType(file.mimetype), //对应int值
                     size: file.size, //文件大小
                     userUuid: userUuid

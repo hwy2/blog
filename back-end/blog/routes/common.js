@@ -18,6 +18,18 @@ router.post('/enclosure', fileService.setFileUpload({
 });
 
 /**
+ * 上传头像图片
+ * 支持单/多文件上传
+ * file 为接受name参数名字
+ */
+router.post('/face', fileService.setFileUpload({
+    pathType: "face", //上传对应文件夹 默认
+}).array('files', 5), function (req, res, next) {
+    req.body.fileName = 'face'
+    commonDao.uploadEnclosure(req, res, next);
+});
+
+/**
  * 返回一个随机的图片URL
  */
 router.get('/wallpaper', function (req, res, next) {

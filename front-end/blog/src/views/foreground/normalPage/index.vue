@@ -234,7 +234,8 @@ import {
   onBeforeMount,
   onMounted,
   getCurrentInstance,
-  computed
+  computed,
+  watch
 } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -247,7 +248,7 @@ const store = useStore();
 
 // vue2.x的data参数
 
-const uuid = computed(() => router.currentRoute.value.params.uuid);
+const uuid = ref<any>();
 const article = ref<any>({});
 const articleLink = ref<string>(
   "http://" + location.host + router.currentRoute.value.path
@@ -274,10 +275,10 @@ const commentSumber = computed(() => {
 /**
  * 获取文章内容
  */
-const getArticleInfo = () => {
+const getArticleInfo = (uuid:string) => {
   const loading = ElLoading.service({ fullscreen: true });
   proxy.$axios
-    .get("/article/info", { articleUuid: uuid.value })
+    .get("/article/info", { articleUuid: uuid })
     .then((res: any) => {
       console.log(res);
       document.title = res.result.article.title;
@@ -365,7 +366,7 @@ const createComments = () => {
         formLabelAlign.comments = "";
         formLabelAlign.niceName = "";
         proxy.$refs.comments.innerText = "";
-        getArticleInfo();
+        getArticleInfo(uuid.value);
       } else {
         ElNotification({
           title: "失败",
@@ -435,11 +436,20 @@ const getdateFormat = (data: string, format: string) => {
 
 onBeforeMount(() => {
   // 挂载开始之前
-  getArticleInfo();
+  getArticleInfo(uuid.value);
 });
 onMounted(() => {
   // 挂载之后
 });
+watch(
+  () => router.currentRoute.value.params.uuid,
+  (newval: any) => {
+    console.log(newval);
+    uuid.value = newval;
+    getArticleInfo(uuid.value);
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <style lang="scss">

@@ -27,7 +27,7 @@ var Article = Mysql.define('article', {
         type: Sequelize.INTEGER,
         defaultValue: 1, //默认值
     },
-    abstract: Sequelize.STRING,
+    abstract: Sequelize.STRING,//摘要
     pageview: { // 阅读次数
         type: Sequelize.INTEGER,
         defaultValue: 0

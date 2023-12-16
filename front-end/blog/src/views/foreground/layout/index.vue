@@ -13,9 +13,9 @@
       </div>
       <!-- nav -->
       <div class="nav">
-        <el-menu default-active="1" class="el-menu-demo" mode="horizontal">
-          <el-menu-item index="1">
-            <a href="javascript:void(0)" @click="home()">首页</a></el-menu-item
+        <el-menu :default-active="defaultActive" class="el-menu-demo" mode="horizontal"  @select="handleSelect">
+          <el-menu-item index="1" @click="home()">
+            <a href="javascript:void(0)" >首页</a></el-menu-item
           >
           <el-menu-item
             :index="'3-' + index"
@@ -285,10 +285,12 @@ import {
   onBeforeMount,
   getCurrentInstance,
   onBeforeUnmount,
-  nextTick
+  nextTick,
+  watch
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import Cookies from "js-cookie";
 // import { Search } from "@element-plus/icons-vue";
 // import dateFormat from "@/assets/js/dateFormat.js";
 
@@ -344,7 +346,8 @@ const description = computed(
   () => store.state.foreground.webConfig.siteDescription
 ); // 站长简介
 const pageList = computed(() => store.state.foreground.pageList);//文章列表
-const showSearch = ref(false)
+const showSearch = ref(false)//显示搜索？
+const defaultActive = ref<any>('1')//导航栏
 
 
 /** 获取统计数据 */
@@ -507,10 +510,15 @@ const jumpArticle = (uuid: string) => {
     params: { uuid }
   });
 };
+const handleSelect = (key: string, keyPath: string) => {
+  // console.log(key, keyPath);
+  defaultActive.value = key;
+};
 
 // 生命周期
 onBeforeMount(async () => {
   proxy.getWebConfigInfo();
+  defaultActive.value = Cookies.get('defaultActive')
 });
 onMounted(() => {
   loading.value = false;
@@ -529,6 +537,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearTimeout(setTimeoutFlag.value);
 });
+watch(defaultActive,(newValue:any) => {
+  console.log(newValue)
+  Cookies.set('defaultActive',newValue)
+})
+
 </script>
 
 <style lang="scss">

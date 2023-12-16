@@ -48,17 +48,17 @@
             </div>
 
             <el-form-item class="clearfix">
-              <el-button
+              <!-- <el-button
                 type="primary"
                 @click="submitArticleForm('articleForm', true)"
               >
                 保存草稿
-              </el-button>
+              </el-button> -->
               <el-button
                 type="primary"
                 @click="submitArticleForm('articleForm', false)"
               >
-                发布页面
+                {{ paramsUuid ? "修改页面" : "发布页面" }}
               </el-button>
             </el-form-item>
             <div class="clear"></div>
@@ -114,16 +114,11 @@ const article = reactive({
   abstract: "",
   pageview: 0,
   ishot: false,
-  userUuid: computed(() => {
-    if (proxy.$Cookies.get("user")) {
-      const user = JSON.parse(proxy.$Cookies.get("user"));
-      return user.uuid;
-    }
-    return "";
-  }),
+  userUuid: "",
   pageOrder: 0,
   template: 0,
-  categoryUuids: computed(() => store.state.backstage.categoryList[0].uuid)
+  categoryUuids: "",
+  uuid: ""
 });
 const rulesArticle = reactive({
   title: [
@@ -137,7 +132,7 @@ const rulesArticle = reactive({
   content: [{ required: true, message: "请输入文章内容", trigger: "blur" }],
   photo: [{ required: true, message: "请输入链接", trigger: "blur" }],
   abstract: [
-    { required: true, message: "请输入摘要", trigger: "blur" },
+    { required: false, message: "请输入摘要", trigger: "blur" },
     {
       max: 255,
       message: "最长为 255 个字符",
@@ -146,7 +141,8 @@ const rulesArticle = reactive({
   ]
 });
 const categoryList = ref<Array<any>>([]);
-
+const paramsUuid = ref();
+const user = ref<any>({});
 /**
  * 文章状态 （0已删除、1已发布、2草稿、3页面）
  */
@@ -234,6 +230,7 @@ const uploadImg = async (
 const submitArticleForm = (formName: string, isdraft: boolean) => {
   saveStatus.value = true;
   isdraft ? (article.state = status.draft) : (article.state = status.page);
+
   if (article.abstract === "") {
     article.abstract = content.value.substr(0, 100);
   }
@@ -243,7 +240,7 @@ const submitArticleForm = (formName: string, isdraft: boolean) => {
   }
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      if (router.currentRoute.value.params.uuid) {
+      if (paramsUuid.value) {
         updateArticle(article, isdraft);
       } else {
         createArticle(article, isdraft);
@@ -262,6 +259,8 @@ const submitArticleForm = (formName: string, isdraft: boolean) => {
  * 创建页面
  */
 const createArticle = (article: any, isdraft: boolean) => {
+  console.log("创建");
+  article.userUuid = user.value.uuid;
   proxy.$axios
     .post("/article/create", article)
     .then((res: any) => {
@@ -303,6 +302,7 @@ const createArticle = (article: any, isdraft: boolean) => {
  * 创建页面
  */
 const updateArticle = (article: any, isdraft: boolean) => {
+  // return
   proxy.$axios
     .put("/article/update", { article: article })
     .then((res: any) => {
@@ -348,7 +348,7 @@ const getArticleInfo = (uuid: any) => {
   proxy.$axios
     .get("/article/info", { articleUuid: uuid })
     .then((res: any) => {
-      console.log(res.result.article.content);
+      console.log("info", res.result.article);
       document.title = "编辑" + res.result.article.title;
       res.result.article.createDate = dateFormat(
         res.result.article.createDate,
@@ -358,21 +358,18 @@ const getArticleInfo = (uuid: any) => {
         res.result.article.updateDate,
         "yyyy-MM-dd hh:mm:ss"
       );
-
-      (article.title = res.result.article.title),
-        (article.content = res.result.article.content),
-        (article.photo = res.result.article.photo),
-        (article.state = res.result.article.state),
-        (article.abstract = res.result.article.abstract),
-        (article.pageview = res.result.article.pageview),
-        (article.ishot = res.result.article.ishot),
-        (article.userUuid = res.result.article.user.uuid),
-        (article.pageOrder = res.result.article.pageOrder),
-        (article.template = res.result.article.template),
-        (article.categoryUuids = res.result.article.categories[0].uuid(
-          article as any
-        ).uuid =
-          res.result.article.uuid);
+      article.uuid = res.result.article.uuid;
+      article.title = res.result.article.title;
+      article.content = res.result.article.content;
+      article.photo = res.result.article.photo;
+      article.state = res.result.article.state;
+      article.abstract = res.result.article.abstract;
+      article.pageview = res.result.article.pageview;
+      article.ishot = res.result.article.ishot;
+      article.userUuid = res.result.article.user.uuid;
+      article.pageOrder = res.result.article.pageOrder;
+      article.template = res.result.article.template;
+      article.categoryUuids = res.result.article.categories[0].uuid;
       content.value = res.result.article.content;
       loading.close();
     })
@@ -381,9 +378,13 @@ const getArticleInfo = (uuid: any) => {
       loading.close();
     });
 };
+
 onBeforeMount(() => {
   // 挂载之前
   categoryList.value = store.state.backstage.categoryList;
+  user.value = JSON.parse(proxy.$Cookies.get("user"));
+  article.userUuid = user.value.uuid;
+  article.categoryUuids = categoryList.value[0].uuid;
   document.title = "创建页面";
 });
 onMounted(() => {
@@ -394,8 +395,8 @@ onMounted(() => {
 
   // 如果路由中携带有文章的uuid，默认认为是修改文章
   if (router.currentRoute.value.query.uuid) {
-    const paramsUuid = router.currentRoute.value.query.uuid;
-    getArticleInfo(paramsUuid);
+    paramsUuid.value = router.currentRoute.value.query.uuid;
+    getArticleInfo(paramsUuid.value);
   }
 });
 // 单页面导航守卫
@@ -410,7 +411,10 @@ onBeforeRouteLeave((to, from, next) => {
       next();
     } else {
       // 取消导航并停留在同一页面上
-      store.commit("backstage/setActiveIndex", "/backstage/setting/basicSettings");
+      store.commit(
+        "backstage/setActiveIndex",
+        "/backstage/setting/basicSettings"
+      );
       next(false);
     }
   } else {
@@ -495,13 +499,13 @@ onBeforeUnmount(() => {
               .el-button {
                 margin-left: auto;
               }
-              .el-button:nth-of-type(1) {
-                background-color: #999;
-                border-color: #999;
-                &:hover {
-                  background-color: rgb(182, 182, 182);
-                }
-              }
+              // .el-button:nth-of-type(1) {
+              //   background-color: #999;
+              //   border-color: #999;
+              //   &:hover {
+              //     background-color: rgb(182, 182, 182);
+              //   }
+              // }
             }
           }
           .clear {

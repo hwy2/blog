@@ -321,10 +321,12 @@ module.exports = {
         var params = req.body || req.params;
         // console.log(params.article)
         var article = params.article;
-        var articleUuid = utils.trim(article.uuid);
+        var articleUuid = article.uuid;
         var categoryUuids = utils.handleArray(article.categoryUuids);
         article.state = parseInt(article.state);
-        if (!articleUuid || !categoryUuids) {
+        // console.log(parseInt(article.state))
+        // console.log(articleUuid, categoryUuids)
+        if (!articleUuid || (article.state!=4 && !categoryUuids)) {
             utils.handleJson({
                 response: res,
                 msg: i18n.__('pleasePassUuid')

@@ -57,14 +57,17 @@
                 type="primary"
                 @click="submitArticleForm('articleForm', false)"
               >
-                发布文章
+                {{ !paramsUuid ? "发布文章" : "修改文章" }}
               </el-button>
             </el-form-item>
             <div class="clear"></div>
           </el-form>
         </div>
         <div class="content-right">
-          <div class="title">分类</div>
+          <div class="title">
+            分类
+            <el-button type="primary" :icon="Plus" size="small" circle @click="editDialog = true"></el-button>
+          </div>
           <div class="category">
             <el-checkbox-group v-model="checkboxGroup">
               <div v-for="(item, index) in categoryList" :key="index">
@@ -75,6 +78,43 @@
         </div>
       </div>
     </div>
+    <el-dialog v-model="editDialog" title="添加类别" width="50%">
+      <el-form
+        label-position="left"
+        label-width="80px"
+        :model="formcategory"
+        class="clearfix"
+        ref="validateFormRef"
+      >
+        <el-form-item
+          prop="title"
+          label="标题"
+          :rules="[
+            {
+              required: true,
+              message: '标题不能为空',
+              trigger: 'blur'
+            },
+            {
+              min: 2,
+              max: 255,
+              message: '长度在 2 到 255 个字符',
+              trigger: 'blur'
+            }
+          ]"
+        >
+          <el-input v-model="formcategory.title" placeholder=""></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="editDialog = false">取消</el-button>
+          <el-button  type="primary" @click="handleCreateCategoy()">
+            创建
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 <script lang="ts" setup name="writingArticles">
@@ -93,7 +133,8 @@ import { useStore } from "vuex";
 import { useRouter, onBeforeRouteLeave } from "vue-router";
 import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import { ElNotification, ElLoading } from "element-plus";
+import { ElNotification, ElLoading, ElButton } from "element-plus";
+import { Plus } from "@element-plus/icons-vue";
 
 const store = useStore();
 const router = useRouter();
@@ -134,6 +175,15 @@ const rulesArticle = reactive({
   ]
 });
 const categoryList = computed(() => store.state.backstage.categoryList);
+const paramsUuid = ref<any>("");
+const formcategory = reactive({
+  title: "",
+  userUuid: ""
+});
+const editDialog = ref<boolean>(false)//新增
+const validateFormRef = ref()
+const user = ref<any>({})
+
 
 /**
  * 文章状态 （0已删除、1已发布、2草稿、3页面）
@@ -142,8 +192,10 @@ enum status {
   delete, // 删除
   release, // 发布
   draft, // 草稿
+  awaitingApproval, //待审核
   page // 页面
 }
+
 // .5s后再监听article对象的变化，
 setTimeout(() => {
   watch(
@@ -249,12 +301,10 @@ const submitArticleForm = (formName: string, isdraft: boolean) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (isdraft) {
       article.state = status.draft;
-    } else {
-      article.state = status.release;
     }
 
     if (valid && article.content !== "") {
-      if (router.currentRoute.value.query.uuid) {
+      if (paramsUuid.value) {
         updateArticle(isdraft);
       } else {
         createArticle(isdraft);
@@ -308,6 +358,8 @@ const createArticle = (isdraft: boolean) => {
     });
 };
 const updateArticle = (isdraft: boolean) => {
+  // return
+  console.log("article", article);
   proxy.$axios
     .put("/article/update", { article: article })
     .then((res: any) => {
@@ -395,11 +447,75 @@ const getArticleInfo = (uuid: any) => {
       loading.close();
     });
 };
+/** 创建 */
+const handleCreateCategoy = () => {
+  (validateFormRef.value as any).validate((valid: any, fields: any) => {
+    if (valid) {
+      proxy.$axios
+        .post("/category/create", {
+          title: formcategory.title,
+          userUuid: formcategory.userUuid
+        })
+        .then((resp: any) => {
+          if (resp.code === "200") {
+            ElNotification({
+              title: "成功",
+              message: "创建成功",
+              type: "success"
+            });
+            editDialog.value = false;
+            getCategoryList();
+          } else {
+            ElNotification({
+              title: "失败",
+              message: resp.msg,
+              type: "error"
+            });
+          }
+        })
+        .catch((error: any) => {
+          console.log(error);
+        });
+    }else {
+      ElNotification({
+        title: "失败",
+        message: "请按照规则填写",
+        type: "error"
+      });
+    }
+  });
+};
+/**
+ * 获取类别列表
+ */
+const getCategoryList = () => {
+  proxy.$axios
+    .get("/category/list", {
+      userUuid: user.value.uuid
+    })
+    .then((res: any) => {
+      console.log("获取类别列表", res);
+      for (const item of res.result.list) {
+        item.createDate = dateFormat(item.createDate, "MM-dd");
+      }
+      store.commit("backstage/setCategoryList", res.result.list);
+      store.commit(
+        "backstage/setClassificationsTotal",
+        res.result.page.totalRow
+      );
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+
 onBeforeMount(() => {
   // 挂载之前
   document.title = "撰写文章";
   if (proxy.$Cookies.get("user")) {
     const user = JSON.parse(proxy.$Cookies.get("user"));
+    user.value = user
+    formcategory.userUuid = user.uuid;
     article.userUuid = user.uuid;
   }
   article.categoryUuids = store.state.backstage.categoryList[0].uuid;
@@ -412,10 +528,13 @@ onMounted(() => {
 
   // 如果路由中携带有文章的uuid，默认认为是修改文章
   if (router.currentRoute.value.query.uuid) {
-    const paramsUuid = router.currentRoute.value.query.uuid;
-    getArticleInfo(paramsUuid);
+    document.title = "修改文章";
+    paramsUuid.value = router.currentRoute.value.query.uuid;
+    getArticleInfo(paramsUuid.value);
   }
 });
+
+
 // 单页面导航守卫
 onBeforeRouteLeave((to, from, next) => {
   if (!saveStatus.value) {

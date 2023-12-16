@@ -255,7 +255,7 @@
                 :key="item.uuid"
                 @click.stop="jumpArticle(item.uuid)"
               >
-               <div
+                <div
                   class="skew-elm1"
                   :style="`background: url('${
                     item.photo + '?t=' + new Date().getTime() + index
@@ -284,7 +284,8 @@ import {
   onMounted,
   getCurrentInstance,
   computed,
-  ref
+  ref,
+  watch
 } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
@@ -297,15 +298,15 @@ const { proxy }: any = getCurrentInstance();
 const store = useStore();
 
 // vue2.x的data参数
-const uuid = computed(() => {
-  //当前文章UUID
-  return router.currentRoute.value.params.uuid;
-});
+const uuid = ref<any>();
 
 const article = ref<any>({}); //文章内容
 const articleLink = computed(() => {
   //文章链接
-  return "http://" + location.host + router.currentRoute.value.path;
+  return (
+    store.state.foreground.webConfig.siteAddress +
+    router.currentRoute.value.path
+  );
 });
 const isArticleShow = ref<boolean>(false); //是否显示
 
@@ -333,10 +334,10 @@ const authorArcileList = ref<Array<any>>([]); //作者其他文章
 /**
  * 获取文章内容
  */
-const getArticleInfo = () => {
+const getArticleInfo = (uuid: string) => {
   const loading = ElLoading.service({ fullscreen: true });
   proxy.$axios
-    .get("/article/info", { articleUuid: uuid.value })
+    .get("/article/info", { articleUuid: uuid })
     .then((res: any) => {
       console.log(res);
       getAuthorArcile(res.result.article.user.uuid);
@@ -403,8 +404,8 @@ const createComments = () => {
   const loading = ElLoading.service({ fullscreen: true });
   proxy.$axios
     .post("/comment/create", {
-      ip: '',
-      vestingPlace:'',
+      ip: "",
+      vestingPlace: "",
       agent: navigator.userAgent,
       email: formLabelAlign.email,
       nickName: formLabelAlign.niceName,
@@ -427,7 +428,7 @@ const createComments = () => {
         formLabelAlign.niceName = "";
         proxy.$refs.comments.innerText = "";
 
-        getArticleInfo();
+        getArticleInfo(uuid.value);
       } else {
         ElNotification({
           title: "失败",
@@ -529,11 +530,22 @@ const getAuthorArcile = (uuid: string) => {
 
 onBeforeMount(async () => {
   // 挂载开始之前
-  getArticleInfo();
+  uuid.value = router.currentRoute.value.params.uuid;
+  getArticleInfo(uuid.value);
 });
 onMounted(() => {
   // 挂载之后
 });
+
+watch(
+  () => router.currentRoute.value.params.uuid,
+  (newval: any) => {
+    console.log(newval);
+    uuid.value = newval;
+    getArticleInfo(uuid.value);
+  },
+  { immediate: true, deep: true }
+);
 </script>
 
 <style lang="scss">
@@ -909,9 +921,9 @@ onMounted(() => {
             width: 50%;
 
             .el-form-item__content {
-               .el-input {
-                 border-bottom: 2px solid rgb(145, 145, 145);
-               }
+              .el-input {
+                border-bottom: 2px solid rgb(145, 145, 145);
+              }
               input {
                 border-bottom: 1px solid transparent;
 
@@ -1141,7 +1153,7 @@ onMounted(() => {
             width: 78%;
             overflow: hidden;
             box-sizing: border-box;
-             border-radius: 10px;
+            border-radius: 10px;
             h3 {
               min-width: 15px;
               color: var(--el-color-primary-dark-2);

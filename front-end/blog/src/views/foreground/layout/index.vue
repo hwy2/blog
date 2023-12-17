@@ -1,6 +1,9 @@
 <template>
   <div class="homePage">
-    <div class="bg" :style="{ backgroundImage: backgroundImage }"></div>
+    <div
+      class="bg"
+      :style="{ backgroundImage: `url(' ${backgroundImage}')` }"
+    ></div>
     <div class="toolbar">
       <!-- logo -->
       <div class="logo">
@@ -13,9 +16,14 @@
       </div>
       <!-- nav -->
       <div class="nav">
-        <el-menu :default-active="defaultActive" class="el-menu-demo" mode="horizontal"  @select="handleSelect">
+        <el-menu
+          :default-active="defaultActive"
+          class="el-menu-demo"
+          mode="horizontal"
+          @select="handleSelect"
+        >
           <el-menu-item index="1" @click="home()">
-            <a href="javascript:void(0)" >首页</a></el-menu-item
+            <a href="javascript:void(0)">首页</a></el-menu-item
           >
           <el-menu-item
             :index="'3-' + index"
@@ -31,11 +39,10 @@
       <!-- search -->
       <div class="search">
         <div class="pcview" v-show="!showSearch">
-            <i class="iconfont iconsearch" @click="openSearch"></i>
+          <i class="iconfont iconsearch" @click="openSearch"></i>
         </div>
-        <div class="handsets"  v-show="showSearch">
-      
-            <label for="search">
+        <div class="handsets" v-show="showSearch">
+          <label for="search">
             <!-- <i class="iconfont iconsearch"></i> -->
             <el-input
               type="text"
@@ -52,9 +59,9 @@
       </div>
     </div>
     <el-container v-loading="loading">
-        <el-main :style="clientHeight">
-          <router-view v-if="isRouterAlive"></router-view>
-        </el-main>
+      <el-main :style="clientHeight">
+        <router-view v-if="isRouterAlive"></router-view>
+      </el-main>
       <!-- 页脚 -->
       <el-footer height="100%">
         <div class="footer-box">
@@ -311,7 +318,9 @@ const drawer = ref<boolean>(false); // 抽屉
 const isCategoryNone = ref<boolean>(true); // 是否是类别
 const isPageNone = ref<boolean>(true); // 是否是页面
 const searchDialogVisible = ref<boolean>(false); // 搜索dialog
-const backgroundImage = ref<string>(`url('/src/assets/images/bg.jpg')`); // 背景图片
+
+import backgroundImage from "@/assets/images/bg.jpg";
+// const backgroundImage = ref<string>(`url('/src/assets/images/bg.jpg')`); // 背景图片
 const clientHeight = computed(
   () => "min-height:" + (document.documentElement.clientHeight - 237) + "px"
 ); // 动态高度
@@ -345,10 +354,9 @@ const authorName = computed(() => store.state.foreground.webConfig.authorName); 
 const description = computed(
   () => store.state.foreground.webConfig.siteDescription
 ); // 站长简介
-const pageList = computed(() => store.state.foreground.pageList);//文章列表
-const showSearch = ref(false)//显示搜索？
-const defaultActive = ref<any>('1')//导航栏
-
+const pageList = computed(() => store.state.foreground.pageList); //文章列表
+const showSearch = ref(false); //显示搜索？
+const defaultActive = ref<any>("1"); //导航栏
 
 /** 获取统计数据 */
 const getDataSummaryList = () => {
@@ -518,7 +526,11 @@ const handleSelect = (key: string, keyPath: string) => {
 // 生命周期
 onBeforeMount(async () => {
   proxy.getWebConfigInfo();
-  defaultActive.value = Cookies.get('defaultActive')
+
+  if (!Cookies.get("defaultActive")) {
+    Cookies.set("defaultActive", "1");
+  }
+  defaultActive.value = Cookies.get("defaultActive") || "1";
 });
 onMounted(() => {
   loading.value = false;
@@ -529,19 +541,21 @@ onMounted(() => {
   window.addEventListener("scroll", listenScroll);
   setTimeout(() => {
     condition.value.state = 4; // 请求页面
+    const temp = condition.value.currPage;
+    condition.value.currPage = 1;
     proxy.getAricleList(condition.value);
-  }, 1000);
+    condition.value.currPage = temp;
+  }, 500);
   tick(localStorage.getItem("runingTime") || startTime.value);
 });
 
 onBeforeUnmount(() => {
   clearTimeout(setTimeoutFlag.value);
 });
-watch(defaultActive,(newValue:any) => {
-  console.log(newValue)
-  Cookies.set('defaultActive',newValue)
-})
-
+watch(defaultActive, (newValue: any) => {
+  console.log(newValue);
+  Cookies.set("defaultActive", newValue);
+});
 </script>
 
 <style lang="scss">

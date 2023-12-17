@@ -212,6 +212,7 @@
               @next-click="handleChangePage"
               @prev-click="handleChangePage"
               @current-change="handleChangePage"
+              v-model:current-page="condition.currPage"
               :hide-on-single-page="hidePage"
               :page-size="condition.pageSize"
               :pager-count="11"
@@ -324,6 +325,7 @@ const condition = computed({
     return store.state.foreground.condition;
   },
   set: (val) => {
+    console.log(val)
     store.commit("foreground/setCondition", val);
   }
 });
@@ -371,6 +373,8 @@ const jumpArticle = (uuid: string, index = -1) => {
 const handleChangePage = (val: any) => {
   condition.value.currPage = val;
   condition.value.state = 1;
+  console.log('是这？')
+   store.commit("foreground/setConditionCurrPage", val);
   proxy.getAricleList(condition.value);
   scrollTo(0, 0); // 回到页面顶部
 };

@@ -4,3 +4,4 @@ logs
 package-lock.json
 .vscode
 logs/error.log
+dist

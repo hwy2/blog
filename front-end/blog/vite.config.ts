@@ -50,6 +50,7 @@ export default defineConfig({
                 // 生产环境时移除console
                 drop_console: true,
                 drop_debugger: true,
+                pure_funcs: ['console.log']
             },
         }
     }

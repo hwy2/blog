@@ -3,6 +3,8 @@
  */
 var i18n = require('i18n'); //国际化
 var utils = require('../libs/utils'); //工具类
+let path = require("path");
+var express = require("express");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -23,9 +25,8 @@ module.exports = function (app) {
   app.use('/comment', require('./comment'));
   app.use('/dataSummary', require('./dataSummary'));
   app.use('/links', require('./links'));
-  // app.use('/', function (req, res, next) {
-  //   res.send('respond with a resource');
-  // });
+
+  app.use('/', express.static(path.join(__dirname,'..','/dist')));
 
   // catch 404 and forward to error handler
   app.use(function (req, res, next) {

@@ -9,6 +9,9 @@ var bodyParser = require('body-parser'); //json
 var config = require('config-lite'); //读取配置文件
 var winston = require('winston'); //日志
 var expressWinston = require('express-winston'); //基于 winston 的用于 express 的日志中间件
+// 导入 express-rate-limit 依赖项
+const rateLimit = require("express-rate-limit");
+
 var models = require('./models'); //临时添加 为了生成数据库表，后面写到Controllers里面
 var routes = require('./routes'); //路由
 
@@ -55,6 +58,16 @@ app.use(cors({
   methods: "PUT,POST,GET,DELETE,OPTIONS",
   // optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
+// 使用它的选项调用 ratelimiter 函数
+// max：包含最大请求数
+// windowsMs：包含接收最大请求的时间（以毫秒为单位）
+// 消息：在速率限制时向用户显示的消息
+const limiter = rateLimit({
+  max: 50,
+  windowMs: 60 * 60 * 1000,
+  message: "来自该 IP 的请求太多"
+});
+app.use(limiter);
 
 // 路由
 routes(app);
@@ -74,6 +87,11 @@ app.use(expressWinston.errorLogger({
 
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
+
+
+// var history = require('connect-history-api-fallback');
+// app.use(express.static(path.join(__dirname, 'dist')));
+// app.use(history());
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

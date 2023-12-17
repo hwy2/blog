@@ -152,7 +152,12 @@ export default createStore({
                     state.pageTtotals = status
                 },
                 setCondition(state, status) {
+                    console.log('condition',status)
                     state.condition = status
+                },
+                setConditionCurrPage(state, status) {
+                    console.log('condition.currPage', status)
+                    state.condition.currPage = status
                 },
                 setSearch(state, status) {
                     state.search = status

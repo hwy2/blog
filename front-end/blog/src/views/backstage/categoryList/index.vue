@@ -35,6 +35,13 @@
             >
             </el-table-column>
             <el-table-column
+              label="描述"
+              prop="descriptions"
+              width="260"
+              align="center"
+            >
+            </el-table-column>
+            <el-table-column
               label="创建者"
               prop="name"
               width="200"
@@ -159,7 +166,26 @@
             }
           ]"
         >
-          <el-input v-model="formcategory.title" placeholder=""></el-input>
+          <el-input autofocus  v-model="formcategory.title" placeholder=""></el-input>
+        </el-form-item>
+        <el-form-item
+          prop="descriptions"
+          label="描述"
+          :rules="[
+            {
+              required: false,
+              message: '标题不能为空',
+              trigger: 'blur'
+            },
+            {
+              min: 1,
+              max: 255,
+              message: '长度在 1 到 255 个字符',
+              trigger: 'blur'
+            }
+          ]"
+        >
+          <el-input v-model="formcategory.descriptions" placeholder=""></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -216,6 +242,7 @@ const condition = reactive({
 const search = ref<string>("");
 const formcategory = reactive({
   title: "",
+  descriptions:'',
   userUuid: "",
   uuid:''
 }); //类别表单
@@ -313,12 +340,14 @@ const openDialog = () => {
   btnName.value = "创建";
   formcategory.title = "";
   formcategory.userUuid = user.value.uuid;
+   formcategory.descriptions = ''
   editDialog.value = true;
 };
 // 编辑窗口
 const editCategory = (data: any) => {
   dialogTitle.value = "修改类别";
   btnName.value = "修改";
+  formcategory.descriptions = data.descriptions;
   formcategory.title = data.title;
   formcategory.userUuid = data.userUuid;
   formcategory.uuid = data.uuid
@@ -331,7 +360,8 @@ const handleCreateCategoy = () => {
       proxy.$axios
         .post("/category/create", {
           title: formcategory.title,
-          userUuid: formcategory.userUuid
+          userUuid: formcategory.userUuid,
+          descriptions:formcategory.descriptions
         })
         .then((resp: any) => {
           if (resp.code === "200") {
@@ -369,6 +399,7 @@ const handleUpdateCategoy = () => {
       proxy.$axios
         .put("/category/update", {
           title: formcategory.title,
+          descriptions:formcategory.descriptions,
           categoryUuid: formcategory.uuid
         })
         .then((resp: any) => {

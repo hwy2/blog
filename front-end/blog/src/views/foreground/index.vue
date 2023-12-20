@@ -209,8 +209,6 @@
           </div>
           <div class="paging">
             <el-pagination
-              @next-click="handleChangePage"
-              @prev-click="handleChangePage"
               @current-change="handleChangePage"
               v-model:current-page="condition.currPage"
               :hide-on-single-page="hidePage"
@@ -219,6 +217,9 @@
               layout="prev, pager, next"
               :total="total"
             >
+              <!--@next-click="handleChangePage"
+              @prev-click="handleChangePage" -->
+              <!-- v-model:current-page="condition.currPage" -->
             </el-pagination>
           </div>
         </div>
@@ -270,7 +271,7 @@
             <div class="banner">
               <p>推荐阅读</p>
             </div>
-             <div class="list">
+            <div class="list">
               <div
                 class="list-item"
                 v-for="(item, index) in hotArticleList"
@@ -304,7 +305,8 @@ import {
   onBeforeMount,
   onMounted,
   getCurrentInstance,
-  computed
+  computed,
+  watch
 } from "vue";
 // import { ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
@@ -325,7 +327,7 @@ const condition = computed({
     return store.state.foreground.condition;
   },
   set: (val) => {
-    console.log(val)
+    console.log(val);
     store.commit("foreground/setCondition", val);
   }
 });
@@ -373,8 +375,8 @@ const jumpArticle = (uuid: string, index = -1) => {
 const handleChangePage = (val: any) => {
   condition.value.currPage = val;
   condition.value.state = 1;
-  console.log('是这？')
-   store.commit("foreground/setConditionCurrPage", val);
+  console.log("是这？", val);
+  store.commit("foreground/setCondition", condition.value);
   proxy.getAricleList(condition.value);
   scrollTo(0, 0); // 回到页面顶部
 };
@@ -413,6 +415,7 @@ onMounted(async () => {
     }, 100);
   }
 });
+
 </script>
 
 <style lang="scss">
@@ -1005,12 +1008,16 @@ onMounted(async () => {
             width: 78%;
             overflow: hidden;
             box-sizing: border-box;
-             border-radius: 10px;
+            border-radius: 10px;
             h3 {
               min-width: 15px;
               color: var(--el-color-primary-dark-2);
-              padding: 10px 0 0;
+              padding: 6px 0 0;
               box-sizing: border-box;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              height: 2em;
               &:hover {
                 color: #000;
                 color: #ff4081;
@@ -1020,8 +1027,8 @@ onMounted(async () => {
 
             p {
               box-sizing: border-box;
-              padding: 5px 10px 0px 0;
-              font-size: 16px;
+              padding: 2px 10px 0px 0;
+              font-size: 15px;
               line-height: 1.3;
               color: var(--el-color-info-light-3);
               font-weight: 100;

@@ -4,7 +4,7 @@ import cookies from 'js-cookie';
 import { declassificationAES, encryptedAES } from "../utils/index"
 
 // 基础URL
-axios.defaults.baseURL = 'http://localhost:3000'
+axios.defaults.baseURL = 'http://localhost:3060'
 // post请求头
 axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
 // 设置超时

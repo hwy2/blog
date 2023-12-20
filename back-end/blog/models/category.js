@@ -6,17 +6,21 @@ var Sequelize = require('sequelize');
 var Mysql = require('./mysql');
 // console.log("category文章类别表");
 
-var category = Mysql.define('category',{
-     uuid: { //使用uuid 而不使用id
-         type: Sequelize.UUID, //设置类型
-         allowNull: false, //是否允许为空
-         primaryKey: true, //主键
-         defaultValue: Sequelize.UUIDV1, //默认值
-     }, //uuid
-     title:{//类别名称
-         type:Sequelize.STRING,
-         allowNull:false
-     }
+var category = Mysql.define('category', {
+    uuid: { //使用uuid 而不使用id
+        type: Sequelize.UUID, //设置类型
+        allowNull: false, //是否允许为空
+        primaryKey: true, //主键
+        defaultValue: Sequelize.UUIDV1, //默认值
+    }, //uuid
+    title: {//类别名称
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    descriptions: {//描述
+        type: Sequelize.STRING,
+        allowNull: true
+    }
 }, {
     freezeTableName: true, //开启自定义表名
     tableName: 'Category', //表名字

@@ -31,6 +31,11 @@ var WebConfig = Mysql.define('webConfig', {
         allowNull: false,
         defaultValue:0
     },//是否开启封面图
+    isOpenCommentaries: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: 0
+    },//是否开启封面图
 }, {
     freezeTableName: true, //开启自定义表名
     tableName: 'WebConfig', //表名字

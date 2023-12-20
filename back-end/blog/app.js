@@ -63,7 +63,7 @@ app.use(cors({
 // windowsMs：包含接收最大请求的时间（以毫秒为单位）
 // 消息：在速率限制时向用户显示的消息
 const limiter = rateLimit({
-  max: 50,
+  max: 5000,
   windowMs: 60 * 60 * 1000,
   message: "来自该 IP 的请求太多"
 });

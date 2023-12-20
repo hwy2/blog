@@ -69,7 +69,11 @@
             </blockquote>
           </div>
 
-          <div class="article-comment" id="article-comments">
+          <div
+            class="article-comment"
+            id="article-comments"
+            v-if="webConfig.isOpenCommentaries"
+          >
             <div class="comment-header">
               <p class="title">评论</p>
               <p class="smail-title">
@@ -98,6 +102,7 @@
                     type="textarea"
                     :rows="1"
                     placeholder=""
+                    autosize
                     v-model="formLabelAlign.comments"
                   >
                   </el-input>
@@ -107,6 +112,7 @@
                       tabindex="0"
                       ref="comments"
                       contenteditable="true"
+                      autosize
                       @focus="revise($event, 'focus', false)"
                       @blur="revise($event, 'blur', false)"
                       @keyup="makeExpandingArea()"
@@ -135,6 +141,7 @@
                   <el-input
                     v-model="formLabelAlign.niceName"
                     placeholder=""
+                    autosize
                     @focus="revise($event, 'focus')"
                     @blur="revise($event, 'blur')"
                   ></el-input>
@@ -161,6 +168,7 @@
                   <el-input
                     v-model="formLabelAlign.email"
                     placeholder=""
+                    autosize
                     @focus="revise($event, 'focus')"
                     @blur="revise($event, 'blur')"
                   ></el-input>
@@ -315,6 +323,9 @@ const formLabelAlign = reactive({
   niceName: "",
   email: "",
   comments: ""
+});
+let webConfig = computed(() => {
+  return store.getters["foreground/getWebConfig"];
 });
 
 /**
@@ -696,7 +707,7 @@ watch(
         h1,
         h2 {
           position: relative;
-          margin: 0.8em 0 0.6em;
+          margin: 1.8em 0 1em;
           &::before {
             content: "#";
             font-weight: 700;
@@ -805,7 +816,7 @@ watch(
 
         h3,
         h4 {
-          margin: 0.8em 0 0.6em;
+          margin: 1.6em 0 0.9em;
           border-left: 4px solid #e91e63;
           padding-left: 7px;
           line-height: 1.35;
@@ -821,6 +832,14 @@ watch(
           a {
             color: rgb(255, 64, 129);
           }
+        }
+        img {
+          object-fit: cover;
+          width: auto;
+          height: auto;
+          display: block;
+          margin: auto;
+          max-width: 100%;
         }
       }
 
@@ -965,7 +984,7 @@ watch(
               display: flex;
               list-style: none;
               position: relative;
-              align-items: center;
+              align-items: flex-start;
               padding: 10px 16px 20px 16px;
               &:hover .avatar {
                 transform: scale(1.15);

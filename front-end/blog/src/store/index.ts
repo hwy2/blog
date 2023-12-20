@@ -2,6 +2,13 @@ import {
     createStore
 } from 'vuex'
 import createPersistedState from 'vuex-persistedstate';
+import SecureLS from "secure-ls";
+
+var ls = new SecureLS({
+    encodingType: "aes",    //加密类型
+    isCompression: false,   //是否压缩
+    encryptionSecret: "encryptions",   //PBKDF2值  加密秘密
+});
 
 export default createStore({
     actions: {},
@@ -152,7 +159,7 @@ export default createStore({
                     state.pageTtotals = status
                 },
                 setCondition(state, status) {
-                    console.log('condition',status)
+                    console.log('condition', status)
                     state.condition = status
                 },
                 setConditionCurrPage(state, status) {
@@ -175,6 +182,13 @@ export default createStore({
         }
     },
     plugins: [
-        createPersistedState()
+        createPersistedState({
+            key: "encryptionStore",
+            storage: {
+                getItem: (key) => ls.get(key),
+                setItem: (key, value) => ls.set(key, value),
+                removeItem: (key) => ls.remove(key),
+            }
+        })
     ]
 })

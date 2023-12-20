@@ -49,7 +49,7 @@
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        width: 10%;
+        width: 20%;
 
         a {
             color: #000;
@@ -73,8 +73,14 @@
     }
     .nav {
         font-size: 16px;
-        width: 70%;
+        width: 80%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
         .el-menu {
+            width: 80%;
+            justify-content: flex-end;
             background: rgba(255, 255, 255, -0.2);
         }
         .el-menu-item.is-active {
@@ -83,33 +89,37 @@
         .el-sub-menu.is-active .el-sub-menu__title {
             border-bottom: 1px rgba(255, 255, 255, -0.2) solid;
         }
-    }
-    .search {
-        width: 20%;
-        display: flex;
-        justify-content: flex-end;
-        .el-input {
-            .el-input__wrapper {
-                background-color: #f2f2f2;
-            }
-        }
-        i {
-            font-size: 1.8rem;
-            color: #848383;
-            &:hover {
-                color: var(--hover);
-            }
-        }
+        .search {
+            max-width: 20%;
+            display: flex;
+            justify-content: flex-end;
 
-        .handsets {
-            // display: none;
-            width: 100%;
-            height: 40px;
-            // background: blueviolet;
             .el-input {
-                height: 100%;
                 .el-input__wrapper {
                     background-color: #f2f2f2;
+                }
+            }
+            i {
+                font-size: 1.8rem;
+                color: #848383;
+                &:hover {
+                    color: var(--hover);
+                }
+            }
+            .el-icon {
+                font-size: inherit !important;
+            }
+
+            .handsets {
+                // display: none;
+                width: 100%;
+                height: 40px;
+                // background: blueviolet;
+                .el-input {
+                    height: 100%;
+                    .el-input__wrapper {
+                        background-color: #f2f2f2;
+                    }
                 }
             }
         }

@@ -301,6 +301,7 @@ onMounted(() => {
             }
             .head {
               width: 80%;
+              height: 1.2em;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;

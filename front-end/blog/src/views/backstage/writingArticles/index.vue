@@ -519,6 +519,7 @@ onBeforeMount(() => {
     article.userUuid = user.uuid;
   }
   article.categoryUuids = store.state.backstage.categoryList[0].uuid;
+  // proxy.getCategoryList();
 });
 onMounted(() => {
   // 挂载之后
@@ -668,11 +669,12 @@ onBeforeUnmount(() => {
 
         .category {
           width: 100%;
-          height: 51vh;
+          height: 500px;
           box-sizing: border-box;
           overflow: hidden;
           padding: 15px;
           background-color: #fff;
+          overflow-y: auto;
           div {
             padding: 5px 0;
             font-size: 1.1em;

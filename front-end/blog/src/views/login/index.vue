@@ -47,7 +47,8 @@ import {
   onBeforeUnmount,
   getCurrentInstance,
   computed,
-  onBeforeMount
+  onBeforeMount,
+  nextTick
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -170,12 +171,10 @@ const handleKeyDown = (event: any) => {
 };
 onBeforeMount(() => {
   sessionStorage.removeItem("store");
-  window.addEventListener("keydown", handleKeyDown);
+  // window.addEventListener("keydown", handleKeyDown);
 });
 onBeforeUnmount(() => {
-  window.removeEventListener("keydown", () => {
-    console.log("卸载监听");
-  });
+  console.log("触发");
 });
 </script>
 

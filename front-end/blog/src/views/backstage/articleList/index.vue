@@ -143,6 +143,7 @@
                 >
                   恢复
                 </el-button>
+
                 <el-button
                   :disabled="user.role == 1 && scope.row.state != 2"
                   size="small"
@@ -236,14 +237,14 @@
                     </el-button>
                   </template>
                 </el-popconfirm>
-                <!-- <el-button
+                <el-button
                   title="永久从数据库删除"
                   size="small"
                   type="danger"
-                  style="width: 22%"
+                  v-if="scope.row.state == 0"
                   @click="handleForeverDelete(scope.$index, scope.row)"
                   >永除</el-button
-                > -->
+                >
               </template>
             </el-table-column>
           </el-table>
@@ -405,10 +406,10 @@ const handleDelete = (index: number, row: any) => {
 /**
  * 弹窗
  */
-// const handleForeverDelete = (index: number, row: any) => {
-//   centerDialogVisible.value = true;
-//   article.value = row;
-// };
+const handleForeverDelete = (index: number, row: any) => {
+  centerDialogVisible.value = true;
+  article.value = row;
+};
 /**
  * 批量删除
  */

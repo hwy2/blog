@@ -35,26 +35,30 @@
             <router-link :to="item.to">{{ item.title }}</router-link>
           </el-menu-item>
         </el-menu>
-      </div>
-      <!-- search -->
-      <div class="search">
-        <div class="pcview" v-show="!showSearch">
-          <i class="iconfont iconsearch" @click="openSearch"></i>
-        </div>
-        <div class="handsets" v-show="showSearch">
-          <label for="search">
-            <!-- <i class="iconfont iconsearch"></i> -->
-            <el-input
-              type="text"
-              name="search"
-              v-model="condition.articleVague"
-              @keydown.enter="listenSearch()"
-            >
-              <template #prefix>
-                <i class="iconfont iconsearch"></i>
-              </template>
-            </el-input>
-          </label>
+        <!-- search -->
+        <div class="search">
+          <div class="pcview" v-show="!showSearch">
+            <i class="iconfont iconsearch" @click="openSearch"></i>
+          </div>
+          <div class="handsets" v-show="showSearch">
+            <label for="search">
+              <!-- <i class="iconfont iconsearch"></i> -->
+              <el-input
+                type="text"
+                name="search"
+                clearable
+                v-model="condition.articleVague"
+                @keydown.enter="listenSearch()"
+              >
+                <template #prefix>
+                  <i class="iconfont iconsearch"></i>
+                </template>
+                <template #append>
+                  <el-button :icon="Close" @click="showSearch=false" />
+                </template>
+              </el-input>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -298,7 +302,7 @@ import {
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import Cookies from "js-cookie";
-// import { Search } from "@element-plus/icons-vue";
+import { Close } from "@element-plus/icons-vue";
 // import dateFormat from "@/assets/js/dateFormat.js";
 
 // 变量定义
@@ -472,6 +476,7 @@ const openSearch = () => {
   showSearch.value = true;
   // searchDialogVisible.value = true;
 };
+
 /** 监听搜索框回车事件 */
 const listenSearch = () => {
   // 只模糊搜索文章内容
@@ -556,6 +561,18 @@ watch(defaultActive, (newValue: any) => {
   console.log(newValue);
   Cookies.set("defaultActive", newValue);
 });
+
+watch(
+  () => router.currentRoute.value.path,
+  (newValue: any) => {
+    console.log('监听路由',newValue);
+    if(newValue == '/home/index'){
+      defaultActive.value = '1'
+      Cookies.set("defaultActive",  '1');
+    }
+  }
+);
+
 </script>
 
 <style lang="scss">

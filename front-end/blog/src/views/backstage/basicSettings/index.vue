@@ -54,7 +54,7 @@
                 <el-input v-model="webConfig.internetAlert"></el-input>
               </el-form-item>
               <p>网警备案号</p>
-              <el-form-item label="开启封面图" prop="internetAlert">
+              <el-form-item label="开启封面图" prop="isOpenCoverImage">
                 <!-- <el-input v-model="webConfig.internetAlert"></el-input> -->
                 <el-switch
                   v-model="webConfig.isOpenCoverImage"
@@ -64,6 +64,16 @@
                 />
               </el-form-item>
               <p>是否开启首页文章封面</p>
+              <el-form-item label="开启文章评论" prop="isOpenCommentaries">
+                <!-- <el-input v-model="webConfig.internetAlert"></el-input> -->
+                <el-switch
+                  v-model="webConfig.isOpenCommentaries"
+                  size="large"
+                  active-text="开启"
+                  inactive-text="关闭"
+                />
+              </el-form-item>
+              <p>是否开启文章评论</p>
 
               <el-form-item>
                 <el-button type="primary" @click="submitWebConfigForm()"
@@ -93,17 +103,21 @@ import { ElNotification } from "element-plus";
 const store = useStore();
 // const router = useRouter();
 const { proxy }: any = getCurrentInstance();
-let webConfig = reactive({
-  siteName: "",
-  siteAddress: "",
-  authorName: "",
-  runningTime: "",
-  siteDescription: "",
-  keyWord: "",
-  recordNumber: "",
-  internetAlert: "",
-  isOpenCoverImage: 0
-});
+// let webConfig = reactive({
+//   siteName: "",
+//   siteAddress: "",
+//   authorName: "",
+//   runningTime: "",
+//   siteDescription: "",
+//   keyWord: "",
+//   recordNumber: "",
+//   internetAlert: "",
+//   isOpenCoverImage: 0,
+//   isOpenCommentaries: 0
+// });
+let webConfig = computed(()=>{
+  return store.getters["foreground/getWebConfig"]
+})
 const rulesWebConfig = reactive({
   siteName: [
     { required: true, message: "请输入站点名称", trigger: "blur" },
@@ -176,11 +190,11 @@ const webConfigForm = ref();
 
 const submitWebConfigForm = () => {
   webConfigForm.value.validate((valid: any) => {
-    console.log(valid);
+    console.log(valid,webConfig.value);
     if (valid) {
       proxy.$axios
         .put("/webConfig/update", {
-          webConfig: webConfig
+          webConfig: webConfig.value
         })
         .then((res: any) => {
           console.log(res);
@@ -190,6 +204,7 @@ const submitWebConfigForm = () => {
               message: "用户信息更新成功",
               type: "success"
             });
+            proxy.getWebConfigInfo();
           } else {
             ElNotification({
               title: "错误",
@@ -211,18 +226,19 @@ const submitWebConfigForm = () => {
     }
   });
 };
+
 onBeforeMount(() => {
   // 挂载之前
-  console.log('？？？？？？？')
   document.title = "基本设置";
-  let webConfigTemp: any = store.getters["foreground/getWebConfig"];
-  delete webConfigTemp.createDate;
-  delete webConfigTemp.updateDate;
-  console.log(webConfigTemp)
-  webConfig = webConfigTemp;
+  proxy.getWebConfigInfo();
 });
 onMounted(() => {
   // 挂载之后
+  // let webConfigTemp: any = store.getters["foreground/getWebConfig"];
+  // delete webConfigTemp.createDate;
+  // delete webConfigTemp.updateDate;
+  // console.log(webConfigTemp);
+  // webConfig = webConfigTemp;
 });
 </script>
 

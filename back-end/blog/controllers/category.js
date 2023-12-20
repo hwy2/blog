@@ -68,6 +68,8 @@ module.exports = {
         var params = req.body || req.params;
         var title = utils.trim(params.title);
         var userUuid = utils.trim(params.userUuid);
+        var descriptions = utils.trim(params.descriptions)
+        console.log('descriptions', descriptions)
         if (!title || !userUuid) {
             utils.handleJson({
                 response: res,
@@ -93,6 +95,7 @@ module.exports = {
 
             categoryResult = yield Category.create({
                 title: title,
+                descriptions: descriptions,
                 userUuid: userUuid
             });
 
@@ -209,6 +212,7 @@ module.exports = {
         var params = req.body || req.params;
         var title = utils.trim(params.title);
         var categoryUuid = utils.trim(params.categoryUuid);
+        var descriptions = utils.trim(params.descriptions)
         if (!categoryUuid) {
             utils.handleJson({
                 response: res,
@@ -238,7 +242,7 @@ module.exports = {
                 })
                 return;
             }
-            categoryResult = yield Category.update({ title: title }, {
+            categoryResult = yield Category.update({ title: title, descriptions: descriptions }, {
                 where: {
                     uuid: categoryUuid
                 }

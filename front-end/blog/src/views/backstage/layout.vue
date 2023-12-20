@@ -47,29 +47,6 @@ const dataSummary = computed({
   }
 });
 
-/**
- * 获取类别列表
- */
-const getCategoryList = () => {
-  proxy.$axios
-    .get("/category/list", {
-      userUuid: user.value.uuid
-    })
-    .then((res: any) => {
-      console.log("获取类别列表", res);
-      for (const item of res.result.list) {
-        item.createDate = dateFormat(item.createDate, "MM-dd");
-      }
-      store.commit("backstage/setCategoryList", res.result.list);
-      store.commit(
-        "backstage/setClassificationsTotal",
-        res.result.page.totalRow
-      );
-    })
-    .catch((err: any) => {
-      console.log(err);
-    });
-};
 
 /**
  * 获取数据统计
@@ -108,7 +85,7 @@ onMounted(() => {
     router.push({ name: "login" });
   }
   getDataSummaryList();
-  getCategoryList();
+  proxy.getCategoryList();
 });
 </script>
 

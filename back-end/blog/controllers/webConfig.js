@@ -14,6 +14,8 @@ module.exports = {
             keyWord: utils.trim(params.keyWord),
             recordNumber: utils.trim(params.recordNumber),
             internetAlert: utils.trim(params.internetAlert),
+            isOpenCoverImage: utils.trim(params.isOpenCoverImage),
+            isOpenCommentaries: utils.trim(params.isOpenCommentaries),
         };
 
 

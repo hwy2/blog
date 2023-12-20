@@ -197,3 +197,29 @@ export const getHotArticle = (data: any = {}, format: string = 'yyyy年MM月dd�
     })
 
 }
+
+/**
+ * 获取类别列表
+ */
+export const getCategoryList = () => {
+    const user: any = JSON.parse(Cookies.get("user") || '{}');
+   axios
+        .get("/category/list", {
+            userUuid: user.uuid,
+            pageSize:100
+        })
+        .then((res: any) => {
+            console.log("获取类别列表", res);
+            for (const item of res.result.list) {
+                item.createDate = dateFormat(item.createDate, "MM-dd");
+            }
+            store.commit("backstage/setCategoryList", res.result.list);
+            store.commit(
+                "backstage/setClassificationsTotal",
+                res.result.page.totalRow
+            );
+        })
+        .catch((err: any) => {
+            console.log(err);
+        });
+};

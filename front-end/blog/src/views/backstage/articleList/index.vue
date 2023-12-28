@@ -18,7 +18,7 @@
               <el-radio-button label="可用" name="0" />
               <el-radio-button label="待审核" name="1" />
               <el-radio-button label="草稿" name="2" />
-              <el-radio-button label="已删除" name="2" />
+              <el-radio-button v-if="user.role==1" label="已删除" name="2" />
             </el-radio-group>
           </div>
           <div class="right"></div>
@@ -312,6 +312,14 @@ import { useStore } from "vuex";
 import { ElNotification, ElMessage } from "element-plus";
 import dateFormat from "@/assets/js/dateFormat.js";
 import { InfoFilled } from "@element-plus/icons-vue";
+import {
+  updateArticleApi,
+  deleteArticleApi,
+  setStickyApi,
+  setArticleStateApi,
+  setIshotArticleApi,
+  getUserArticleListApi
+} from "@/utils/api/article";
 
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
@@ -381,8 +389,7 @@ const handleDelete = (index: number, row: any) => {
   delete row.createDate;
   delete row.category;
 
-  proxy.$axios
-    .put("/article/update", { article: row })
+  updateArticleApi({ article: row })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -465,8 +472,7 @@ const handleChangePage = (val: any) => {
  * 永久删除文章
  */
 const deleteArticle = (uuid: string) => {
-  proxy.$axios
-    .get("/article/del", { articleUuid: uuid })
+  deleteArticleApi({ articleUuid: uuid })
     .then((resp: any) => {
       centerDialogVisible.value = false;
       if (resp.code === "200") {
@@ -495,8 +501,7 @@ const deleteArticle = (uuid: string) => {
  * @param condition
  */
 const handleSticky = (uuid: string, sticky: boolean = true) => {
-  proxy.$axios
-    .post("/article/setSticky", { articleUuid: uuid, sticky })
+  setStickyApi({ articleUuid: uuid, sticky })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -523,8 +528,7 @@ const handleSticky = (uuid: string, sticky: boolean = true) => {
  * @param condition
  */
 const handleSetArticleState = (uuid: string, state: string) => {
-  proxy.$axios
-    .post("/article/setArticleState", { articleUuid: uuid, state: state })
+  setArticleStateApi({ articleUuid: uuid, state: state })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -551,8 +555,7 @@ const handleSetArticleState = (uuid: string, state: string) => {
  * @param condition
  */
 const handleSetArticleTestimonials = (uuid: string, ishot: boolean = true) => {
-  proxy.$axios
-    .post("/article/setIshotArticle", { articleUuid: uuid, ishot })
+  setIshotArticleApi({ articleUuid: uuid, ishot })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -579,8 +582,7 @@ const handleSetArticleTestimonials = (uuid: string, ishot: boolean = true) => {
  * @param condition
  */
 const getUserArticleList = (condition: any) => {
-  proxy.$axios
-    .get("/article/userArticleList", condition)
+  getUserArticleListApi(condition)
     .then((res: any) => {
       console.log(res);
       if (res.code == "200") {

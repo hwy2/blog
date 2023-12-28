@@ -156,10 +156,7 @@
               </div>
               <div class="clear"></div>
               <el-form-item>
-                <el-button
-                  type="primary"
-                  title="发送评论"
-                  @click="submitForm()"
+                <el-button type="primary" title="发送评论" @click="submitForm()"
                   ><i class="iconfont iconfasong"></i
                 ></el-button>
               </el-form-item>
@@ -195,10 +192,7 @@
                     </div>
                     <div class="time">
                       {{
-                        getdateFormat(
-                          item.createDate,
-                          "yyyy-MM-dd hh:mm:ss"
-                        )
+                        getdateFormat(item.createDate, "yyyy-MM-dd hh:mm:ss")
                       }}
                     </div>
 
@@ -209,9 +203,7 @@
                   <div class="reply">
                     <a
                       href="javascript:void(0)"
-                      @click="
-                        changeCommentFlag(item.nickName, item.uuid)
-                      "
+                      @click="changeCommentFlag(item.nickName, item.uuid)"
                     >
                       <button>回复</button>
                     </a>
@@ -241,6 +233,8 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { ElNotification, ElLoading } from "element-plus";
 import { marked } from "marked";
+import { getArticleInfoApi, addPageViewsApi } from "@/utils/api/article";
+import { createCommentApi } from "@/utils/api/comment";
 
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
@@ -275,10 +269,9 @@ const commentSumber = computed(() => {
 /**
  * 获取文章内容
  */
-const getArticleInfo = (uuid:string) => {
+const getArticleInfo = (uuid: string) => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .get("/article/info", { articleUuid: uuid })
+  getArticleInfoApi({ articleUuid: uuid })
     .then((res: any) => {
       console.log(res);
       document.title = res.result.article.title;
@@ -307,11 +300,10 @@ const getArticleInfo = (uuid:string) => {
  * 修改文章阅读数
  */
 const setArticlePageview = (pageview: number) => {
-  proxy.$axios
-    .get("/article/addPageViews", {
-      articleUuid: uuid.value,
-      articlePageview: pageview
-    })
+  addPageViewsApi({
+    articleUuid: uuid.value,
+    articlePageview: pageview
+  })
     .then((res: any) => {
       console.log(res);
     })
@@ -342,16 +334,15 @@ const submitForm = () => {
  */
 const createComments = () => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .post("/comment/create", {
-      ip: '',
-      agent: navigator.userAgent,
-      email: formLabelAlign.email,
-      nickName: formLabelAlign.niceName,
-      comments: formLabelAlign.comments,
-      articleUuid: (article.value as any).uuid,
-      link: articleLink.value
-    })
+  createCommentApi({
+    ip: "",
+    agent: navigator.userAgent,
+    email: formLabelAlign.email,
+    nickName: formLabelAlign.niceName,
+    comments: formLabelAlign.comments,
+    articleUuid: (article.value as any).uuid,
+    link: articleLink.value
+  })
     .then((res: any) => {
       console.log(res);
       loading.close();

@@ -41,6 +41,7 @@
                 }}</router-link>
               </div>
             </div>
+            <div v-if="!aricleList.length" class="notDate">无数据</div>
           </div>
         </div>
         <div class="comments">
@@ -55,6 +56,7 @@
                 >:<span v-html="item.comments"></span>
               </div>
             </div>
+            <div v-if="!commentList.length" class="notDate">无数据</div>
           </div>
         </div>
         <div class="category">
@@ -72,6 +74,7 @@
                 <a href="javascript:void(0)">{{ item.title }}</a>
               </div>
             </div>
+            <div v-if="!categoryList.length" class="notDate">无数据</div>
           </div>
         </div>
       </div>
@@ -90,13 +93,17 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
+// import { ElNotification } from "element-plus";
 import dateFormat from "@/assets/js/dateFormat.js";
+import { getUserArticleListApi } from "@/utils/api/article";
+import { getuserCommentListApi } from "@/utils/api/comment";
+import { getUserCategoryListApi } from "@/utils/api/category";
+
 const store = useStore();
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 const commentList = ref<Array<any>>([]);
-const categoryList = computed(() => store.state.backstage.categoryList);
+const categoryList = ref<Array<any>>([]);
 const aricleList = ref<Array<any>>([]);
 const condition = computed({
   get: () => {
@@ -106,13 +113,10 @@ const condition = computed({
     store.commit("foreground/setCondition", val);
   }
 });
-const dataSummary = computed({
-  get: () => {
-    return store.state.backstage.dataSummary;
-  },
-  set: (val) => {
-    store.commit("backstage/setDataSummary", val);
-  }
+const dataSummary = reactive({
+  articlesTotal: 0,
+  commentsTotal: 0,
+  categoriesTotal: 0
 });
 const activeIndex = computed({
   get: () => {
@@ -128,17 +132,18 @@ const clientHeight = computed(() => {
   return "min-height:" + height + "px";
 });
 const user = ref<any>({});
+
 // 获取用户文章
 const getUserArticleList = (uuid: string) => {
   console.log(user.value);
-  proxy.$axios
-    .get("/article/userArticleList", { userUuid: uuid, state: 1 })
+  getUserArticleListApi({ userUuid: uuid, state: 1 })
     .then((res: any) => {
       console.log(res);
       for (const item of res.result.list) {
         item.createDate = dateFormat(item.createDate, "MM-dd");
       }
       aricleList.value = res.result.list;
+      dataSummary.articlesTotal = res.result.page.totalRow;
       store.commit("backstage/setArticlesTotal", res.result.page.totalRow);
       // commentList.value = res.result.list;
     })
@@ -154,14 +159,14 @@ const statisticalData: any = computed(
  * 获取评论列表
  */
 const getCommentList = (uuid: string) => {
-  proxy.$axios
-    .get("/comment/userCommentList", { userUuid: uuid })
+  getuserCommentListApi({ userUuid: uuid })
     .then((res: any) => {
-      console.log("评论列表", res);
+      console.log("评论列表1546465", res);
       if (res.code == "200") {
         for (const item of res.result.list) {
           item.createDate = dateFormat(item.createDate, "MM-dd");
         }
+        dataSummary.commentsTotal = res.result.page.totalRow;
         commentList.value = res.result.list;
         store.commit("backstage/setCommentsTotal", res.result.page.totalRow);
       }
@@ -170,13 +175,35 @@ const getCommentList = (uuid: string) => {
       console.log(err);
     });
 };
+
+/**
+ * 获取用户类别列表
+ */
+const getCategoryList = (uuid: string) => {
+  getUserCategoryListApi({ userUuid: uuid })
+    .then((res: any) => {
+      console.log("类别列表", res);
+      if (res.code == "200") {
+        categoryList.value = res.result.list;
+        dataSummary.categoriesTotal = res.result.page.totalRow;
+        store.commit(
+          "backstage/setClassificationsTotal",
+          res.result.page.totalRow
+        );
+      }
+    })
+    .catch((err: any) => {
+      console.log(err);
+    });
+};
+
 /**
  * 返回首页，并搜索
  */
 const pushHome = (category: string) => {
   condition.value.currPage = 1;
   condition.value.categoryTitle = category;
-  proxy.getAricleList(condition);
+  proxy.getAricleList(condition.value);
   router.push({ name: "index", params: { category } });
 };
 /**
@@ -190,6 +217,7 @@ onBeforeMount(() => {
   const temp = JSON.parse(proxy.$Cookies.get("user"));
   getCommentList(temp.uuid);
   getUserArticleList(temp.uuid);
+  getCategoryList(temp.uuid);
   user.value = temp;
 });
 onMounted(() => {
@@ -197,7 +225,7 @@ onMounted(() => {
   condition.value.currPage = 1;
   condition.value.state = 1;
   condition.value.categoryTitle = "";
-  proxy.getAricleList(condition, "MM-dd");
+  proxy.getAricleList(condition.value, "MM-dd");
 });
 </script>
 
@@ -341,6 +369,12 @@ onMounted(() => {
                 }
               }
             }
+          }
+          .notDate{
+            color: #999;
+            font-size: 13px;
+            padding-left: 30px;
+            font-family: 'Courier New', Courier, monospace;
           }
         }
       }

@@ -51,22 +51,14 @@
                 <span>{{ scope.row.user.name }}</span>
               </template>
             </el-table-column>
-            <el-table-column
-              label="创建时间"
-              prop="createDate"
-              align="center"
-            >
+            <el-table-column label="创建时间" prop="createDate" align="center">
               <template #default="scope">
                 <span>{{
                   dateFormat(scope.row.createDate, "yyyy-MM-dd hh:mm:ss")
                 }}</span>
               </template>
             </el-table-column>
-            <el-table-column
-              label="修改时间"
-              prop="createDate"
-              align="center"
-            >
+            <el-table-column label="修改时间" prop="createDate" align="center">
               <template #default="scope">
                 <span>{{
                   dateFormat(scope.row.updateDate, "yyyy-MM-dd hh:mm:ss")
@@ -166,7 +158,11 @@
             }
           ]"
         >
-          <el-input autofocus  v-model="formcategory.title" placeholder=""></el-input>
+          <el-input
+            autofocus
+            v-model="formcategory.title"
+            placeholder=""
+          ></el-input>
         </el-form-item>
         <el-form-item
           prop="descriptions"
@@ -185,13 +181,20 @@
             }
           ]"
         >
-          <el-input v-model="formcategory.descriptions" placeholder=""></el-input>
+          <el-input
+            v-model="formcategory.descriptions"
+            placeholder=""
+          ></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="editDialog = false">取消</el-button>
-          <el-button type="primary" v-if="btnName == '修改'" @click="handleUpdateCategoy()">
+          <el-button
+            type="primary"
+            v-if="btnName == '修改'"
+            @click="handleUpdateCategoy()"
+          >
             {{ btnName }}
           </el-button>
           <el-button v-else type="primary" @click="handleCreateCategoy()">
@@ -217,6 +220,12 @@ import {
 import { ElNotification, ElMessage, FormInstance } from "element-plus";
 import { InfoFilled } from "@element-plus/icons-vue";
 import dateFormat from "@/assets/js/dateFormat.js";
+import {
+  deleteCategoryApi,
+  createCategoryApi,
+  getCategoryListApi,
+  updateCategoryApi
+} from "@/utils/api/category";
 
 // const store = useStore();
 // const router = useRouter();
@@ -242,9 +251,9 @@ const condition = reactive({
 const search = ref<string>("");
 const formcategory = reactive({
   title: "",
-  descriptions:'',
+  descriptions: "",
   userUuid: "",
-  uuid:''
+  uuid: ""
 }); //类别表单
 const user = ref<any>({}); //用户
 const editDialog = ref<boolean>(false); //弹窗
@@ -265,8 +274,7 @@ const handleSelectionChange = (val: any) => {
 const handleDelete = (row: any) => {
   console.log(row);
 
-  proxy.$axios
-    .get("/category/del", { uuid: row.uuid })
+  deleteCategoryApi({ uuid: row.uuid })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -312,8 +320,7 @@ const handleChangePage = (val: any) => {
  * 获取所有的分类
  */
 const getCategoryList = (condition: any) => {
-  proxy.$axios
-    .get("/category/list", condition)
+  getCategoryListApi(condition)
     .then((resp: any) => {
       console.log(resp);
       if (resp.code === "200") {
@@ -340,7 +347,7 @@ const openDialog = () => {
   btnName.value = "创建";
   formcategory.title = "";
   formcategory.userUuid = user.value.uuid;
-   formcategory.descriptions = ''
+  formcategory.descriptions = "";
   editDialog.value = true;
 };
 // 编辑窗口
@@ -350,19 +357,18 @@ const editCategory = (data: any) => {
   formcategory.descriptions = data.descriptions;
   formcategory.title = data.title;
   formcategory.userUuid = data.userUuid;
-  formcategory.uuid = data.uuid
+  formcategory.uuid = data.uuid;
   editDialog.value = true;
 };
 /** 创建 */
 const handleCreateCategoy = () => {
   (validateFormRef.value as any).validate((valid: any, fields: any) => {
     if (valid) {
-      proxy.$axios
-        .post("/category/create", {
-          title: formcategory.title,
-          userUuid: formcategory.userUuid,
-          descriptions:formcategory.descriptions
-        })
+      createCategoryApi({
+        title: formcategory.title,
+        userUuid: formcategory.userUuid,
+        descriptions: formcategory.descriptions
+      })
         .then((resp: any) => {
           if (resp.code === "200") {
             ElNotification({
@@ -383,7 +389,7 @@ const handleCreateCategoy = () => {
         .catch((error: any) => {
           console.log(error);
         });
-    }else {
+    } else {
       ElNotification({
         title: "失败",
         message: "请按照规则填写",
@@ -396,12 +402,11 @@ const handleCreateCategoy = () => {
 const handleUpdateCategoy = () => {
   (validateFormRef.value as any).validate((valid: any, fields: any) => {
     if (valid) {
-      proxy.$axios
-        .put("/category/update", {
-          title: formcategory.title,
-          descriptions:formcategory.descriptions,
-          categoryUuid: formcategory.uuid
-        })
+      updateCategoryApi({
+        title: formcategory.title,
+        descriptions: formcategory.descriptions,
+        categoryUuid: formcategory.uuid
+      })
         .then((resp: any) => {
           if (resp.code === "200") {
             ElNotification({
@@ -422,7 +427,7 @@ const handleUpdateCategoy = () => {
         .catch((error: any) => {
           console.log(error);
         });
-    }else {
+    } else {
       ElNotification({
         title: "失败",
         message: "请按照规则填写",

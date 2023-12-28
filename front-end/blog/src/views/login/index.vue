@@ -53,6 +53,7 @@ import {
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
+import { loginAPI } from "@/utils/api/user";
 
 const store = useStore();
 const router = useRouter();
@@ -117,11 +118,10 @@ const submitForm = (formName: string) => {
  * 登录请求，并跳转
  */
 const login = () => {
-  proxy.$axios
-    .post("/user/login", {
-      email: ruleForm.account,
-      password: ruleForm.password
-    })
+  loginAPI({
+    email: ruleForm.account,
+    password: ruleForm.password
+  })
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {

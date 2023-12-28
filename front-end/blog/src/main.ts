@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from '@/router'
 import store from '@/store'
-import axios from '@/axios'
+import {request} from '@/axios'
 import './index.scss'
 // import '@/assets/js/localStorage'
 import * as publicMethods from '@/public'
@@ -11,7 +11,7 @@ import VueLazyload from 'vue3-lazy' // vue-lazyload
 
 // 挂载到实例
 const app = createApp(App)
-app.config.globalProperties.$axios = axios;
+app.config.globalProperties.$request = request;
 app.config.globalProperties.$Cookies = Cookies;
 // 分环境处理
 // if (process.env.NODE_ENV === 'development') {

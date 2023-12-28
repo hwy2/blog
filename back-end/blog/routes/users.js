@@ -67,8 +67,18 @@ router.put('/token', function (req, res, next) {
 /**
  * 更新adminToken 防止token过期
  */
-router.put('/adminToken', function (req, res, next) {
-    userDao.updateAccessToken(req, res, next,true);
+router.put('/adminToken', async function (req, res, next) {
+    try {
+        const result = await verifyAdminToken(token, userUuid)
+        // console.log(result,"result")
+        if (result == 'ok') {
+            userDao.updateAccessToken(req, res, next, true);
+        } else {
+            userDao.updateAccessToken(req, res, next)
+        }
+    } catch (error) {
+        userDao.updateAccessToken(req, res, next)
+    }
 });
 /**
  * 查询全部用户 支持 高级搜索、分页
@@ -113,7 +123,7 @@ router.get("/del", checkAdminToken, function (req, res, next) {
 /**
  * 发送邮箱验证码
  */
-router.post('/emailPost', checkToken, function (req, res, next){
+router.post('/emailPost', checkToken, function (req, res, next) {
     userDao.getEmailInformation(req, res, next)
 })
 /**

@@ -16,7 +16,7 @@ module.exports = {
         return new Promise(function (resolve, reject) {
             //检验是否传入邮件接收者 和邮件标题 和邮件内容
             if (!opts.to || !opts.subject || !opts.html) {
-                console.log(i18n.__('pleasePassParamsComplete'));
+                //console.log(i18n.__('pleasePassParamsComplete'));
                 reject(i18n.__('pleasePassParamsComplete'));
                 return;
             }
@@ -37,7 +37,7 @@ module.exports = {
                     pass: config.email.spassword,
                 },
             });
-            console.log(opts);
+          //  console.log(opts);
             transporter.sendMail(opts, function (error, info) {
                 if (error) {
                     console.log("邮件发送失败啦");

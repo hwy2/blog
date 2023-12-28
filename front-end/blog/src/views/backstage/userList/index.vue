@@ -334,6 +334,14 @@ import { ElNotification, ElMessage } from "element-plus";
 import { Plus, ZoomIn } from "@element-plus/icons-vue";
 import dateFormat from "@/assets/js/dateFormat.js";
 import { isvalidPass, isvalidUsername } from "@/assets/js/validate.js";
+import {
+  getUsetListAPI,
+  delUsetAPI,
+  regUsetAPI,
+  updateUsetAPI,
+  resetUsetPwdAPI
+} from "@/utils/api/user";
+import { commonFaceApi } from "@/utils/api/common";
 
 // const store = useStore();
 // const router = useRouter();
@@ -499,8 +507,7 @@ const handleSelectionChange = (val: any) => {
  * 请求用户列表
  */
 const getUserList = () => {
-  proxy.$axios
-    .get("/user/list", condition)
+  getUsetListAPI(condition)
     .then((res: any) => {
       console.log(res);
       if (res.code == "200") {
@@ -536,8 +543,7 @@ const handleChangePage = (val: any) => {
  * 删除请求
  */
 const deleteUser = (userUuid: string) => {
-  proxy.$axios
-    .get("/user/del", { userUuid })
+  delUsetAPI({ userUuid })
     .then((res: any) => {
       console.log(res);
       centerDialogVisible.value = false;
@@ -627,7 +633,7 @@ const newlyUser = () => {
   formUser.address = "";
   formUser.uuid = "";
   formUser.userInfoUuid = "";
-  formUser.synopsis = "";
+  formUser.synopsis = "这个人很懒，没有留下任何信息！";
   addOrModify.value = true;
   fileList.value = [];
   rulesUser.password = [
@@ -693,12 +699,11 @@ const submitUserForm = (formName: string) => {
  * 创建用户及用户信息
  */
 const createUser = (form: any) => {
-  proxy.$axios
-    .post("/user/reg", form)
+  regUsetAPI(form)
     .then((res: any) => {
       console.log(res);
-      newUserVisible.value = false;
       if (res.code === "200") {
+         newUserVisible.value = false;
         ElNotification({
           title: "成功",
           message: "新增用户成功",
@@ -722,8 +727,7 @@ const createUser = (form: any) => {
  */
 const updateUser = (user: any, userInfo: any) => {
   console.log("userInfo", userInfo);
-  proxy.$axios
-    .put("/user/upInfo", { user, userInfo })
+  updateUsetAPI({ user, userInfo })
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -752,12 +756,11 @@ const updateUser = (user: any, userInfo: any) => {
 const updateUserPwd = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      proxy.$axios
-        .put("/user/resetPwd", {
-          password: formUser.password,
-          confirmPassword: formUser.confirmPassword,
-          userUuid: formUser.uuid
-        })
+      resetUsetPwdAPI({
+        password: formUser.password,
+        confirmPassword: formUser.confirmPassword,
+        userUuid: formUser.uuid
+      })
         .then((res: any) => {
           console.log(res);
           if (res.code === "200") {
@@ -826,8 +829,7 @@ const uploadFile = (param: any) => {
     const data = new FormData();
     data.append("files", param);
     data.append("userUuid", loginUser.value.uuid);
-    proxy.$axios
-      .post("/common/face", data)
+    commonFaceApi(data)
       .then((resp: any) => rev(resp))
       .catch((error: any) => rej(error));
   });
@@ -885,7 +887,7 @@ const uploadExceed = (uploadFile: any) => {
 };
 /**
  * 查看图片
- * @param uploadFile 
+ * @param uploadFile
  */
 const handlePictureCardPreview = (uploadFile: any) => {
   dialogImageUrl.value = uploadFile.url!;

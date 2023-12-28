@@ -13,10 +13,7 @@
                 v-for="(item, index) in articleList"
                 :key="index"
               >
-                <div
-                  class="item-header"
-                  @click="modifyState(index, $event)"
-                >
+                <div class="item-header" @click="modifyState(index, $event)">
                   <p>{{ item.date }}</p>
                   <p>{{ item?.res?.length }}篇</p>
                   <i
@@ -33,9 +30,7 @@
                     v-for="(resList, j) in item?.res"
                     :key="j"
                   >
-                    <span>{{
-                      getdateFormat(resList.createDate, "MM-dd")
-                    }}</span
+                    <span>{{ getdateFormat(resList.createDate, "MM-dd") }}</span
                     >&emsp; {{ resList.title }}</router-link
                   >
                 </div>
@@ -61,6 +56,7 @@ import {
 // import { useStore } from "vuex";
 // import { useRouter } from "vue-router";
 import { ElNotification, ElLoading } from "element-plus";
+import { getArticleListApi } from "@/utils/api/article";
 
 // const store = useStore();
 // const router = useRouter();
@@ -78,8 +74,7 @@ const listNone = ref<Array<boolean>>([]);
 
 const getArticleList = () => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .get("/article/list", condition)
+  getArticleListApi(condition)
     .then((res: any) => {
       console.log(res);
       loading.close();
@@ -104,7 +99,7 @@ const getArticleList = () => {
           list[index].res.push(item);
         }
       });
-      articleList.value= list;
+      articleList.value = list;
       console.log(list);
     })
     .catch((error: any) => {

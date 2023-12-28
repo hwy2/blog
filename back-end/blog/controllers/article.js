@@ -115,7 +115,7 @@ module.exports = {
             currPage: parseInt(utils.trim(params.currPage)) || config.page.currPage, //获取当前页
             pageSize: parseInt(utils.trim(params.pageSize)) || config.page.pageSize //每页数量
         }
-
+       // console.log(page, 'page')
         co(function* () {
             // console.log(condition)
             var articleResultCount = yield Article.findAll({
@@ -152,7 +152,7 @@ module.exports = {
                 ]
             });
 
-            console.log(condition)
+           // console.log(condition)
             // 由于findAndCountAll计数器的不正确性，所以需要先查询所有的条数再分页
             var articleResult = yield Article.findAll({
                 include: [{
@@ -844,7 +844,7 @@ module.exports = {
                 }
             })
 
-            console.log('result', result)
+           // console.log('result', result)
             utils.handleJson({
                 response: res,
                 msg: 'doSuccess',

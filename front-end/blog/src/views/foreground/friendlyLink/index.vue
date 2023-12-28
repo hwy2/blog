@@ -9,7 +9,9 @@
                 <div class="card-media">
                   <main
                     class="laz"
-                    style="background-image: url('/src/assets/images/sidebar.jpg')"
+                    style="
+                      background-image: url('/src/assets/images/sidebar.jpg');
+                    "
                   ></main>
                   <!-- <img :src="item.image" alt="头像" /> -->
                 </div>
@@ -104,8 +106,8 @@ import {
   getCurrentInstance,
   onBeforeMount
 } from "vue";
-import { ElNotification,ElMessage  } from 'element-plus'
-
+import { ElNotification, ElMessage } from "element-plus";
+import { getLinksListApi, applyLinksApi } from "@/utils/api/links";
 
 const { proxy }: any = getCurrentInstance();
 const dialogTableVisible = ref<boolean>(false);
@@ -172,8 +174,7 @@ const rulesLinks = reactive({
 });
 const formLabelWidth = ref<string>("120px");
 const getFriendlyLink = () => {
-  proxy.$axios
-    .get("/links/list", condition)
+  getLinksListApi(condition)
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -189,10 +190,9 @@ const getFriendlyLink = () => {
  */
 const submitAddForm = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
-    console.log(valid)
+    console.log(valid);
     if (valid) {
-      proxy.$axios
-        .post("/links/apply", formLinks)
+      applyLinksApi(formLinks)
         .then((res: any) => {
           console.log(res);
           dialogTableVisible.value = false;
@@ -222,7 +222,7 @@ const submitAddForm = (formName: string) => {
         title: "错误",
         message: "必填项不能为空",
         type: "error",
-        duration:8000
+        duration: 8000
       });
       return false;
     }

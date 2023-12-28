@@ -276,6 +276,13 @@ import {
 } from "element-plus";
 import dateFormat from "@/assets/js/dateFormat.js";
 import { Check, Delete, Edit, InfoFilled } from "@element-plus/icons-vue";
+import {
+  getuserCommentListApi,
+  deleteCommentApi,
+  updateCommentStatusApi,
+  updateCommentApi,
+  recoverCommentApi
+} from "@/utils/api/comment";
 
 // const store = useStore();
 // const router = useRouter();
@@ -318,10 +325,9 @@ const validateFormRef = ref<FormInstance>();
  * 获取评论数据
  */
 const getCommentData = (condition: any) => {
-  proxy.$axios
-    .get("/comment/userCommentList", condition)
+  getuserCommentListApi(condition)
     .then((resp: any) => {
-      console.log(resp, "kk");
+      console.log(resp, "kk22");
       if (resp.code == "200") {
         commentListData.value = resp.result.list;
         commentTotal.value = resp.result.page.totalRow;
@@ -377,8 +383,7 @@ const handleBatchDelete = () => {
 const handleDelete = (index: number, row: any) => {
   console.log(row);
 
-  proxy.$axios
-    .get("/comment/del", { commentUuid: row.uuid })
+  deleteCommentApi({ commentUuid: row.uuid })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -403,8 +408,7 @@ const handleDelete = (index: number, row: any) => {
  * 修改状态
  */
 const updateStatus = (status: number, commentUuid: string) => {
-  proxy.$axios
-    .post("/comment/updateCommentStatus", { status, commentUuid })
+  updateCommentStatusApi({ status, commentUuid })
     .then((resp: any) => {
       if (resp.code === "200") {
         console.log(resp);
@@ -500,8 +504,7 @@ const updateComments = () => {
   (validateFormRef.value as any).validate((valid: any, fields: any) => {
     console.log(valid, fields);
     if (valid) {
-      proxy.$axios
-        .put("/comment/update", { comment: formLabelAlign })
+      updateCommentApi({ comment: formLabelAlign })
         .then((resp: any) => {
           console.log(resp, "");
           if (resp.code == "200") {
@@ -532,22 +535,23 @@ const updateComments = () => {
     }
   });
 };
-//
+/**
+ * 回复评论
+ */
 const recoverComments = () => {
   (validateFormRef.value as any).validate((valid: any, fields: any) => {
     console.log(valid, fields);
     if (valid) {
-      proxy.$axios
-        .post("/comment/recover", {
-          ip: "",
-          vestingPlace: "",
-          agent: navigator.userAgent,
-          email: formLabelAlign.email,
-          nickName: formLabelAlign.nickName,
-          comments: formLabelAlign.comments,
-          articleUuid: article.value.uuid,
-          link: ""
-        })
+      recoverCommentApi({
+        ip: "",
+        vestingPlace: "",
+        agent: navigator.userAgent,
+        email: formLabelAlign.email,
+        nickName: formLabelAlign.nickName,
+        comments: formLabelAlign.comments,
+        articleUuid: article.value.uuid,
+        link: ""
+      })
         .then((resp: any) => {
           console.log(resp, "");
           if (resp.code == "200") {

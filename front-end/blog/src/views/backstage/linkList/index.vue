@@ -179,13 +179,20 @@ import {
   onBeforeMount,
   watch
 } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+// import { useStore } from "vuex";
+// import { useRouter } from "vue-router";
 import { ElNotification, ElLoading, ElMessage } from "element-plus";
 import { InfoFilled } from "@element-plus/icons-vue";
+import {
+  getLinksListApi,
+  delLinksApi,
+  getLinksInfoApi,
+  createLinksApi,
+  upinfoLinksApi
+} from "@/utils/api/links";
 
-const store = useStore();
-const router = useRouter();
+// const store = useStore();
+// const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 
 const tableData = ref<Array<any>>([]); //外链数据
@@ -273,8 +280,7 @@ watch(search, (newValue, oldValue) => {
  * 获取全部友链
  */
 const getLinksList = () => {
-  proxy.$axios
-    .get("/links/list", condition)
+  getLinksListApi(condition)
     .then((res: any) => {
       console.log(res);
       if (res.code == "200") {
@@ -327,29 +333,27 @@ const handleChangePage = (val: any) => {
  * 删除方法
  */
 const deleteLinks = (linksUuid: string) => {
-  proxy.$axios
-    .get("/links/del", {
-      linksUuid
-    })
-    .then((res: any) => {
-      console.log(res);
-      centerDialogVisible.value = false;
-      if (res.code === "200") {
-        ElNotification({
-          title: "成功",
-          message: "删除成功",
-          type: "success"
-        });
-        links.value = {};
-        getLinksList();
-      } else {
-        ElNotification({
-          title: "失败",
-          message: res.msg,
-          type: "error"
-        });
-      }
-    });
+  delLinksApi({
+    linksUuid
+  }).then((res: any) => {
+    console.log(res);
+    centerDialogVisible.value = false;
+    if (res.code === "200") {
+      ElNotification({
+        title: "成功",
+        message: "删除成功",
+        type: "success"
+      });
+      links.value = {};
+      getLinksList();
+    } else {
+      ElNotification({
+        title: "失败",
+        message: res.msg,
+        type: "error"
+      });
+    }
+  });
 };
 /**
  * 显示单个links信息
@@ -361,8 +365,7 @@ const getLinksInfo = (linksUuid: string) => {
     spinner: "el-icon-loading",
     background: "rgba(0, 0, 0, 0.7)"
   });
-  proxy.$axios
-    .get("/links/info", { linksUuid })
+  getLinksInfoApi({ linksUuid })
     .then((res: any) => {
       console.log(res, "info");
       if (res.code === "200") {
@@ -389,8 +392,7 @@ const submitAddForm = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
       formLinks.uuid = "";
-      proxy.$axios
-        .post("/links/create", formLinks)
+      createLinksApi(formLinks)
         .then((res: any) => {
           console.log(res);
           if (res.code === "200") {
@@ -427,8 +429,7 @@ const submitAddForm = (formName: string) => {
 const submitModifyForm = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      proxy.$axios
-        .put("/links/upinfo", { links: formLinks })
+      upinfoLinksApi({ links: formLinks })
         .then((res: any) => {
           console.log(res);
           if (res.code === "200") {

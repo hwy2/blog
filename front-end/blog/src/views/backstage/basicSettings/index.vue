@@ -99,25 +99,15 @@ import {
 import { useStore } from "vuex";
 // import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
+import { setWebConfigUpdateApi } from "@/utils/api/webConfig";
 
 const store = useStore();
 // const router = useRouter();
 const { proxy }: any = getCurrentInstance();
-// let webConfig = reactive({
-//   siteName: "",
-//   siteAddress: "",
-//   authorName: "",
-//   runningTime: "",
-//   siteDescription: "",
-//   keyWord: "",
-//   recordNumber: "",
-//   internetAlert: "",
-//   isOpenCoverImage: 0,
-//   isOpenCommentaries: 0
-// });
-let webConfig = computed(()=>{
-  return store.getters["foreground/getWebConfig"]
-})
+
+let webConfig = computed(() => {
+  return store.getters["foreground/getWebConfig"];
+});
 const rulesWebConfig = reactive({
   siteName: [
     { required: true, message: "请输入站点名称", trigger: "blur" },
@@ -190,12 +180,11 @@ const webConfigForm = ref();
 
 const submitWebConfigForm = () => {
   webConfigForm.value.validate((valid: any) => {
-    console.log(valid,webConfig.value);
+    console.log(valid, webConfig.value);
     if (valid) {
-      proxy.$axios
-        .put("/webConfig/update", {
-          webConfig: webConfig.value
-        })
+      setWebConfigUpdateApi({
+        webConfig: webConfig.value
+      })
         .then((res: any) => {
           console.log(res);
           if (res.code === "200") {

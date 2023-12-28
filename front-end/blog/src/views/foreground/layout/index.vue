@@ -54,7 +54,7 @@
                   <i class="iconfont iconsearch"></i>
                 </template>
                 <template #append>
-                  <el-button :icon="Close" @click="showSearch=false" />
+                  <el-button :icon="Close" @click="showSearch = false" />
                 </template>
               </el-input>
             </label>
@@ -126,7 +126,7 @@
       title=""
       v-model="drawer"
       direction="ltr"
-      size="15%"
+      size="288px"
       :with-header="false"
     >
       <div class="sidebar-header">
@@ -304,6 +304,7 @@ import { useRouter } from "vue-router";
 import Cookies from "js-cookie";
 import { Close } from "@element-plus/icons-vue";
 // import dateFormat from "@/assets/js/dateFormat.js";
+import { getDataSummaryListApi } from "@/utils/api/dataSummary";
 
 // 变量定义
 const store = useStore();
@@ -358,14 +359,13 @@ const authorName = computed(() => store.state.foreground.webConfig.authorName); 
 const description = computed(
   () => store.state.foreground.webConfig.siteDescription
 ); // 站长简介
-const pageList = computed(() => store.state.foreground.pageList); //文章列表
+const pageList = computed(() => store.state.foreground.pageList); //页面列表
 const showSearch = ref(false); //显示搜索？
 const defaultActive = ref<any>("1"); //导航栏
 
 /** 获取统计数据 */
 const getDataSummaryList = () => {
-  proxy.$axios
-    .get("/dataSummary/list")
+  getDataSummaryListApi({})
     .then((res: any) => {
       // console.log(res);
       store.commit("foreground/setDataSummary", res.result.list);
@@ -550,7 +550,7 @@ onMounted(() => {
     condition.value.currPage = 1;
     proxy.getAricleList(condition.value);
     condition.value.currPage = temp;
-  }, 500);
+  }, 50);
   tick(localStorage.getItem("runingTime") || startTime.value);
 });
 
@@ -565,14 +565,13 @@ watch(defaultActive, (newValue: any) => {
 watch(
   () => router.currentRoute.value.path,
   (newValue: any) => {
-    console.log('监听路由',newValue);
-    if(newValue == '/home/index'){
-      defaultActive.value = '1'
-      Cookies.set("defaultActive",  '1');
+    console.log("监听路由", newValue);
+    if (newValue == "/home/index") {
+      defaultActive.value = "1";
+      Cookies.set("defaultActive", "1");
     }
   }
 );
-
 </script>
 
 <style lang="scss">

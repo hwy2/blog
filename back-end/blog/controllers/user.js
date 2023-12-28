@@ -95,7 +95,6 @@ module.exports = {
             })
             return;
         }
-
         co(function* () {
 
             var userResult = yield User.findOne({
@@ -131,6 +130,10 @@ module.exports = {
             delete user.password;
 
             userInfo.userUuid = user.uuid;
+            if (!userInfo.birth){
+                delete userInfo.birth
+            }
+            if (!userInfo.synopsis) delete userInfo.synopsis
             var userInfoResult = yield UserInfo.create(userInfo)
             if (!userInfoResult) { //注册失败
                 utils.handleJson({
@@ -144,10 +147,7 @@ module.exports = {
                 response: res,
                 msg: i18n.__('regSuccess'),
                 result: {
-                    user: user,
-                    accessToken: tokenService.setToken({
-                        uuid: user.uuid
-                    }) //token
+                    user: user
                 }
             });
 
@@ -184,6 +184,9 @@ module.exports = {
                 where: {
                     email: email
                 },
+                attributes: {
+                    exclude: ['captcha']
+                },
                 include: [{
                     model: UserInfo
                 }]
@@ -215,7 +218,7 @@ module.exports = {
             // user.role = user.role === '1' ? '管理员' : '普通用户'
             // 验证是否为管理员
             if (user.role && user.role === '1') {
-                // console.log("管理员登录");
+               // console.log("管理员登录");
 
                 utils.handleJson({
                     response: res,
@@ -304,7 +307,8 @@ module.exports = {
                     result: {
                         accessToken: tokenService.setToken({
                             uuid: userUuid,
-                            isAdmin: true
+                            isAdmin: true,
+                            role: user.role
                         })
                     }
                 });
@@ -369,7 +373,7 @@ module.exports = {
             var result = yield User.findAndCountAll({
                 where: condition,
                 attributes: {
-                    exclude: ['password']
+                    exclude: ['password','captcha']
                 },
                 include: UserInfo,
                 limit: page.pageSize, //每页多少条
@@ -417,7 +421,7 @@ module.exports = {
      */
     getUserInfo: function (req, res, next) {
         var params = req.query || req.params;
-        console.log("params", params);
+      //  console.log("params", params);
         var userUuid = utils.trim(params.userUuid);
 
         if (!userUuid) {
@@ -434,7 +438,7 @@ module.exports = {
                     uuid: userUuid
                 },
                 attributes: {
-                    exclude: ['password']
+                    exclude: ['password', 'captcha']
                 },
                 include: UserInfo
             });
@@ -472,7 +476,7 @@ module.exports = {
         var userInfo = params.userInfo
         var userUuid = user.uuid;
         var userInfoUuid = userInfo.uuid
-        console.log(params)
+       // console.log(params)
         if (!userUuid) {
             utils.handleJson({
                 response: res,
@@ -500,9 +504,9 @@ module.exports = {
 
                 return;
             }
-            console.log('111', userInfo)
+            //console.log('111', userInfo)
             if (userInfoUuid && userInfo.nickName) {
-                console.log('session')
+              //  console.log('session')
                 yield UserInfo.update({
                     nickName: userInfo.nickName,
                     birth: userInfo.birth,

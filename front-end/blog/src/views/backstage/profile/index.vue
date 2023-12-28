@@ -18,9 +18,17 @@
           <p>
             {{ user?.userInfo?.nickName }}
           </p>
-          <p>角色： <b>{{ user?.role == 1 ? "管理员" : "用户" }}</b></p>
-          <p>邮箱： <b>{{ user?.email }}</b></p>
-          <p>邮箱是否验证：<b style="color: cornflowerblue;">{{ user?.state== 1 ? "已验证" : "未验证" }}</b> </p>
+          <p>
+            角色： <b>{{ user?.role == 1 ? "管理员" : "用户" }}</b>
+          </p>
+          <p>
+            邮箱： <b>{{ user?.email }}</b>
+          </p>
+          <p>
+            邮箱是否验证：<b style="color: cornflowerblue">{{
+              user?.state == 1 ? "已验证" : "未验证"
+            }}</b>
+          </p>
 
           <p>
             目前有<span>{{ dataSummary?.articlesTotal }}</span> 篇文章, 并有
@@ -209,6 +217,15 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification, ElMessage } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
+import {
+  getUserInfoAPI,
+  setUserPWDAPI,
+  setEmailCaptchaEmailAPI,
+  setEmailPostAPI
+} from "@/utils/api/user";
+import { commonFaceApi } from "@/utils/api/common";
+import { setUserInfoApi } from "@/utils/api/userInfo";
+
 const store = useStore();
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
@@ -347,8 +364,7 @@ const submitForm = (formName: string) => {
  * 获取用户信息
  */
 const getUserInfo = () => {
-  proxy.$axios
-    .get("/user/info", { userUuid: user.value.uuid })
+  getUserInfoAPI({ userUuid: user.value.uuid })
     .then((res: any) => {
       if (res.code === "200") {
         proxy.$Cookies.set("user", JSON.stringify(res.result.user));
@@ -380,12 +396,11 @@ const getUserInfo = () => {
 const submitPwdForm = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      proxy.$axios
-        .put("/user/pwd", {
-          userUuid: (user.value as any).uuid,
-          oldPwd: formUser.oldPwd,
-          newPwd: formUser.newPwd
-        })
+      setUserPWDAPI({
+        userUuid: (user.value as any).uuid,
+        oldPwd: formUser.oldPwd,
+        newPwd: formUser.newPwd
+      })
         .then((res: any) => {
           if (res.code === "200") {
             ElNotification({
@@ -446,8 +461,7 @@ const uploadFile = (param: any) => {
     const data = new FormData();
     data.append("files", param);
     data.append("userUuid", user.value.uuid);
-    proxy.$axios
-      .post("/common/face", data)
+    commonFaceApi(data)
       .then((resp: any) => rev(resp))
       .catch((error: any) => rej(error));
   });
@@ -474,10 +488,9 @@ const uploadRemove = (uploadFile: any) => {
  * 修改用户信息
  */
 const updateUserInfo = () => {
-  proxy.$axios
-    .put("/userInfo/upinfo", {
-      userInfo: formUserInfo
-    })
+  setUserInfoApi({
+    userInfo: formUserInfo
+  })
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -518,11 +531,10 @@ const handlePictureCardPreview = (uploadFile: any) => {
  * 发送验证码
  */
 const postCaptcha = () => {
-  proxy.$axios
-    .post("/user/emailPost", {
-      userUuid: user.value.uuid,
-      email: formUser.email
-    })
+  setEmailPostAPI({
+    userUuid: user.value.uuid,
+    email: formUser.email
+  })
     .then((res: any) => {
       if (res.code === "200") {
         ElNotification.success("发送验证码成功");
@@ -539,12 +551,11 @@ const postCaptcha = () => {
 const verifyEmail = (formName: string) => {
   proxy.$refs[formName].validate((valid: any) => {
     if (valid) {
-      proxy.$axios
-        .post("/user/captchaEmail", {
-          userUuid: user.value.uuid,
-          email: formUser.email,
-          captcha: formUser.captcha
-        })
+      setEmailCaptchaEmailAPI({
+        userUuid: user.value.uuid,
+        email: formUser.email,
+        captcha: formUser.captcha
+      })
         .then((res: any) => {
           if (res.code === "200") {
             ElNotification.success("邮箱验证成功");

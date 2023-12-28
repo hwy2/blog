@@ -1,15 +1,21 @@
 import axios from "axios";
-import { ElNotification } from 'element-plus';
+import { ElNotification, ElLoading } from 'element-plus';
 import cookies from 'js-cookie';
 import { declassificationAES, encryptedAES } from "../utils/index"
 
 // 基础URL
-axios.defaults.baseURL = 'http://localhost:3060'
+axios.defaults.baseURL = 'https://www.3dcw.cn'
+// axios.defaults.baseURL = 'http://localhost:3060'
 // post请求头
 axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
 // 设置超时
 axios.defaults.timeout = 10000;
-
+let loading: any  = ElLoading.service({
+    lock: true,
+    text: "Loading",
+    spinner: "el-icon-loading",
+    background: "rgba(0, 0, 0, 0.7)"
+});
 axios.interceptors.request.use(
     config => {
         const accessToken = cookies.get('accessToken');
@@ -17,13 +23,15 @@ axios.interceptors.request.use(
             config.headers.accessToken = accessToken;
         }
         // 加密提交
-        if (config.url != "/common/enclosure" && config.url != "/common/face" &&(config.method === 'post' || config.method === 'put') && config.data)
+        if (config.url != "/common/enclosure" && config.url != "/common/face" && (config.method === 'post' || config.method === 'put') && config.data)
             config.data = {
                 data: encryptedAES(config.data)
             }
+        loading.close() 
         return config;
     },
     error => {
+        loading.close()
         return Promise.reject(error);
     }
 );
@@ -37,8 +45,10 @@ axios.interceptors.response.use(
         } else {
             return Promise.reject(response);
         }
+        loading.close()
     },
     error => {
+        loading.close()
         ElNotification({
             title: '错误',
             message: `异常请求：${JSON.stringify(error.message)}`,
@@ -49,68 +59,21 @@ axios.interceptors.response.use(
 
 
 
-export default {
-    /**
-     * axios Post提交
-     * @param url 连接
-     * @param data 参数
-     * @returns Promise对象
-     */
-    post(url: string, data: any) {
-        return new Promise((resolve, reject) => {
-            axios({
-                method: 'post',
-                url,
-                data
-            })
-                .then(res => {
-                    resolve(res.data)
-                })
-                .catch(err => {
-                    reject(err)
-                });
+export const request = (options = { method: "get", url: '/', data: {} }) => {
+    return new Promise((resolve, rejects) => {
+        let option: any = {
+            method: options.method,
+            url: options.url,
+        }
+        if (options.method == 'get')
+            option['params'] = options.data
+        else
+            option['data'] = options.data
+        axios(option).then(res => {
+            resolve(res.data)
         })
-    },
-    /**
-     * axios get提交
-     * @param url 连接
-     * @param data 参数
-     * @returns Promise对象
-     */
-    get(url: string, data: any) {
-        return new Promise((resolve, reject) => {
-            axios({
-                method: 'get',
-                url,
-                params: data,
+            .catch(err => {
+                rejects(err)
             })
-                .then(res => {
-                    resolve(res.data)
-                })
-                .catch(err => {
-                    reject(err)
-                })
-        })
-    },
-    /**
-     * axios Put提交
-     * @param url 连接
-     * @param data 参数
-     * @returns Promise对象
-     */
-    put(url: string, data: any) {
-        return new Promise((resolve, reject) => {
-            axios({
-                method: 'put',
-                url,
-                data,
-            })
-                .then(res => {
-                    resolve(res.data)
-                })
-                .catch(err => {
-                    reject(err)
-                })
-        })
-    }
-};
+    })
+}

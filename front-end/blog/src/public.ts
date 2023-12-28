@@ -1,6 +1,9 @@
 import dateFormat from "@/assets/js/dateFormat.js";
-import { ElLoading } from "element-plus";
-import axios from "./axios";
+import { ElLoading, ElMessage } from "element-plus";
+import { getArticleListApi, getTestimonialsArticleApi, getHotArticleApi } from "@/utils/api/article";
+import { getWebConfigInfoApi } from "@/utils/api/webConfig"
+import { setAminTokenApi } from "@/utils/api/user"
+import { getCategoryListApi } from "@/utils/api/category"
 import store from '@/store'
 import Cookies from 'js-cookie'
 
@@ -11,85 +14,93 @@ import Cookies from 'js-cookie'
  */
 export const getAricleList = (data: any = {}, format: string = 'yyyy年MM月dd日') => {
     const loading = ElLoading.service({ fullscreen: true });
-    axios.get("/article/list", data)
-        .then((res: any) => {
-            console.log('获取文章列表', res);
-            if (res.code == "200") {
-                for (const item of res?.result?.list) {
-                    item.createDate = dateFormat(item.createDate, format);
-                    item.updateDate = dateFormat(item.updateDate, format);
-                    const category = [];
-                    for (const iterator of item.categories) {
-                        category.push(iterator.title);
-                    }
-                    item.category = category.join(',')
-                }
-                if (data.state === 4) {
-                    // 有序号的页面
-                    const orderly = res.result.list.filter((item: any) => {
-                        switch (item.template) {
-                            case 0:
-                                item.to = "/home/normalPage/" + item.uuid
-                                break;
-                            case 1:
-                                item.to = "/home/archiveArticles"
-                                break;
-                            case 2:
-                                item.to = "/home/friendlyLink"
-                                break;
-                            default:
-                                break;
+    return new Promise((resolve, reject) => {
+        getArticleListApi(data)
+            .then((res: any) => {
+                console.log('获取文章列表', res);
+                if (res.code == "200") {
+                    for (const item of res?.result?.list) {
+                        item.createDate = dateFormat(item.createDate, format);
+                        item.updateDate = dateFormat(item.updateDate, format);
+                        const category = [];
+                        for (const iterator of item.categories) {
+                            category.push(iterator.title);
                         }
-                        return item.pageOrder > 0;
-                    });
-                    // 冒泡排序
-                    for (let i = 0; i < orderly.length - 1; i++) {
-                        for (let j = 0; j < orderly.length - i - 1; j++) {
-                            if (orderly[j].pageOrder > orderly[j + 1].pageOrder) {
-                                const swap = orderly[j];
-                                orderly[j] = orderly[j + 1];
-                                orderly[j + 1] = swap;
+                        item.category = category.join(',')
+                    }
+                    if (data.state === 4) {
+                        // 有序号的页面
+                        const orderly = res.result.list.filter((item: any) => {
+                            switch (item.template) {
+                                case 0:
+                                    item.to = "/home/normalPage/" + item.uuid
+                                    break;
+                                case 1:
+                                    item.to = "/home/archiveArticles"
+                                    break;
+                                case 2:
+                                    item.to = "/home/friendlyLink"
+                                    break;
+                                default:
+                                    break;
+                            }
+                            return item.pageOrder > 0;
+                        });
+                        // 冒泡排序
+                        for (let i = 0; i < orderly.length - 1; i++) {
+                            for (let j = 0; j < orderly.length - i - 1; j++) {
+                                if (orderly[j].pageOrder > orderly[j + 1].pageOrder) {
+                                    const swap = orderly[j];
+                                    orderly[j] = orderly[j + 1];
+                                    orderly[j + 1] = swap;
+                                }
                             }
                         }
-                    }
 
-                    // 无序号的页面
-                    const disorder = res.result.list.filter((item: any) => {
-                        return item.pageOrder === 0;
-                    });
+                        // 无序号的页面
+                        let disorder = res.result.list.filter((item: any) => {
+                            return item.pageOrder === 0;
+                        });
 
-                    if (orderly.length > 0) {
-                        for (const item of orderly) {
-                            disorder.splice(item.pageOrder - 1, 0, item);
+                        if (orderly.length > 0) {
+                            for (const item of orderly) {
+                                disorder.splice(item.pageOrder - 1, 0, item);
+                            }
                         }
-                    }
-                    store.commit("foreground/setPageList", disorder);
-                    store.commit("foreground/setPageTtotals", res.result.page.totalRow);
-                    loading.close();
-                    return;
-                } else {
+                        disorder = disorder.filter((item: any) => {
+                            return item.state == 4
+                        })
 
-                    store.commit("foreground/setArticleList", res.result.list);
-                    store.commit('foreground/setArticleStickyList', res.result.articleSticky)
-                    store.commit("foreground/setTotal", res.result.page.totalRow);
-                    loading.close();
+                        store.commit("foreground/setPageList", disorder);
+                        store.commit("foreground/setPageTtotals", res.result.page.totalRow);
+                        loading.close();
+                        return;
+                    } else {
+                        resolve(res.result.list)
+                        store.commit("foreground/setArticleList", res.result.list);
+                        store.commit('foreground/setArticleStickyList', res.result.articleSticky)
+                        store.commit("foreground/setTotal", res.result.page.totalRow);
+                        loading.close();
+                    }
                 }
-            }
-        })
-        .catch((error: any) => {
-            store.commit("foreground/setPageList", []);
-            store.commit("foreground/setPageTtotals", 0);
-            store.commit("foreground/setArticleList", []);
-            store.commit("foreground/setTotal", 0);
-            console.log(error);
-            loading.close();
-        });
+            })
+            .catch((error: any) => {
+                reject([])
+                store.commit("foreground/setPageList", []);
+                store.commit("foreground/setPageTtotals", 0);
+                store.commit("foreground/setArticleList", []);
+                store.commit("foreground/setTotal", 0);
+                console.log(error);
+                loading.close();
+            });
+    })
+
 }
 /**
  * 获取网站配置项，并修改HTML页面属性
  */
 export const getWebConfigInfo = async () => {
-    await axios.get("/webConfig/info", {})
+    await getWebConfigInfoApi({})
         .then((res: any) => {
             console.log(res);
             store.commit("foreground/setWebConfig", res.result.webConfig);
@@ -129,7 +140,7 @@ export const updateAccessToken = () => {
     if (user === '{}' || !accessToken) {
         return;
     }
-    axios.put("/user/adminToken", {
+    setAminTokenApi({
         userUuid: user.uuid,
         token: accessToken
     })
@@ -155,14 +166,15 @@ export const getTestimonialsAricleList = (data: any = {}, format: string = 'yyyy
     const loading = ElLoading.service({ fullscreen: true });
 
     return new Promise((resolve, reject) => {
-        axios.get("/article/testimonialsArticle", data)
+        getTestimonialsArticleApi(data)
             .then((res: any) => {
                 console.log(res);
                 if (res.code == "200") {
                     resolve(res.result.list)
                     loading.close();
                 } else {
-                    reject(res)
+                    // reject(res)
+                    ElMessage.error(res.msg)
                 }
             })
             .catch((error: any) => {
@@ -180,7 +192,7 @@ export const getHotArticle = (data: any = {}, format: string = 'yyyy年MM月dd�
     const loading = ElLoading.service({ fullscreen: true });
 
     return new Promise((resolve, reject) => {
-        axios.get("/article/hotArticle", data)
+        getHotArticleApi(data)
             .then((res: any) => {
                 console.log(res);
                 if (res.code == "200") {
@@ -203,11 +215,10 @@ export const getHotArticle = (data: any = {}, format: string = 'yyyy年MM月dd�
  */
 export const getCategoryList = () => {
     const user: any = JSON.parse(Cookies.get("user") || '{}');
-   axios
-        .get("/category/list", {
-            userUuid: user.uuid,
-            pageSize:100
-        })
+    getCategoryListApi({
+        userUuid: user.uuid,
+        pageSize: 100
+    })
         .then((res: any) => {
             console.log("获取类别列表", res);
             for (const item of res.result.list) {

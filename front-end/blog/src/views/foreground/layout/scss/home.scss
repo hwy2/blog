@@ -739,6 +739,9 @@
 
 @media (max-width: 800px) {
     .toolbar {
+        .logo {
+            width: 80%;
+        }
         .nav {
             display: none;
         }

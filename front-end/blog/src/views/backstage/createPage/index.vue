@@ -99,6 +99,12 @@ import { useRouter, onBeforeRouteLeave } from "vue-router";
 import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { ElNotification, ElLoading } from "element-plus";
+import { commonEnclosureApi } from "@/utils/api/common";
+import {
+  createArticleApi,
+  updateArticleApi,
+  getArticleInfoApi
+} from "@/utils/api/article";
 
 const store = useStore();
 const router = useRouter();
@@ -214,8 +220,7 @@ const uploadImg = async (
         const data = new FormData();
         data.append("files", file);
         data.append("userUuid", article.userUuid);
-        proxy.$axios
-          .post("/common/enclosure", data)
+        commonEnclosureApi(data)
           .then((resp: any) => rev(resp))
           .catch((error: any) => rej(error));
       });
@@ -261,8 +266,7 @@ const submitArticleForm = (formName: string, isdraft: boolean) => {
 const createArticle = (article: any, isdraft: boolean) => {
   console.log("创建");
   article.userUuid = user.value.uuid;
-  proxy.$axios
-    .post("/article/create", article)
+  createArticleApi(article)
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -299,12 +303,11 @@ const createArticle = (article: any, isdraft: boolean) => {
     });
 };
 /**
- * 创建页面
+ * 更新页面
  */
 const updateArticle = (article: any, isdraft: boolean) => {
   // return
-  proxy.$axios
-    .put("/article/update", { article: article })
+  updateArticleApi({ article: article })
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -345,8 +348,7 @@ const updateArticle = (article: any, isdraft: boolean) => {
  */
 const getArticleInfo = (uuid: any) => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .get("/article/info", { articleUuid: uuid })
+  getArticleInfoApi({ articleUuid: uuid })
     .then((res: any) => {
       console.log("info", res.result.article);
       document.title = "编辑" + res.result.article.title;

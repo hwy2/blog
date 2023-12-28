@@ -191,7 +191,7 @@ module.exports = {
         const query = new IP2Region();
         const ipAddress = query.search(ip);
         // 打印查询结果
-        console.log('>>> ipAddress: ', ipAddress);
+       // console.log('>>> ipAddress: ', ipAddress);
         return ipAddress
     },
     /**

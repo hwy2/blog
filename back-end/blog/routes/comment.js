@@ -10,15 +10,18 @@ var verifyAdminToken = require('../services/token').verifyAdminToken;//验证管
  */
 router.post("/create", function (req, res, next) {
     let ip = utils.getClientIp(req)
-    console.log(ip)
+   // console.log(ip)
     let vestingPlace = utils.getIP2Region(ip)
     req.body.ip = ip
     req.body.vestingPlace = vestingPlace.country+vestingPlace.province+vestingPlace.city
     commentDao.createComment(req, res, next);
 });
+/**
+ * 回复评论
+ */
 router.post("/recover", function (req, res, next) {
     let ip = utils.getClientIp(req)
-    console.log(ip)
+   // console.log(ip)
     let vestingPlace = utils.getIP2Region(ip)
     req.body.ip = ip
     req.body.vestingPlace = vestingPlace.country + vestingPlace.province + vestingPlace.city
@@ -64,6 +67,7 @@ router.get("/userCommentList", async function (req, res, next) {
 
     try {
         const result = await verifyAdminToken(token, userUuid)
+       // console.log(result,"result")
         if (result == 'ok') {
             commentDao.getCommentList(req, res, next)
         }else{

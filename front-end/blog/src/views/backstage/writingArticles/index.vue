@@ -66,7 +66,13 @@
         <div class="content-right">
           <div class="title">
             分类
-            <el-button type="primary" :icon="Plus" size="small" circle @click="editDialog = true"></el-button>
+            <el-button
+              type="primary"
+              :icon="Plus"
+              size="small"
+              circle
+              @click="editDialog = true"
+            ></el-button>
           </div>
           <div class="category">
             <el-checkbox-group v-model="checkboxGroup">
@@ -109,7 +115,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="editDialog = false">取消</el-button>
-          <el-button  type="primary" @click="handleCreateCategoy()">
+          <el-button type="primary" @click="handleCreateCategoy()">
             创建
           </el-button>
         </span>
@@ -135,6 +141,13 @@ import MdEditor from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { ElNotification, ElLoading, ElButton } from "element-plus";
 import { Plus } from "@element-plus/icons-vue";
+import { commonEnclosureApi } from "@/utils/api/common";
+import {
+  createArticleApi,
+  updateArticleApi,
+  getArticleInfoApi
+} from "@/utils/api/article";
+import { createCategoryApi, getCategoryListApi } from "@/utils/api/category";
 
 const store = useStore();
 const router = useRouter();
@@ -180,10 +193,9 @@ const formcategory = reactive({
   title: "",
   userUuid: ""
 });
-const editDialog = ref<boolean>(false)//新增
-const validateFormRef = ref()
-const user = ref<any>({})
-
+const editDialog = ref<boolean>(false); //新增
+const validateFormRef = ref();
+const user = ref<any>({});
 
 /**
  * 文章状态 （0已删除、1已发布、2草稿、3页面）
@@ -279,8 +291,7 @@ const uploadImg = async (
         const data = new FormData();
         data.append("files", file);
         data.append("userUuid", article.userUuid);
-        proxy.$axios
-          .post("/common/enclosure", data)
+        commonEnclosureApi(data)
           .then((resp: any) => rev(resp))
           .catch((error: any) => rej(error));
       });
@@ -320,8 +331,7 @@ const submitArticleForm = (formName: string, isdraft: boolean) => {
   });
 };
 const createArticle = (isdraft: boolean) => {
-  proxy.$axios
-    .post("/article/create", article)
+  createArticleApi(article)
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -360,8 +370,7 @@ const createArticle = (isdraft: boolean) => {
 const updateArticle = (isdraft: boolean) => {
   // return
   console.log("article", article);
-  proxy.$axios
-    .put("/article/update", { article: article })
+  updateArticleApi({ article: article })
     .then((res: any) => {
       console.log(res);
       if (res.code === "200") {
@@ -402,8 +411,7 @@ const updateArticle = (isdraft: boolean) => {
  */
 const getArticleInfo = (uuid: any) => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .get("/article/info", { articleUuid: uuid })
+  getArticleInfoApi({ articleUuid: uuid })
     .then((res: any) => {
       console.log(res);
       if (res.code == "200") {
@@ -451,11 +459,10 @@ const getArticleInfo = (uuid: any) => {
 const handleCreateCategoy = () => {
   (validateFormRef.value as any).validate((valid: any, fields: any) => {
     if (valid) {
-      proxy.$axios
-        .post("/category/create", {
-          title: formcategory.title,
-          userUuid: formcategory.userUuid
-        })
+      createCategoryApi({
+        title: formcategory.title,
+        userUuid: formcategory.userUuid
+      })
         .then((resp: any) => {
           if (resp.code === "200") {
             ElNotification({
@@ -476,7 +483,7 @@ const handleCreateCategoy = () => {
         .catch((error: any) => {
           console.log(error);
         });
-    }else {
+    } else {
       ElNotification({
         title: "失败",
         message: "请按照规则填写",
@@ -489,10 +496,9 @@ const handleCreateCategoy = () => {
  * 获取类别列表
  */
 const getCategoryList = () => {
-  proxy.$axios
-    .get("/category/list", {
-      userUuid: user.value.uuid
-    })
+  getCategoryListApi({
+    userUuid: user.value.uuid
+  })
     .then((res: any) => {
       console.log("获取类别列表", res);
       for (const item of res.result.list) {
@@ -514,7 +520,7 @@ onBeforeMount(() => {
   document.title = "撰写文章";
   if (proxy.$Cookies.get("user")) {
     const user = JSON.parse(proxy.$Cookies.get("user"));
-    user.value = user
+    user.value = user;
     formcategory.userUuid = user.uuid;
     article.userUuid = user.uuid;
   }
@@ -534,7 +540,6 @@ onMounted(() => {
     getArticleInfo(paramsUuid.value);
   }
 });
-
 
 // 单页面导航守卫
 onBeforeRouteLeave((to, from, next) => {

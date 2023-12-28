@@ -57,11 +57,24 @@ router.get("/categoryArticleList", function (req, res, next) {
     CategoryDao.categoryArticleList(req, res, next);
 });
 
-router.get("/userCategoryList", checkToken, function (req, res, next) {
-    CategoryDao.userCategoryList(req, res, next);
-});
-router.get("/userCategoryList", checkAdminToken, function (req, res, next) {
-    CategoryDao.categoryList(req, res, next);
+
+/**
+ 获取用户评论信息
+ */
+router.get("/userCategoryList", async function (req, res, next) {
+    var userUuid = (req.query || req.query || req.params).userUuid
+    var token = req.headers.accesstoken;
+
+    try {
+        const result = await verifyAdminToken(token, userUuid)
+        if (result == 'ok') {
+            CategoryDao.categoryList(req, res, next)
+        } else {
+            CategoryDao.userCategoryList(req, res, next)
+        }
+    } catch (error) {
+        CategoryDao.userCategoryList(req, res, next)
+    }
 });
 
 

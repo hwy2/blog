@@ -129,7 +129,7 @@ module.exports = {
         var params = req.body || req.params;
         var userInfo = params.userInfo;
         var userInfoUuid = userInfo.uuid;
-        console.log(userInfo.uuid)
+       // console.log(userInfo.uuid)
         if (!userInfoUuid) {
             utils.handleJson({
                 response: res,

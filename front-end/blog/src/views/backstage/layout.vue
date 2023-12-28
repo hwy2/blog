@@ -28,7 +28,7 @@ import {
 } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-
+import { getDataSummaryListApi } from "@/utils/api/dataSummary";
 import dateFormat from "@/assets/js/dateFormat.js";
 import { Navbar, Sidebar } from "@/components";
 
@@ -47,13 +47,11 @@ const dataSummary = computed({
   }
 });
 
-
 /**
  * 获取数据统计
  */
 const getDataSummaryList = () => {
-  proxy.$axios
-    .get("/dataSummary/list")
+  getDataSummaryListApi({})
     .then((res: any) => {
       console.log(res);
       dataSummary.value.articlesTotal = res.result.list.filter((item: any) => {
@@ -84,7 +82,7 @@ onMounted(() => {
   } else {
     router.push({ name: "login" });
   }
-  getDataSummaryList();
+  // getDataSummaryList();
   proxy.getCategoryList();
 });
 </script>

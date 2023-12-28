@@ -69,7 +69,7 @@ module.exports = {
         var title = utils.trim(params.title);
         var userUuid = utils.trim(params.userUuid);
         var descriptions = utils.trim(params.descriptions)
-        console.log('descriptions', descriptions)
+       // console.log('descriptions', descriptions)
         if (!title || !userUuid) {
             utils.handleJson({
                 response: res,
@@ -277,7 +277,7 @@ module.exports = {
         var params = req.query || req.params;
         var categoryTitle = params.categoryTitle
         var condition = {};
-        console.log(params)
+      ///  console.log(params)
         if (categoryTitle) {
             condition.title = {
                 [Op.like]: '%' + categoryTitle + '%'
@@ -289,7 +289,7 @@ module.exports = {
             pageSize: parseInt(params.pageSize) || config.page.pageSize //每页数量
         }
         co(function* () {
-            console.log(condition.title)
+           // console.log(condition.title)
             var categoryResult = yield Category.findAndCountAll({
                 where: condition,
                 include: [{

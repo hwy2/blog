@@ -118,6 +118,7 @@ import {
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification, ElMessage } from "element-plus";
+import { deleteArticleApi } from "@/utils/api/article";
 
 const store = useStore();
 const router = useRouter();
@@ -146,8 +147,8 @@ const hidePage = computed(() => {
 });
 
 watch(search, (newValue: any, oldValue: any) => {
-  condition.articleVague = newValue
-  proxy.getAricleList(condition)
+  condition.articleVague = newValue;
+  proxy.getAricleList(condition);
 });
 
 /**
@@ -186,7 +187,7 @@ const handleBatchDelete = () => {
   Array.from(multipleSelection.value).map((item: any) => {
     deleteArticle(item.uuid);
   });
-  proxy.getAricleList();
+  proxy.getAricleList(condition);
 };
 /**
  * 选择全部
@@ -197,8 +198,7 @@ const handleSelectionChange = (val: any) => {
 };
 /** 删除请求 */
 const deleteArticle = (uuid: string) => {
-  proxy.$axios
-    .get("/article/del", { articleUuid: uuid })
+  deleteArticleApi({ articleUuid: uuid })
     .then((resp: any) => {
       centerDialogVisible.value = false;
       if (resp.code === "200") {

@@ -68,7 +68,7 @@ module.exports = {
             })
 
         }).catch(function (error) {
-            console.log('error')
+           // console.log('error')
             utils.handleError({
                 response: res,
                 error: error
@@ -150,7 +150,7 @@ module.exports = {
             });
             return;
         }
-        console.log(comment)
+        //console.log(comment)
         // return
         co(function* () {
             var commentFindOne = yield Comment.findOne({
@@ -170,7 +170,7 @@ module.exports = {
                     uuid: commentUuid
                 }
             });
-            console.log('ss', commentResult)
+            //console.log('ss', commentResult)
             if (!commentResult) {
                 utils.handleJson({
                     response: res,
@@ -398,7 +398,7 @@ module.exports = {
                 { model: User }
             ]
         })
-        console.log('articleResult', articleResult.dataValues)
+       // console.log('articleResult', articleResult.dataValues)
         var object = ` <div id="contentDiv" onmouseover="getTop().stopPropagation(event);"
         onclick="getTop().preSwapLink(event, 'html', 'ZC2010-kTkPZlCCgcLTTSBBibaHRb8');"
         style="position:relative;font-size:14px;height:auto;padding:15px 15px 10px 15px;z-index:1;zoom:1;line-height:1.7;"
@@ -470,7 +470,7 @@ module.exports = {
     },
     /**获取用户文章相关联的评论 */
     getUserCommentList: function (req, res, next) {
-        console.log('getUserCommentList')
+        //console.log('getUserCommentList')
         var params = req.query || req.params;
         var userUuid = utils.trim(params.userUuid);
         var comments = utils.trim(params.comments);
@@ -511,13 +511,16 @@ module.exports = {
                 include: [
                     {
                         model: Comment,
-                        where: condition
+                        where: condition,
+                        include: [{
+                            model: Article
+                        }],
                     }
                 ]
             })
-            // console.log('articleResult', articleResult[0].comments)
+            // console.log('articleResult', articleResult)
             var commentsList = froItem(articleResult)
-
+           console.log('哈哈',commentsList)
             var pageResult = yield utils.handlePage({
                 count: commentsList.length,
                 page: page

@@ -18,7 +18,10 @@ var UserInfo = Mysql.define("userInfo", {
         type: Sequelize.STRING,
         allowNull: false
     }, //昵称
-    birth: Sequelize.DATE, //出生日期
+    birth:{
+        type: Sequelize.DATE,
+        defaultValue:new Date('1970-1-1')
+    },  //出生日期
     sex: { //性别 1男 0女 
         type: Sequelize.STRING(2),
         defaultValue: "1"

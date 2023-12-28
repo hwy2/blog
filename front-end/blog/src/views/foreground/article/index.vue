@@ -299,7 +299,12 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { ElNotification, ElLoading } from "element-plus";
 import { marked } from "marked";
-import axios from "../../../axios";
+import {
+  getArticleInfoApi,
+  addPageViewsApi,
+  getArticleListApi
+} from "@/utils/api/article";
+import { createCommentApi } from "@/utils/api/comment";
 
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
@@ -347,8 +352,7 @@ const authorArcileList = ref<Array<any>>([]); //作者其他文章
  */
 const getArticleInfo = (uuid: string) => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .get("/article/info", { articleUuid: uuid })
+  getArticleInfoApi({ articleUuid: uuid })
     .then((res: any) => {
       console.log(res);
       getAuthorArcile(res.result.article.user.uuid);
@@ -378,11 +382,10 @@ const getArticleInfo = (uuid: string) => {
  * 修改文章阅读数
  */
 const setArticlePageview = (pageview: number) => {
-  proxy.$axios
-    .get("/article/addPageViews", {
-      articleUuid: uuid.value,
-      articlePageview: pageview
-    })
+  addPageViewsApi({
+    articleUuid: uuid.value,
+    articlePageview: pageview
+  })
     .then((res: any) => {
       console.log(res);
     })
@@ -413,17 +416,16 @@ const submitForm = () => {
  */
 const createComments = () => {
   const loading = ElLoading.service({ fullscreen: true });
-  proxy.$axios
-    .post("/comment/create", {
-      ip: "",
-      vestingPlace: "",
-      agent: navigator.userAgent,
-      email: formLabelAlign.email,
-      nickName: formLabelAlign.niceName,
-      comments: formLabelAlign.comments,
-      articleUuid: (article.value as any).uuid,
-      link: articleLink.value
-    })
+  createCommentApi({
+    ip: "",
+    vestingPlace: "",
+    agent: navigator.userAgent,
+    email: formLabelAlign.email,
+    nickName: formLabelAlign.niceName,
+    comments: formLabelAlign.comments,
+    articleUuid: (article.value as any).uuid,
+    link: articleLink.value
+  })
     .then((res: any) => {
       console.log(res);
       loading.close();
@@ -527,8 +529,7 @@ const getAuthorArcile = (uuid: string) => {
   const data = {
     userUuid: uuid
   };
-  axios
-    .get("/article/list", data)
+  getArticleListApi(data)
     .then((res: any) => {
       console.log("获取作者文章列表", res);
       authorArcileList.value = res.result.list;
@@ -546,6 +547,7 @@ onBeforeMount(async () => {
 });
 onMounted(() => {
   // 挂载之后
+  scrollTo(0, 0);
 });
 
 watch(
@@ -838,7 +840,7 @@ watch(
           width: auto;
           height: auto;
           display: block;
-          margin: auto;
+          
           max-width: 100%;
         }
       }

@@ -300,6 +300,7 @@
 </template>
 
 <script lang="ts" setup>
+import { ElMessage } from "element-plus";
 import {
   ref,
   onBeforeMount,
@@ -311,12 +312,15 @@ import {
 // import { ElLoading } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import dateFormat from "@/assets/js/dateFormat.js";
+import { getArticleListApi } from "@/utils/api/article";
+
 //// @ts-ignore
 const store = useStore();
 const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 
-const aricleList = computed(() => store.state.foreground.articleLists);
+const aricleList = ref<any>([]);
 const total = computed(() => store.state.foreground.totals);
 const hidePage = computed(() => {
   if (store.state.foreground.articleLists > 7) return false;
@@ -366,7 +370,7 @@ const jumpArticle = (uuid: string, index = -1) => {
     // });
     itemRef.value[index].classList.remove("pic");
     router.push(`/home/article/${uuid}`);
-    scrollTo(0, 0);
+    // scrollTo(0, 0);
   });
 };
 /**
@@ -377,18 +381,44 @@ const handleChangePage = (val: any) => {
   condition.value.state = 1;
   console.log("是这？", val);
   store.commit("foreground/setCondition", condition.value);
+  getAricleList();
   proxy.getAricleList(condition.value);
   scrollTo(0, 0); // 回到页面顶部
+};
+/**
+ * 获取文章表
+ */
+const getAricleList = () => {
+  condition.value.state = 1;
+  getArticleListApi(condition.value)
+    .then((res: any) => {
+      if (res.code == "200") {
+        for (const item of res?.result?.list) {
+          item.createDate = dateFormat(item.createDate, "yyyy年MM月dd日");
+          item.updateDate = dateFormat(item.updateDate, "yyyy年MM月dd日");
+          const category = [];
+          for (const iterator of item.categories) {
+            category.push(iterator.title);
+          }
+          item.category = category.join(",");
+        }
+        aricleList.value = res?.result?.list;
+      }
+    })
+    .catch((error: any) => {
+      console.log(error);
+      ElMessage.error(error);
+    });
 };
 
 onBeforeMount(() => {
   // 挂载开始之前
+  getAricleList();
 });
 onMounted(async () => {
   // 挂载之后
   condition.value.state = 1;
   // 获取文章列表
-  proxy.getAricleList(condition.value);
   readSoaringList.value = await proxy.getTestimonialsAricleList();
   hotArticleList.value = await proxy.getHotArticle();
   const category =
@@ -415,7 +445,6 @@ onMounted(async () => {
     }, 100);
   }
 });
-
 </script>
 
 <style lang="scss">
@@ -1095,7 +1124,7 @@ onMounted(async () => {
 @media (max-width: 800px) {
   #postIndex {
     .content {
-      width: 94%;
+      width: 100%;
       margin: 0 auto;
       padding: 0;
       .main {
@@ -1134,7 +1163,7 @@ onMounted(async () => {
                   margin-right: 5px;
                 }
                 span {
-                  padding-right: 15px;
+                  padding-right: 10px;
                   font-size: 12px;
                 }
               }

@@ -19,7 +19,7 @@ module.exports = {
         // console.log(req.body)
         var files = req.files;
         var fileName = params.fileName
-        console.log(fileName,"fileName")
+        //console.log(fileName,"fileName")
         var userUuid = utils.trim(params.userUuid)
         if (!files || !files.length) {
             //err
@@ -218,7 +218,7 @@ module.exports = {
             }
             // console.log(resultOne.dataValues.absoluteUrl)
             const urlString = utils.splitString(resultOne.dataValues.absoluteUrl)
-            console.log(urlString)
+          //  console.log(urlString)
             fileService.delFile(urlString, resultOne.dataValues.relativeUrl)
             // return
             var result = yield Attachment.destroy({

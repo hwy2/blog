@@ -58,9 +58,7 @@ module.exports = {
         co(function* () {
             var articleResult = yield Article.findAndCountAll({
                 where: {
-                    state: {
-                        [Op.or]: [1, 2],
-                    }
+                    state: 1
                 }
             });
             var articlesTotal = articleResult.count;

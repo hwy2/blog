@@ -118,14 +118,15 @@ import {
   onBeforeMount,
   watch
 } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+// import { useStore } from "vuex";
+// import { useRouter } from "vue-router";
 import { ElNotification, ElMessage } from "element-plus";
-import dateFormat from "@/assets/js/dateFormat.js";
+// import dateFormat from "@/assets/js/dateFormat.js";
 import { InfoFilled } from "@element-plus/icons-vue";
+import { delCommonFileApi, getCommonFileListApi } from "@/utils/api/common";
 
-const store = useStore();
-const router = useRouter();
+// const store = useStore();
+// const router = useRouter();
 const { proxy }: any = getCurrentInstance();
 
 const condition = reactive({
@@ -173,8 +174,7 @@ const handleBatchDelete = () => {
  * 删除（）
  */
 const handleDelete = (row: any) => {
-  proxy.$axios
-    .get("/common/del", { fileUuid: row.uuid })
+  delCommonFileApi({ fileUuid: row.uuid })
     .then((resp: any) => {
       if (resp.code === "200") {
         ElNotification({
@@ -205,8 +205,7 @@ const handleChangePage = (val: any) => {
 };
 
 const getFileData = (condition: any) => {
-  proxy.$axios
-    .get("/common/userList", condition)
+  getCommonFileListApi(condition)
     .then((resp: any) => {
       console.log(resp, "file");
       if (resp.code == "200") {

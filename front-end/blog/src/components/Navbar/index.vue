@@ -22,10 +22,11 @@
 </template>
 
 <script lang="ts" name="navbar" setup>
-import { computed,ref,onMounted,getCurrentInstance } from 'vue'
+import { computed, ref, onMounted, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
+import { logoutApi } from "@/utils/api/user";
 
 const store = useStore();
 const router = useRouter();
@@ -38,8 +39,7 @@ const user = ref<any>({});
  * 退出登录
  */
 const logout = () => {
-  proxy.$axios
-    .get("/user/logout", {})
+  logoutApi({})
     .then((res: any) => {
       if (res.code === "200") {
         ElNotification({
